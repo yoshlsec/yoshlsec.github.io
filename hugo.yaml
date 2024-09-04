@@ -6,7 +6,7 @@ pygmentsUseClasses: false
 pygmentsUseClassic: true
 pygmentsStyle: emacs
 
-contentDir: content/en
+contentDir: content/
 defaultContentLanguage: en
 defaultContentLanguageInSubdir: false
 enableMissingTranslationPlaceholders: true
