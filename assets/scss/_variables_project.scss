@@ -1,0 +1,261 @@
+/*
+
+Add styles or override variables from the theme here.
+
+
+#0B4387 -> Azul oscuro
+#4185B8 -> Texto links
+##131516 -> Background
+
+Nuevo stuff
+
+Extra: 2C4554
+
+Nav & Footer & Background Aside: 061823
+Background: 102735 - 122836
+Color font: 9bc3db
+Background Etiquetas: 061823
+*/
+@import 'td/code-dark';
+
+
+$enable-gradients: false !default;
+$enable-shadows: false !default;
+
+$primary: #081720   !default; // Navbar
+$dark: #081720 !default;  // Footer
+
+// Navbar Settings
+nav.td-navbar.js-navbar-scroll {
+  span.navbar-brand__name{
+    color: #bdbdbd;
+  }
+
+  li.nav-item {
+    a.nav-link {
+      color: #fff;
+      span {
+        color: #bdbdbd;
+      }
+    }
+  }
+
+  div.td-search {
+    div.td-search__icon {
+      color: #fff;
+    }
+    input.td-search__input.form-control.td-search-input {
+      color: #bdbdbd !important;
+    }
+  }
+  aside.td-sidebar__inner {
+  div.td-sidebar-menu{
+    input.td-search__input.form-control.td-search-input::placeholder {
+      color: #fff !important;
+    }
+  }
+  }
+}
+
+// Background Settings
+main {
+  // Writeups Stuff  
+  background-color:#071d2b;
+  color: #919493;
+
+  p.reading-time {margin-top: 10px;}
+
+  div.td-content p code { background-color: #1B1E1F !important;}
+  
+  div.pageinfo {
+    background-color: #343E50;
+    color: #99B2CB;
+  }
+  a {color: #A19C91;}
+  h1, h2, h3, h4, h5, h6 {color:#9bc3db;}
+
+  section.row.td-search-result {
+    div#___gcse_0 {
+      div.gsc-control-cse.gsc-control-cse-en {
+        background-color: #1B1E1F !important;
+        color: #98B2CB !important;
+
+        div.gs-bidi-start-align.gs-snippet {
+          color: #98B2CB !important;
+        }
+      }
+    }
+  }
+
+  // Listado posts - Writeups
+
+  div.td-blog-posts-list__body {
+    border: 1px solid #FFF;
+    border-radius: 1%;
+    padding: 12px;
+
+    p small.text-body-secondary {color: #8b9195 !important;}
+    
+    h5 a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 23px;
+      z-index: -1;
+    }
+  }
+
+  div.alert {
+    color:  #414D64 !important;
+  }
+
+  // About Stuff
+  section#td-cover-block-0 {
+    background-color: #09202e;
+  }
+}
+
+ul.list-unstyled.d-flex.justify-content-between.align-items-center.mb-0.pt-5 {
+  li {
+    border: 1px solid #98B2CB !important;
+  }
+}
+
+li.breadcrumb-item.active {
+  color: #FFF;
+  opacity: 0.9 !important;
+}
+
+div.td-byline {time.text-body-secondary {color: #9E9E9B !important;}}
+figure.card.rounded.p-2.td-post-card.mb-4.mt-4 {
+  background-color: #1B1E1F !important;
+  color: #98B2CB;
+  border: 1px solid #393e42;
+  small.text-body-secondary {color: #98B2CB !important; }
+}
+
+pre {
+  background-color: #1B1E1F !important;
+  border: 1px solid #393e42 !important;
+}
+
+.td-outer {
+  background-color: #071d2b;
+}
+
+// Footer
+div.td-blog-posts__pagination ul li.page-item {
+  a.page-link {
+    background-color: #131516;
+    border: 1px solid #ffffff;
+  }
+}
+
+// Searchers Articles
+article.card.article-teaser.article-type-blog {
+  background-color: #1B1E1F;
+  color: #98B2CB;
+  border: 1px solid #393e42;
+}
+
+
+// Left & Right Aside
+span{
+  color:#bdbdbd;
+}
+
+.td-page-meta__lastmod {
+  display: none;
+}
+
+// Left Aside
+
+aside.td-sidebar {
+  background-color: #131516;
+}
+
+// Right Aside
+
+div.td-page-meta{
+  visibility: hidden !important;
+  display: none !important;
+}
+
+div.td-toc {
+  margin-top: 12px;
+  nav#TableOfContents {
+    a {
+    color: #dedede;
+    }
+    a:hover {
+      color: #9BC3DB;
+    }
+  }
+}
+
+div.taxonomy {
+    h5.taxonomy-title {
+    color: #497A9C;
+    border-color: #7ABBEC;
+  }
+
+  ul.taxonomy-terms {
+    a.taxonomy-term {
+      background-color: #061823;
+      color: #497A9C;
+
+      border-color: #497A9C;
+    }
+
+    span.taxonomy-count {
+      background-color: #061823;
+      color: #497A9C;
+      padding: 2px;
+      padding-left: 4px;
+      padding-right: 4px;
+      align-self: center;
+    }
+  }
+}
+
+div.td-content {
+  div.pageinfo-primary {
+    background-color: #414d64;
+    color: #c2d2eb;
+  }
+}
+
+// CSS Botones - Home Page
+
+.botones {
+  padding: 10px 100px 10px 100px; // Top Right  Bottom Left
+  font-size: 20px;
+  margin: 0 10px 10px 10px;
+  background-color: rgba(255, 255, 255, 0);
+  border: 2px solid #007bff;
+  text-decoration: none;
+}
+
+.boton-linkedin:hover {background: #007bff; color: #FFF; text-decoration: none;}
+.boton-discord:hover {background: #007bff; color: white;}
+.boton-email:hover {background: #007bff; color: white;}
+
+.botones a {
+  text-decoration: none;
+
+}
+
+.botones:hover b, .botones:hover i {
+  color: #ffffff;
+}
+
+/*
+Background: #071d2b
+Titulos derecha: #497A9C
+Aside izquierda: ##131516
+
+Links derecha: #4A5152
+
+Info banner: #343E50
+Color text banner: #99B2CB
+Links: #A6C1DC
+*/

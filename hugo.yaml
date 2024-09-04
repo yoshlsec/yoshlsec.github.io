@@ -1,0 +1,162 @@
+baseURL: https://yoshlsec.github.io/
+title: yoshl
+
+pygmentsCodeFences: true
+pygmentsUseClasses: false
+pygmentsUseClassic: true
+pygmentsStyle: emacs
+
+contentDir: content/en
+defaultContentLanguage: en
+defaultContentLanguageInSubdir: false
+enableMissingTranslationPlaceholders: true
+enableRobotsTXT: true
+enableGitInfo: true
+
+taxonomies:
+  tag: tags
+
+menu:
+  main:
+      - identifier: Home
+        pre: <i class="fa-solid fa-house"></i>
+        name: "Home"
+        url: "/"
+        weight: 10
+
+      - identifier: About
+        pre: <i class="fa-solid fa-address-card"></i>
+        name: "About"
+        url: "/about/"
+        weight: 20
+
+      - identifier: Docs
+        post: <i class="fa-solid fa-scroll"></i>
+        name: "Docs "
+        url: "/docs/"
+        weight: 30
+      
+      - identifier: Blog
+        post: <i class="fa-solid fa-book-skull"></i>
+        name: "Writeups "
+        url: "/blog/"
+        weight: 40
+        
+permalinks:
+  blog: /:section/:year/:month/:day/:slug/
+
+imaging:
+  resampleFilter: CatmullRom
+  quality: 75
+  anchor: smart
+
+markup:
+  goldmark:
+    parser:
+      attribute:
+        block: false
+    renderer:
+      unsafe: true
+
+
+outputs:
+  section: []
+
+disableKinds:
+  - taxonomy
+
+params:
+  privacy_policy: https://policies.google.com/privacy
+  version_menu: Releases
+  archived_version: true
+
+  customCSS:
+    - "assets/scss/_variables_project.scss"
+
+  version: 0.0
+  url_latest_version: https://yoshl.github.io
+  github_repo: https://github.com/yoshlsec
+  github_project_repo: https://github.com/yoshlsec
+  
+  github_branch: main
+  gcs_engine_id: d72aa9b2712488cc3
+
+  offlineSearch: false
+  prism_syntax_highlighting: false
+
+  copyright:
+    authors: yoshl |
+    from_year: 2023
+
+  ui:
+    breadcrumb_disable: false
+    navbar_logo: true
+    navbar_translucent_over_cover_disable: true
+    sidebar_menu_compact: true
+    sidebar_search_disable: false
+
+
+    breadcrumb_disable: false
+    taxonomy_breadcrumb_disable: true
+
+    feedback:
+      enable: false
+      'yes': >-
+        Glad to hear it! Please <a href="https://github.com/USERNAME/REPOSITORY/issues/new">tell us how we can improve</a>.
+      'no': >-
+        Sorry to hear that. Please <a href="https://github.com/USERNAME/REPOSITORY/issues/new">tell us how we can improve</a>.
+
+    readingtime:
+      enable: true
+
+  links:
+    user:
+    - name: Mail
+      url: mail:jaime.gomez@dltcode.es
+      icon: fa-solid fa-inbox
+      desc: Mail
+    - name: Linkedin
+      url: https://www.linkedin.com/in/jaime-gomek-martinez/
+      icon: fa-brands fa-linkedin
+      desc: Linkedin 
+    - name: GitHub
+      url: https://github.com/yoshlsec
+      icon: fab fa-github
+      desc: GitHub
+    - name: Discord
+      url: https://discord.com/users/900829643379208273
+      icon: fa-brands fa-discord
+      desc: Discord
+    - name: Telegram
+      url: https://t.me/yo5hl
+      icon: fa-brands fa-telegram
+      desc: Telegram
+      
+  developer:  
+
+module:
+  # Uncomment the next line to build and serve using local docsy clone declared in the named Hugo workspace:
+  # workspace: docsy.work
+  hugoVersion:
+    extended: true
+    min: 0.110.0
+  imports:
+    - path: github.com/google/docsy
+      disable: false
+  
+# #Language configuration
+# languages:
+#   en:
+#     languageName: 
+#     title: Yoshl
+#     params:
+#       description: yoshl web portfolio
+#   # cSpell:disable
+#   'es':
+#     languageName: .
+#     contentDir: content/es
+#     title: Yoshl
+#     params:
+#       description: Portfolio web yoshl
+#       time_format_default: 02.01.2006
+#       time_format_blog: 02.01.2006

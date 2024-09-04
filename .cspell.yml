@@ -1,0 +1,18 @@
+# cSpell:ignore textlintrc
+# For settings, see
+# https://www.streetsidesoftware.com/vscode-spell-checker/docs/configuration/
+version: '0.2'
+caseSensitive: true
+words:
+  - yoshl
+  - Jaime Gomez
+  - yoshi
+  - yosh1
+  - digital forensics
+  - forense informatico
+  - pegasus
+  - cyberghost
+  - cyb3rgh0st
+  - stdgroup
+  - jaime gómez
+  - jaime gomez yoshl
