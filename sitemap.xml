@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>/</loc>
+  </url><url>
+    <loc>/blogs/</loc>
+  </url><url>
+    <loc>/hardening/</loc>
+  </url><url>
+    <loc>/categories/</loc>
+  </url><url>
+    <loc>/blogs/forensics/cbe-fundamentals/</loc>
+  </url><url>
+    <loc>/blogs/forensics/</loc>
+  </url><url>
+    <loc>/blogs/os-internals/</loc>
+  </url><url>
+    <loc>/tags/</loc>
+  </url><url>
+    <loc>/writeups/tjctf-2025/</loc>
+  </url><url>
+    <loc>/writeups/</loc>
+  </url>
+</urlset>

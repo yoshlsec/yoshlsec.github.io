@@ -1,0 +1,18 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>yoshl - IT enjoyer – Writeups done with Caliphal Hounds</title>
+    <link>/writeups/</link>
+    <description>Recent content in Writeups done with Caliphal Hounds on yoshl - IT enjoyer</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    
+	  <atom:link href="/writeups/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+  </channel>
+</rss>
