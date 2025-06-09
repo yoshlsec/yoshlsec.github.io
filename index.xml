@@ -1431,7 +1431,57 @@ $$&lt;/p&gt;
 &lt;li&gt;$f(4) \approx 1.3863$&lt;/li&gt;
 &lt;li&gt;$g(0.5) \approx -0.6931$&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;To consider, the higher value for the iterations and the lower value for $\epsilon$ (initial pertubations) better success hit in $\lambda$&lt;/p&gt;
+&lt;p&gt;To consider, the higher value for the iterations and the lower value for $\epsilon$ (initial pertubations) better success hit in $\lambda$. And remember there can be false positives, so the more tests your function pass, the more likely you are to get it right.&lt;/p&gt;
+&lt;h4&gt;Famous Examples&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;famous-examples&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#famous-examples&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;Also to conclude my first paper I want to mention some famous maps:&lt;/p&gt;
+&lt;h5&gt;Logistic Map&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;logistic-map&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#logistic-map&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+x_{n+1} = r x_n (1 - x_n)
+$$
+$\quad x_n \in (0, 1),\ r \in (3.57, 4]$&lt;/p&gt;
+&lt;h5&gt;Henon Map&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;henon-map&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#henon-map&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+x_{n+1} = 1 - a x_n^2 + y_n \\
+y_{n+1} = b x_n
+$$
+$\quad a = 1.4,\ b = 0.3$&lt;/p&gt;
+&lt;h5&gt;Lorenz System&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;lorenz-system&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#lorenz-system&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+\begin{cases}
+\dot{x} = \sigma(y - x) \\
+\dot{y} = x(\rho - z) - y \\
+\dot{z} = x y - \beta z
+\end{cases}
+$$
+$\quad \text{ with } \sigma = 10,\ \rho = 28,\ \beta = \frac{8}{3}$&lt;/p&gt;
+&lt;h5&gt;Tent Map&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;tent-map&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#tent-map&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+x_{n+1} =
+\begin{cases}
+\mu x_n &amp;amp; \text{if } x_n &amp;lt; \frac{1}{2} \\
+\mu (1 - x_n) &amp;amp; \text{if } x_n \geq \frac{1}{2}
+\end{cases}
+$$
+$\quad \mu \in (1, 2]$&lt;/p&gt;
+&lt;h5&gt;Ikeda Map&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;ikeda-map&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#ikeda-map&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+\begin{cases}
+x_{n+1} = 1 + u (x_n \cos t_n - y_n \sin t_n) \\
+y_{n+1} = u (x_n \sin t_n + y_n \cos t_n)
+\end{cases}
+$$
+$\quad t_n = 0.4 - \dfrac{6}{1 + x_n^2 + y_n^2}$&lt;/p&gt;
+&lt;h2&gt;Part 2?&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;part-2&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#part-2&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;This was only an introduction to the Chaos Based Encryption and theory, maybe in a future there will be a second part of this post, explaining more tests and checkers of chaotic systems, applying specific attacks into CBE and more!&lt;/p&gt;
+&lt;p&gt;For the moment I recommend you check a little of:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Strange Attractor&lt;/li&gt;
+&lt;li&gt;Branching diagram (&lt;a href=&#34;https://espanol.libretexts.org/Matematicas/Computacion_Cientifica_Simulaciones_y_Modelado/Libro%3A_Introducci%C3%B3n_al_Modelado_y_An%C3%A1lisis_de_Sistemas_Complejos_%28Sayama%29/08%3A_Bifurcaciones&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://espanol.libretexts.org/Matematicas/Computacion_Cientifica_Simulaciones_y_Modelado/Libro%3A_Introducci%C3%B3n_al_Modelado_y_An%C3%A1lisis_de_Sistemas_Complejos_(Sayama)/08%3A_Bifurcaciones&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;ApEn and SampEn&lt;/li&gt;
+&lt;li&gt;Test of Kolmogorov-Sinai&lt;/li&gt;
+&lt;li&gt;Advanced Permutational Entropy&lt;/li&gt;
+&lt;li&gt;Fractal Dimesion&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2&gt;External References&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;external-references&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#external-references&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;[1] &lt;a href=&#34;https://www.sciencedirect.com/science/article/abs/pii/S002002551200521X&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.sciencedirect.com/science/article/abs/pii/S002002551200521X&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;[2] &lt;a href=&#34;https://www.mdpi.com/2079-9292/10/12/1392&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2079-9292/10/12/1392&lt;/a&gt;&lt;/p&gt;
