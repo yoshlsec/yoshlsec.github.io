@@ -1,12 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>yoshl - IT enjoyer – </title>
-    <link>/</link>
+    <link>//localhost:1313/</link>
     <description>Recent content on yoshl - IT enjoyer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     
-	  <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -15,10 +15,10 @@
     
     <item>
       <title>BOOK HARDENINGA</title>
-      <link>/hardening/</link>
+      <link>//localhost:1313/hardening/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/hardening/</guid>
+      <guid>//localhost:1313/hardening/</guid>
       <description>
         
         
@@ -28,17 +28,19 @@
     
     <item>
       <title>Chaos Based Encryption applied to stegoanalysis</title>
-      <link>/blogs/forensics/cbe-fundamentals/</link>
+      <link>//localhost:1313/blogs/forensics/cbe-fundamentals/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/blogs/forensics/cbe-fundamentals/</guid>
+      <guid>//localhost:1313/blogs/forensics/cbe-fundamentals/</guid>
       <description>
         
         
-        &lt;p&gt;Before diving deeper into the implementation and analysis of image fiel types, I would like to acknowledge Lazaros Moysis and his YouTube series on Chaos-Based Encryption. Each section of this article will feature one of his videos, along with a detailed explanation of its content. The goal is to provide a more detailed breakdown of the topics he covers, as well as possible scripts or implementations he might be using.&lt;/p&gt;
-&lt;h2&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=Ckq0HkGiReg&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Explaining the Bit Planes of an Image&lt;/a&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;explaining-the-bit-planes-of-an-image&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#explaining-the-bit-planes-of-an-image&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h3&gt;Image Representation&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;image-representation&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#image-representation&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;To start understanding how an image is represented, the knowledge of a NxM matrix is needed.&lt;/p&gt;
+        &lt;p&gt;Before diving deeper into the implementation and analysis of image fiel types, I would like to acknowledge &lt;em&gt;Lazaros Moysis&lt;/em&gt; and his YouTube series on Chaos-Based Encryption.
+Youtube Channel: &lt;a href=&#34;https://www.youtube.com/@lazarosmoysis5095&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.youtube.com/@lazarosmoysis5095&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Each section of this article will feature one of his videos, along with a detailed explanation of its content. The goal is to provide a more detailed breakdown of the topics he covers, as well as possible scripts or implementations he might be using.&lt;/p&gt;
+&lt;h2&gt;Understanding Image Functionality&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;understanding-image-functionality&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#understanding-image-functionality&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h3&gt;How it is represented&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;how-it-is-represented&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#how-it-is-represented&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;To start understanding how an image is represented, the knowledge of a NxM matrix is needed.&lt;/p&gt;
 &lt;p&gt;$$
 A = \begin{bmatrix} a_{ij} \end{bmatrix}
 $$ $$
@@ -46,12 +48,11 @@ $$ $$
 $$
 Every integer in the interval [0,255] can be represented usinng 8 bits, following the fundamentals of number theory:&lt;/p&gt;
 &lt;p&gt;$$
-a_{ij} = a_{ij}^1 {\textcolor{red}{2^0}} + a_{ij}^2 {\textcolor{red}{2^1}} + a_{ij}^3 {\textcolor{red}{2^3}} + a_{ij}^4 {\textcolor{red}{2^4}} + a_{ij}^5 {\textcolor{red}{2^5}} + a_{ij}^6 {\textcolor{red}{2^6}} + a_{ij}^7 {\textcolor{red}{2^7}} + a_{ij}^8 {\textcolor{red}{2^8}}
+a_{ij} = a_{ij}^1 {{2^0}} + a_{ij}^2 {{2^1}} + a_{ij}^3 {{2^3}} + a_{ij}^4 {{2^4}} + a_{ij}^5 {{2^5}} + a_{ij}^6 {{2^6}} + a_{ij}^7 {{2^7}} + a_{ij}^8 {{2^8}}
 $$&lt;/p&gt;
-&lt;h3&gt;Python Script: Black &amp;amp; White Process&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;python-script-black--white-process&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#python-script-black--white-process&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;So when creating a image, we go with the matrix, going bit by bit per each pixel, here an example:&lt;/p&gt;
+&lt;p&gt;Therefore, image creation involves manipulating a matrix, processing each pixel bit by bit. The following is an example:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;Pasted-image-20250115224100.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;
-So, if we have only a 4 pixels image, it is going to follow this process&lt;/p&gt;
+With a 4 pixel Image, it will follow the process:&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;numpy&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;np&lt;/span&gt;
@@ -123,7 +124,7 @@ So, if we have only a 4 pixels image, it is going to follow this process&lt;/p&g
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;p&gt;To see it more clearly we can compare each layer with the values of the numbers used in binary:&lt;/p&gt;
+&lt;p&gt;For greater clarity, each layer can be compared to the positional values of bits in a binary representation.&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;bin&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
@@ -144,12 +145,11 @@ So, if we have only a 4 pixels image, it is going to follow this process&lt;/p&g
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;p&gt;&lt;em&gt;PD: In the layers the first number goes to the back, and the last to the front, so 254 (0b11111110) in layers will be 01111111&lt;/em&gt;&lt;/p&gt;
-&lt;h3&gt;Real image representation&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;real-image-representation&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#real-image-representation&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;After all this could be more and more complex:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;Pasted-image-20250115230051.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;PD: In the layers the first number goes to the back, and the last to the front, so the number 0babcdefgh in layers will be hgfedcba&lt;/em&gt;&lt;/p&gt;
+&lt;h3&gt;Representation of Authentic Images&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;representation-of-authentic-images&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#representation-of-authentic-images&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;Pasted-image-20250115230051.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;Pasted-image-20250115230106.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;And all of this is only with a white and black color image, with the full RBG we will more complex. with more numbers, as a fun fact, when you are compressing a image, what you are doing exactly is to recontruct the image from levels 5-8, 6-8, usually, obtaining the last 3 bits.&lt;/p&gt;
+&lt;p&gt;And all of this applies only to a black-and-white image. When working with full RGB color, things become more complex due to the increased amount of data. As a fun fact, when compressing an image, what you are doing exactly is to reconstruct the image from levels 5-8, 6-8, usually, obtaining the last 3 bits.&lt;/p&gt;
 &lt;h3&gt;Python Script: RGB Process&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;python-script-rgb-process&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#python-script-rgb-process&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;To apply in RGB images replace the 8 bits to 24 bits, diving each 8 block bits for Red Green and Blue colors.&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
@@ -193,16 +193,9 @@ So, if we have only a 4 pixels image, it is going to follow this process&lt;/p&g
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;h1&gt;Chaos Based Image Encryption&lt;/h1&gt;&lt;h2&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=sjpBwFigNww&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;amp;index=2&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Key Space Analysis&lt;/a&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;key-space-analysis&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#key-space-analysis&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Video recommends us to read:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.mdpi.com/2073-8994/15/12/2138&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2073-8994/15/12/2138&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.sciencedirect.com/science/article/abs/pii/S002002551200521X&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.sciencedirect.com/science/article/abs/pii/S002002551200521X&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.mdpi.com/2079-9292/10/12/1392&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2079-9292/10/12/1392&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.mdpi.com/2073-8994/15/3/726&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2073-8994/15/3/726&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.mdpi.com/2073-8994/15/7/1311&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2073-8994/15/7/1311&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3&gt;Why to choose Chaos-Based Encryption?&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;why-to-choose-chaos-based-encryption&#34;&gt;&lt;/span&gt;
+&lt;p&gt;Once understood, the basics, we can proceed with the Chaos-Based-Image Encryption.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;Chaos Based Image Encryption&lt;/h1&gt;&lt;h3&gt;Why to choose Chaos-Based Encryption?&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;why-to-choose-chaos-based-encryption&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#why-to-choose-chaos-based-encryption&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Chaos-Based Encryption&lt;/strong&gt; &lt;strong&gt;(CBE)&lt;/strong&gt; are very sensitive with their seed, with a minimun change in the seed can cause a total diferent result, this can be very useful, to create dynamic keys or encrypted patterns with a low entropy. Making harder to decrypt with linear and diferencials attacks based on the correlations between input and output Mainly the CBE is used in multimedia content such as images, videos, audio and text, with a simple matemathical operations more than AES or RSA, can be run in a low cost hardware.&lt;/p&gt;
 &lt;p&gt;Furthermore in the &lt;a href=&#34;https://iopscience.iop.org/article/10.1088/1757-899X/495/1/012041/pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Differential Cryptanalysis on Chaotic Based Image Encryption Scheme&lt;/em&gt;&lt;/a&gt; article from &lt;em&gt;Lee Kong Chian Faculty of Engineering and Science, &lt;a href=&#34;https://www.utar.edu.my/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Universiti Tunku Abdul
 Rahman&lt;/a&gt;, 43000 Kajang, Selangor, Malaysia&lt;/em&gt; mentioned in the &lt;em&gt;NPCR and UACI cryptoanalysis tests&lt;/em&gt; says:&lt;/p&gt;
@@ -232,7 +225,8 @@ Substitution-box (S-box) [4] and chaotic maps [5–13].&lt;/em&gt;&lt;/p&gt;
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;p&gt;Something to keep in mind is the different technicalities between a chaotic system and a cryptographic algorithm.&lt;/p&gt;
+&lt;h3&gt;Differences Compared to Standard Cryptography&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;differences-compared-to-standard-cryptography&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#differences-compared-to-standard-cryptography&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Something to keep in mind is the different technicalities between a chaotic system and a cryptographic algorithm.&lt;/p&gt;
 &lt;pre class=&#34;mermaid hx-mt-6&#34;&gt;
   graph TD
   subgraph Crypto_Algo [Cryptographic algorithms]
@@ -254,32 +248,60 @@ Substitution-box (S-box) [4] and chaotic maps [5–13].&lt;/em&gt;&lt;/p&gt;
     CS6[&amp;#34;Unpredictability&amp;#34;]
     CS1 --&amp;gt; CS2 --&amp;gt; CS3 --&amp;gt; CS4 --&amp;gt; CS5 --&amp;gt; CS6
   end
-&lt;/pre&gt;&lt;h2&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=7egirofZORM&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;amp;index=3&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Histogram Analysis&lt;/a&gt; | Security method&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;histogram-analysis--security-method&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#histogram-analysis--security-method&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;There are two mainly encryption methods with CBE:&lt;/p&gt;
+&lt;/pre&gt;&lt;h1&gt;Security Testing and Image Analysis&lt;/h1&gt;&lt;p&gt;Below is a detailed explanation of several techniques used to assess the security of a chaotic system&lt;/p&gt;
+&lt;h2&gt;Histogram Analysis&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;histogram-analysis&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#histogram-analysis&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;There are two mainly encryption methods with CBE:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Permutation = Shuffling the pixels of the image&lt;/li&gt;
 &lt;li&gt;Substitution = Changing the values of the pixel images&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;To check the security of thje encryption we can use the &lt;em&gt;Histogram&lt;/em&gt;, which decipts the distributions of greyscale values. Images depicting information will have a non-uniform histogram.&lt;/p&gt;
+&lt;p&gt;By reading this, you can think&amp;hellip;&lt;/p&gt;
+&lt;h3&gt;Is pixel permutation enough?&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;is-pixel-permutation-enough&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#is-pixel-permutation-enough&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;This is a very clear and brief question about the comparation between shuffling and encryption, and the fast question is: no. Buy why is it not enought? Well, permutation only changes the positions of pixels, meaning that their values still the same. Furthermore permutation is inherently deterministic and reversible.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Évariste Galois&lt;/strong&gt; a French mathematician who developed &lt;em&gt;Galois theory&lt;/em&gt; deals extensively with permutations and their algebraic structure. In his thory implicitly relies on the fact that permutation could be inherently deterministic and reversing, he didn&amp;rsquo;t said contextualy:&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Permutation is inherently deterministic and reversible&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;But we can take his explanation to conclude in this thinking.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;uamm_a_2325330_f0002_b.jpg&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;If you want a detailed explanation of this theory check out this article: &lt;a href=&#34;https://www.tandfonline.com/doi/full/10.1080/00029890.2024.2325330#abstract&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.tandfonline.com/doi/full/10.1080/00029890.2024.2325330#abstract&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Reading and investigating I found the following conclusion:&lt;/p&gt;
+&lt;p&gt;$$
+\forall a, b \in S,, \pi(a) = \pi(b) \Rightarrow a = b
+$$
+$$
+\forall y \in S,, \exists x \in S ; \pi(x) = y
+$$&lt;/p&gt;
+&lt;p&gt;A permutation is a bijective mapping, a one-to-one and onto function, from a set to itself.  So the set of all permutations of &lt;em&gt;n&lt;/em&gt; elemnts forms the symmetric group &lt;code&gt;S&lt;/code&gt;. Since permutatinos are bijections, we can conclude they are invertible, being:&lt;/p&gt;
+&lt;p&gt;$$
+\pi^{-1}(\pi(x)) = x
+$$
+So the reversibility of permutations come from the permutations invertibles bijections from the &lt;em&gt;group theory&lt;/em&gt;.&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;The group theory is the studies of algebraic structures know as groups. And says that a group is a set of elements and an operation that meets 4 other conditions:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;$\text{It is closed if a,b} \in G \text{, then }ab \in G.$&lt;/li&gt;
+&lt;li&gt;$\text{It has an identity, if there is an } e \in G \text{ such that for all }a \in G : ea = ae = a.$&lt;/li&gt;
+&lt;li&gt;$\text{Every elemnt has an inverse for all } a \in G \text{ there is a } b \in G \text{ suich that } ab = e.$&lt;/li&gt;
+&lt;li&gt;$\text{Its operation is associative for all }a,b,c \in G : (ab)c =a(bc).$&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;If you want to learn more about &lt;em&gt;group theory&lt;/em&gt; watch: &lt;a href=&#34;https://www.youtube.com/watch?v=IRZK3Dq0OZM&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.youtube.com/watch?v=IRZK3Dq0OZM&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To conclude this section it is demostrated that permutation is a &lt;em&gt;symmetric group&lt;/em&gt; and it can be inverted, being more insecure than encryption.&lt;/p&gt;
+&lt;p&gt;‎&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;For checking, one part of the security of the encryption we can use the &lt;em&gt;Histogram&lt;/em&gt;, which decipts the distributions of greyscale values. Images depicting information will have a non-uniform histogram.&lt;/p&gt;
 &lt;p&gt;The histogram of the &lt;em&gt;original image&lt;/em&gt; and the &lt;em&gt;permutated/shuffled iamge&lt;/em&gt; are the same while the &lt;em&gt;substituted image&lt;/em&gt; are diferent, usually with a smaller variance&amp;hellip;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;Pasted-image-20250207164721.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;If you are treating with non-gray images, such us RBG formats, you will see a histogram for each color, here an example of &lt;em&gt;original image in RGB&lt;/em&gt; and &lt;em&gt;substituted/encrypted image in RGB&lt;/em&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;Pasted-image-20250207165745.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
-&lt;h2&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=HutBEwJxfts&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;amp;index=4&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Pixel Correlation Analysis&lt;/a&gt; | Security method&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;pixel-correlation-analysis--security-method&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#pixel-correlation-analysis--security-method&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Another method for testing the security is the &lt;em&gt;Correlation&lt;/em&gt;, measuring similarity between adjacent pixels.&lt;/p&gt;
+&lt;h2&gt;Pixel Correlation Analysis&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;pixel-correlation-analysis&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#pixel-correlation-analysis&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Another method for testing the security is the &lt;em&gt;Correlation&lt;/em&gt;, measuring similarity between adjacent pixels.&lt;/p&gt;
 &lt;blockquote&gt;
   &lt;p&gt;Adjacent Pixel refers to the pixel points in an image that are positioned next to each other. The correlation between adjacent pixels is used to evaluate the encryption effect, with original images showing strong correlations and encrypted images displaying little to no correlation among neighboring pixel points.&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;ul&gt;
-&lt;li&gt;*Source: &lt;a href=&#34;https://www.sciencedirect.com/topics/computer-science/adjacent-pixel&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.sciencedirect.com/topics/computer-science/adjacent-pixel&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 &lt;p&gt;&lt;img src=&#34;3-s2.0-B9780128120064000024-f02-05-9780128120064.jpg&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;It can be used to asses the encryption effect, there are 4 main formulas to calculares this correlation between neigboring pixels:&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=HutBEwJxfts&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;amp;index=4&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.youtube.com/watch?v=HutBEwJxfts&amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;index=4&lt;/a&gt;
-&lt;a href=&#34;https://www.sciencedirect.com/topics/computer-science/adjacent-pixel&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.sciencedirect.com/topics/computer-science/adjacent-pixel&lt;/a&gt;
-&lt;a href=&#34;https://chatgpt.com/c/67a63690-a084-800f-b92c-644a2e8680a3&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://chatgpt.com/c/67a63690-a084-800f-b92c-644a2e8680a3&lt;/a&gt;&lt;/p&gt;
-&lt;hr&gt;
 &lt;h3&gt;&lt;em&gt;E(x)&lt;/em&gt; - Expected value (Mean)&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;ex---expected-value-mean&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#ex---expected-value-mean&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;$$
 E(x) = \frac{1}{N} \sum_{i=1}^{N} x_i
@@ -791,8 +813,8 @@ We have finish the &lt;em&gt;Pixel Correlation Analysis&lt;/em&gt;, this is more
 &lt;p&gt;&lt;img src=&#34;Pasted-image-20250407225301.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;With their correlation:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;Pasted-image-20250407225317.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
-&lt;h2&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=k_swYJHL_zQ&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;amp;index=6&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Entropy Analysis&lt;/a&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;entropy-analysis&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#entropy-analysis&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Let&amp;rsquo;s start with the pure definition of &lt;em&gt;entropy&lt;/em&gt;:&lt;/p&gt;
+&lt;h2&gt;Entropy Analysis&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;entropy-analysis&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#entropy-analysis&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Let us begin with the precise definition of &lt;em&gt;entropy&lt;/em&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Computting entropy&lt;/strong&gt;:&lt;/p&gt;
 &lt;blockquote&gt;
   &lt;p&gt;In computing, entropy is the randomness collected by an operating system or application for use in cryptography or other uses that require random data. This randomness is often collected from hardware sources, either pre-existing ones such as mouse movements or specially provided randomness generators.&lt;/p&gt;
@@ -802,9 +824,6 @@ We have finish the &lt;em&gt;Pixel Correlation Analysis&lt;/em&gt;, this is more
   &lt;p&gt;In information theory, entropy is a measure of the uncertainty associated with a random variable. The term by itself in this context usually refers to the Shannon entropy, which quantifies, in the sense of an expected value, the information contained in a message, usually in units such as bits. Equivalently, the Shannon entropy is a measure of the average information content one is missing when one does not know the value of the random variable&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;The conclusion is that the enyropy is the amount of informatino and unpredictability/uncertainty present in an image. The highest theoretical value of the entropy is 8, the higher entropy denotes high unpredictability/uncertainity pixel correlation, being the higher, the safer. To continue a detailed explanation of the formula, with a main source of the survey of Computational entropy of &lt;em&gt;Harvard&lt;/em&gt;.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm-publishedversion.pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm-publishedversion.pdf&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 &lt;h3&gt;Entropy formulas (Unidimensional)&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;entropy-formulas-unidimensional&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#entropy-formulas-unidimensional&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;$$
 E = - \sum_{2i=0}^{2^L - 1} p_i \log_2 p_i
@@ -815,14 +834,14 @@ H(X) = \mathbb{E}_{x \leftarrow X} \left[ \log_2 \left( \frac{1}{\Pr[X = x]} \ri
 $$
 At a glance, it seems to be a completed difference formula, but it is the same formula, but the implementation of some variable change are necesary, the &lt;em&gt;expectation&lt;/em&gt; can be written as a sum over &lt;em&gt;all possible values of x (in X)&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;$$
-\mathbb{E}&lt;em&gt;{x \leftarrow X} = \sum&lt;/em&gt;{x \in \mathcal{X}} Pr[X = x]
+\mathbb{E_{x \leftarrow X}} = \sum_{ x \in \mathcal{X} } Pr[X = x]
 $$&lt;/p&gt;
-&lt;hr&gt;
 &lt;p&gt;In a correct notation. which will be not used, is writed as,&lt;/p&gt;
 &lt;p&gt;$$
-\mathbb{E}|X| = \sum_{x \in \mathcal{X}} x · Pr[X = x]
-$$
-&lt;code&gt;Pr[X = x]&lt;/code&gt; is the probability of the molecular proposition &lt;code&gt;X&lt;/code&gt; has the value of the atomic proposition &lt;code&gt;x&lt;/code&gt;.&lt;/p&gt;
+\mathbb{E}|X| = \sum_{x \in \mathcal{X}} x \times Pr[X = x]
+$$&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Pr[X = x]&lt;/code&gt; is the probability of the molecular proposition &lt;code&gt;X&lt;/code&gt; has the value of the atomic proposition &lt;code&gt;x&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;‎&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;After the variable chage, it will be a result of:&lt;/p&gt;
 &lt;p&gt;$$
@@ -865,13 +884,13 @@ Now that the relationship is mentioned the following formulas can be understood.
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;h4&gt;min-entropy&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;min-entropy&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#min-entropy&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;h5&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#formula&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+&lt;h4&gt;min-entropy | Minimun&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;min-entropy--minimun&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#min-entropy--minimun&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;h6&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#formula&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h6&gt;&lt;p&gt;$$
 H_{\infty}(X) = min_{x}\left[ \log_{2}\left( \frac{1}{Pr[X=x]} \right) \right] = \log_{2}\left( \frac{1}{max_{x} Pr[X=x]} \right) = - \log_{2} (max_{x} Pr[X=x])
 $$&lt;/p&gt;
-&lt;h5&gt;Sage Script&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sage-script-1&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#sage-script-1&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+&lt;h6&gt;Sage Script&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sage-script-1&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#sage-script-1&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h6&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;math&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;log2&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
@@ -887,14 +906,16 @@ $$&lt;/p&gt;
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;h4&gt;max-entropy&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;max-entropy&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#max-entropy&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;Also know as the &lt;em&gt;Entropy of Hartley&lt;/em&gt;, uses the &lt;em&gt;set-builder notation&lt;/em&gt; which obtains only the non-negativa values from the source predicate.&lt;/p&gt;
-&lt;h5&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula-1&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#formula-1&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+&lt;p&gt;‎&lt;/p&gt;
+&lt;hr&gt;
+&lt;h4&gt;max-entropy | Maximun&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;max-entropy--maximun&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#max-entropy--maximun&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;Also know as the &lt;em&gt;Entropy of Hartley&lt;/em&gt;, uses the &lt;em&gt;set-builder notation&lt;/em&gt; which obtains only the non-negativa values from the source predicate.&lt;/p&gt;
+&lt;h6&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula-1&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#formula-1&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h6&gt;&lt;p&gt;$$
 H_{0}(X) = \log |{x : Pr[X=x] &amp;gt; 0}|
 $$&lt;/p&gt;
-&lt;h5&gt;Sage Script&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sage-script-2&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#sage-script-2&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+&lt;h6&gt;Sage Script&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sage-script-2&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#sage-script-2&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h6&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;math&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;log2&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
@@ -914,8 +935,8 @@ $$&lt;/p&gt;
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;h3&gt;Review unidimensional&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;review-unidimensional&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#review-unidimensional&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;em&gt;H(X)&lt;/em&gt; measures the &lt;em&gt;average&lt;/em&gt; number of bits of randomness in X, while &lt;code&gt;H_{infty}(X)&lt;/code&gt; and &lt;code&gt;H_{0}(X)&lt;/code&gt; are worst-case lower and upper bounds on &lt;em&gt;H(X)&lt;/em&gt;. Indeed, we have:&lt;/p&gt;
+&lt;h3&gt;Unimensional review&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;unimensional-review&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#unimensional-review&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;em&gt;H(X)&lt;/em&gt; measures the &lt;em&gt;average&lt;/em&gt; number of bits of randomness in X, while &lt;code&gt;H_{infty}(X)&lt;/code&gt; and &lt;code&gt;H_{0}(X)&lt;/code&gt; are worst-case lower and upper bounds on &lt;em&gt;H(X)&lt;/em&gt;. Indeed, we have:&lt;/p&gt;
 &lt;p&gt;$$
 H_{\infty}(X) \le H(x) \le H_{0}(X)
 $$
@@ -992,8 +1013,8 @@ $$&lt;/p&gt;
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;h3&gt;Entropy formulas (Bidimensional)&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;entropy-formulas-bidimensional&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#entropy-formulas-bidimensional&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;The main formula, doesn&amp;rsquo;t variate in mathematical concepts, only in how we prepare the code:&lt;/p&gt;
+&lt;h3&gt;Bidimensional Entropy Formulas&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;bidimensional-entropy-formulas&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#bidimensional-entropy-formulas&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;The main formula does not change in its mathematical principles; only the way we implement the code varies.&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;math&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;log&lt;/span&gt;
@@ -1014,13 +1035,13 @@ $$&lt;/p&gt;
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;h4&gt;min-entropy (bidimensional)&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;min-entropy-bidimensional&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#min-entropy-bidimensional&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;h5&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula-2&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#formula-2&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+&lt;h4&gt;Bidimensional min-entropy&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;bidimensional-min-entropy&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#bidimensional-min-entropy&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;h6&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula-2&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#formula-2&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h6&gt;&lt;p&gt;$$
 H_{\infty}(I) = min_{(x,y)}\left[ \log_{2}\left( \frac{1}{Pr[I(x,y)]} \right) \right] = \log_{2}\left( \frac{1}{max_{(x,y)} Pr[I(x,y)]} \right) = - \log_{2} (max_{(x,y)} Pr[I(x,y)])
 $$&lt;/p&gt;
-&lt;h5&gt;Sage Script&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sage-script-3&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#sage-script-3&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;To simplify the problem, the use of numpy will be applied.&lt;/p&gt;
+&lt;h6&gt;Sage Script&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sage-script-3&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#sage-script-3&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h6&gt;&lt;p&gt;To simplify the problem, the use of numpy will be applied.&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;numpy&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;np&lt;/span&gt;
@@ -1040,13 +1061,13 @@ $$&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;p&gt;Remember that to use &lt;code&gt;np.max()&lt;/code&gt; requires an &lt;code&gt;np.array&lt;/code&gt;.&lt;/p&gt;
-&lt;h4&gt;max-entropy (bidimensional)&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;max-entropy-bidimensional&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#max-entropy-bidimensional&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;h5&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula-3&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#formula-3&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;$$
+&lt;h4&gt;Bidimensional max-entropy&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;bidimensional-max-entropy&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#bidimensional-max-entropy&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;h6&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula-3&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#formula-3&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h6&gt;&lt;p&gt;$$
 H_{0}(I) = \log |{(x,y) : I(x,y) &amp;gt; 0}|
 $$&lt;/p&gt;
-&lt;h5&gt;Sage Script&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sage-script-4&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#sage-script-4&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+&lt;h6&gt;Sage Script&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sage-script-4&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#sage-script-4&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h6&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;numpy&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;np&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;math&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;log2&lt;/span&gt;
@@ -1067,13 +1088,16 @@ $$&lt;/p&gt;
 &lt;h3&gt;Testing for Security&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;testing-for-security-1&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#testing-for-security-1&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;While using this scripts, setting the value of L as (8 bytes) the maximun value will be 8, like the following examples:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;Pasted-image-20250411232018.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Maybe the image you are using could not be the same highest theoretical value, thats why the &lt;em&gt;max-entropy&lt;/em&gt; function was explained. Before the survey is continued, I recommend take a look to the following pdf I have already mentioned, it is very good resource for learning Entropy: &lt;a href=&#34;https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm-publishedversion.pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm-publishedversion.pdf&lt;/a&gt;&lt;/p&gt;
-&lt;h2&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=OPZT1M9kM0I&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;amp;index=7&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Local Entropy&lt;/a&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;local-entropy&#34;&gt;&lt;/span&gt;
+&lt;p&gt;Maybe the image you are using could not be the same highest theoretical value, thats why the &lt;em&gt;max-entropy&lt;/em&gt; function was explained. Before the survey is continued, I recommend take a look to the following pdf I have already mentioned, it is very good resource for learning Entropy:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm-publishedversion.pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm-publishedversion.pdf&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Local Entropy&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;local-entropy&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#local-entropy&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;If you noticed, the &lt;em&gt;Entroy&lt;/em&gt; has a little problem, the data “Plaintext” and “Shuffled”, have the same entropy level, causing a confusion&amp;hellip;. That&amp;rsquo;s why local entropy is created. Consider a collection of non-overlapping blocks in a image, compute the entropy of each block and calculate the avegrage entropy of these entropies, to obtain the local entropy. You can consider &lt;em&gt;N&lt;/em&gt; number of blocks with &lt;em&gt;MxM&lt;/em&gt; size pixels.&lt;/p&gt;
 &lt;p&gt;$$
 \lim_{ N \to \infty } = \frac{1}{N} \sum_{i=1}^{N} H(B_{i}) = H(X)
-$$
-Furthermore, by the &lt;em&gt;CLT (Central Limit Theorem)&lt;/em&gt;, the estimation error usually decays as follows:&lt;/p&gt;
+$$&lt;/p&gt;
+&lt;p&gt;Furthermore, by the &lt;em&gt;CLT (Central Limit Theorem)&lt;/em&gt;, the estimation error usually decays as follows:&lt;/p&gt;
 &lt;p&gt;$$
 |H(X) - \hat{H}_{N}| \propto \frac{1}{\sqrt{ N }}
 $$&lt;/p&gt;
@@ -1157,39 +1181,7 @@ $$&lt;/p&gt;
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;h2&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=BQUMhEG9xok&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;amp;index=8&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Is Pixel Permutation Enough?&lt;/a&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;is-pixel-permutation-enough&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#is-pixel-permutation-enough&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;This is a very clear and brief question about the comparation between shuffling and encryption, and the fast question is: no. Buy why is it not enought? Well, permutation only changes the positions of pixels, meaning that their values still the same. Furthermore permutation is inherently deterministic and reversible.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Évariste Galois&lt;/strong&gt; a French mathematician who developed &lt;em&gt;Galois theory&lt;/em&gt; deals extensively with permutations and their algebraic structure. In his thory implicitly relies on the fact that permutation could be inherently deterministic and reversing, he didn&amp;rsquo;t said contextualy:&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;Permutation is inherently deterministic and reversible&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;But we can take his explanation to conclude in this thinking.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;uamm_a_2325330_f0002_b.jpg&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;If you want a detailed explanation of this theory check out this article: &lt;a href=&#34;https://www.tandfonline.com/doi/full/10.1080/00029890.2024.2325330#abstract&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.tandfonline.com/doi/full/10.1080/00029890.2024.2325330#abstract&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Reading and investigating I found the following conclusion:&lt;/p&gt;
-&lt;p&gt;$$
-\forall a, b \in S,, \pi(a) = \pi(b) \Rightarrow a = b
-$$
-$$
-\forall y \in S,, \exists x \in S ; \pi(x) = y
-$$&lt;/p&gt;
-&lt;p&gt;A permutation is a bijective mapping, a one-to-one and onto function, from a set to itself.  So the set of all permutations of &lt;em&gt;n&lt;/em&gt; elemnts forms the symmetric group &lt;code&gt;S&lt;/code&gt;. Since permutatinos are bijections, we can conclude they are invertible, being:&lt;/p&gt;
-&lt;p&gt;$$
-\pi^{-1}(\pi(x)) = x
-$$
-So the reversibility of permutations come from the permutations invertibles bijections from the &lt;em&gt;group theory&lt;/em&gt;.&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;The group theory is the studies of algebraic structures know as groups. And says that a group is a set of elements and an operation that meets 4 other conditions:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;$\text{It is closed if a,b} \in G \text{, then }ab \in G.$&lt;/li&gt;
-&lt;li&gt;$\text{It has an identity, if there is an } e \in G \text{ such that for all }a \in G : ea = ae = a.$&lt;/li&gt;
-&lt;li&gt;$\text{Every elemnt has an inverse for all } a \in G \text{ there is a } b \in G \text{ suich that } ab = e.$&lt;/li&gt;
-&lt;li&gt;$\text{Its operation is associative for all }a,b,c \in G : (ab)c =a(bc).$&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;If you want to learn more about &lt;em&gt;group theory&lt;/em&gt; watch: &lt;a href=&#34;https://www.youtube.com/watch?v=IRZK3Dq0OZM&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.youtube.com/watch?v=IRZK3Dq0OZM&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;To conclude this section it is demostrated that permutation is a &lt;em&gt;symmetric group&lt;/em&gt; and it can be inverted, being more insecure than encryption.&lt;/p&gt;
-&lt;h2&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=M16KViUjjlI&amp;amp;list=PL9y6bivP9mhEXxZGThfzyIJEZp5-BakCi&amp;amp;index=9&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;NPCR &amp;amp; UACI Cryptanalysis&lt;/a&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;npcr--uaci-cryptanalysis&#34;&gt;&lt;/span&gt;
+&lt;h2&gt;NPCR &amp;amp; UACI Cryptanalysis&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;npcr--uaci-cryptanalysis&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#npcr--uaci-cryptanalysis&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;As It is mentioned in one of the first sections of this post, &lt;em&gt;Chaos Based Encryption&lt;/em&gt; is typically prone to suffer cryptographic differentials attacks such as:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Differential and Chosen-Plaintext Attacks (CPA)&lt;/li&gt;
@@ -1201,8 +1193,8 @@ So the reversibility of permutations come from the permutations invertibles bije
 &lt;p&gt;In this section the &lt;em&gt;NPCR/UACI attacks&lt;/em&gt; will be spoken, anyways If it is precise a further explanation check the following PDF: &lt;a href=&#34;https://arxiv.org/pdf/1910.11679&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://arxiv.org/pdf/1910.11679&lt;/a&gt;, due you are reading a brief explanation of some important part of CBE, in the article mentioned you will find some conventional attacks e.g., chosen plaintext attack, known plaintext attack, and arguing the vulnerable encryption scheme for embedded systems based on continuous third-order hyperbolic sine chaotic system proposed by  Z. Lin et al. in &lt;a href=&#34;https://link.springer.com/article/10.1007/s11042-018-6824-5&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;A novel fast image encryption algorithm for embedded systems.&lt;/em&gt;&lt;/a&gt;. Using:&lt;/p&gt;
 &lt;p&gt;$$
 \ddot{x} + 0.75\dot{x} + x + 1.2 \times 10^{-6} \cdot x \sinh\left(\frac{\dot{x}}{0.026}\right) = 0
-$$
-Both tests are selected to measure the resistance of a proposed cryptosystem against the differential attacks introduced by &lt;em&gt;Eli Biham and Adi Shamir in differential cryptanalysis of DES-like cryptosystems. Journal of CRYPTOLOGY, 4(1):3–72, 1991.&lt;/em&gt;&lt;/p&gt;
+$$&lt;/p&gt;
+&lt;p&gt;Both tests are selected to measure the resistance of a proposed cryptosystem against the differential attacks introduced by &lt;em&gt;Eli Biham and Adi Shamir in differential cryptanalysis of DES-like cryptosystems. Journal of CRYPTOLOGY, 4(1):3–72, 1991.&lt;/em&gt;&lt;/p&gt;
 &lt;h3&gt;Number of Pixels Change Rate - NPCR&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;number-of-pixels-change-rate---npcr&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#number-of-pixels-change-rate---npcr&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;NPCR measures the percentage of pixels variations between two encrypted images when their corresponding cleartext images differ with only one pixel, with the purpose of evaluates the sensitive of the encryption system to small changes in the plain image. The higher the NPCR, the more noticeable the difference is proportionally, meaning the CBE systems works correctly.&lt;/p&gt;
 &lt;p&gt;Knowing this we can go into the formula:&lt;/p&gt;
@@ -1241,7 +1233,7 @@ Where:&lt;/p&gt;
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;p&gt;Also It is possible to apply Pillow module:&lt;/p&gt;
+&lt;p&gt;It is also possible to apply the Pillow module:&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;PIL&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;image&lt;/span&gt;
@@ -1366,21 +1358,111 @@ Where:&lt;/p&gt;
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;h1&gt;External References&lt;/h1&gt;&lt;p&gt;[1] &lt;a href=&#34;https://www.mdpi.com/2079-9292/11/19/3156&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2079-9292/11/19/3156&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;[2] &lt;a href=&#34;https://arxiv.org/abs/nlin/0611017&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://arxiv.org/abs/nlin/0611017&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;[3] &lt;a href=&#34;https://journals.mmupress.com/index.php/jiwe/article/download/1194/684/10872&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://journals.mmupress.com/index.php/jiwe/article/download/1194/684/10872&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;[4] &lt;a href=&#34;https://www.iieta.org/journals/isi/paper/10.18280/isi.250507&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.iieta.org/journals/isi/paper/10.18280/isi.250507&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;[5] &lt;a href=&#34;https://hal.science/tel-01179610/document&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://hal.science/tel-01179610/document&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Creating Secure Chaos Based Systems&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;creating-secure-chaos-based-systems&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#creating-secure-chaos-based-systems&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;The next step is yours. In this paper we have seen what is a Chaotic System, what are they used for, some validity checking for being secure, but how to create one? What properties needs a algorithm to be consider a system? In this section we will get in-depth with some complex (at least for me) mathematical concepts.&lt;/p&gt;
+&lt;h3&gt;Lyapunov exponent&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;lyapunov-exponent&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#lyapunov-exponent&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;First of all, we should mention &lt;em&gt;Lyapunov exponent&lt;/em&gt;, which measures the rate at which an infinitesimally small distance between two initially close states grows over time, in other words, it measures exponential divergence.&lt;/p&gt;
+&lt;p&gt;To understand better the exponent think in two small balls, in the top of a hill, both are nearly the same distance apart, if the hill is smooth, flat, without any rocks you could calculate normaly the trajectory and predict that both will stop in the same space (being the initial space insignificant). This is a common dinamic system.&lt;/p&gt;
+&lt;p&gt;Only, in real life there are rocks, craters, around all the hill, making detours to the balls. Now, its harder to think that each ball will be nearly when they stop, this is how chaotic system works.&lt;/p&gt;
+&lt;h5&gt;Formula&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;formula-4&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#formula-4&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h5&gt;&lt;p&gt;Thus, the Lyapunov exponent is formed as:&lt;/p&gt;
+&lt;p&gt;$$
+F^{t}(x_{0} + \varepsilon) - F^{t}(x_{0}) \approx \varepsilon e^{\lambda t}
+$$&lt;/p&gt;
+&lt;p&gt;Being $\lambda$ the Lyapunov exponent. The left side is the distance between two initially close states after lost steps, and the right side is the assumption that the distance grows exponentially with time. $\lambda$ is measured by a long period time ideally $t \to \infty$. Also, $\epsilon$ are the rocks, craters with a minimun value $\epsilon &amp;laquo; 1$ or $\epsilon = 10^{-6}$.&lt;/p&gt;
+&lt;p&gt;If $\lambda &amp;lt; 0$, the smalls distances are similar not consider a chaotic system. To clear the exponent follow:&lt;/p&gt;
+&lt;p&gt;$$
+e^{\lambda t}  \approx \frac{F^{t}(x_{0} + \varepsilon) - F^{t}(x_{0})}{\epsilon}
+$$&lt;/p&gt;
+&lt;p&gt;Being $\delta(t) = F^{t}(x_{0} + \varepsilon) - F^{t}(x_{0})$&lt;/p&gt;
+&lt;p&gt;$$
+\lambda = \frac{1}{t} \ln ( \frac{\delta(t)}{\epsilon})
+$$&lt;/p&gt;
+&lt;p&gt;Lastly, the limits:&lt;/p&gt;
+&lt;p&gt;$$
+\lambda = \lim_{ t \to \infty ,\epsilon \to 0 } \frac{1}{t} \ln ( \frac{\delta(t)}{\epsilon})
+$$&lt;/p&gt;
+&lt;p&gt;Once this is understood, let&amp;rsquo;s take the following POSSIBLE chaotic system: $f(x) = k \times x \times (x-1)$ and the linear map: $g(x) = x \times k$, where $k \text{ is cte}$ in both cases.&lt;/p&gt;
+&lt;p&gt;To calculate the exponent, use the following sage function:&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;numpy&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;np&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;lyapunov&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;mapFunction&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;eps&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;idx&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;discard&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;100&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;xPert&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x0&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;eps&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;lyap&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mf&#34;&gt;0.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;range&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;idx&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mapFunction&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;xPert&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;  &lt;span class=&#34;n&#34;&gt;mapFunction&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;xPert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;delta&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;abs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;xPert&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;xPert&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;eps&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;xPert&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;delta&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;discard&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;n&#34;&gt;lyap&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;np&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;delta&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;eps&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;ei&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;  &lt;span class=&#34;n&#34;&gt;idx&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;discard&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;lyap&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ei&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;k&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;lambda&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;k&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;g&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;k&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;lambda&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;k&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Taking the following parameters:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;$\epsilon$ | eps = $10^{-8}$ | 1e-8&lt;/li&gt;
+&lt;li&gt;x0 = 0.5&lt;/li&gt;
+&lt;li&gt;idx = 5000&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We obtain:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;$f(2) \approx -17.3998 $&lt;/li&gt;
+&lt;li&gt;$f(4) \approx 1.3863$&lt;/li&gt;
+&lt;li&gt;$g(0.5) \approx -0.6931$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To consider, the higher value for the iterations and the lower value for $\epsilon$ (initial pertubations) better success hit in $\lambda$&lt;/p&gt;
+&lt;h2&gt;External References&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;external-references&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#external-references&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;[1] &lt;a href=&#34;https://www.sciencedirect.com/science/article/abs/pii/S002002551200521X&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.sciencedirect.com/science/article/abs/pii/S002002551200521X&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[2] &lt;a href=&#34;https://www.mdpi.com/2079-9292/10/12/1392&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2079-9292/10/12/1392&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[3] &lt;a href=&#34;https://www.mdpi.com/2073-8994/15/3/726&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2073-8994/15/3/726&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[4] &lt;a href=&#34;https://www.mdpi.com/2073-8994/15/7/1311&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2073-8994/15/7/1311&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[5] &lt;a href=&#34;https://www.mdpi.com/2079-9292/11/19/3156&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2079-9292/11/19/3156&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[6] &lt;a href=&#34;https://arxiv.org/abs/nlin/0611017&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://arxiv.org/abs/nlin/0611017&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[7] &lt;a href=&#34;https://journals.mmupress.com/index.php/jiwe/article/download/1194/684/10872&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://journals.mmupress.com/index.php/jiwe/article/download/1194/684/10872&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[8] &lt;a href=&#34;https://www.iieta.org/journals/isi/paper/10.18280/isi.250507&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.iieta.org/journals/isi/paper/10.18280/isi.250507&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[9] &lt;a href=&#34;https://hal.science/tel-01179610/document&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://hal.science/tel-01179610/document&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[10] &lt;a href=&#34;https://www.mdpi.com/2073-8994/15/12/2138&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.mdpi.com/2073-8994/15/12/2138&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[11] &lt;a href=&#34;https://www.sciencedirect.com/topics/computer-science/adjacent-pixel&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.sciencedirect.com/topics/computer-science/adjacent-pixel&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[12] &lt;a href=&#34;https://www.researchgate.net/publication/266333755_EMBEDDING_INFORMATION_IN_DCT_COEFFICIENTS_BASED_ON_AVERAGE_COVARIANCE/fulltext/54aea2820cf29661a3d39ee4/EMBEDDING-INFORMATION-IN-DCT-COEFFICIENTS-BASED-ON-AVERAGE-COVARIANCE.pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.researchgate.net/publication/266333755_EMBEDDING_INFORMATION_IN_DCT_COEFFICIENTS_BASED_ON_AVERAGE_COVARIANCE/fulltext/54aea2820cf29661a3d39ee4/EMBEDDING-INFORMATION-IN-DCT-COEFFICIENTS-BASED-ON-AVERAGE-COVARIANCE.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[13] &lt;a href=&#34;https://hal.science/hal-02165866v1/document&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://hal.science/hal-02165866v1/document&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[14] &lt;a href=&#34;https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm-publishedversion.pd&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm-publishedversion.pd&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[15] &lt;a href=&#34;https://link.springer.com/article/10.1007/s11042-018-6824-5&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://link.springer.com/article/10.1007/s11042-018-6824-5&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[16] &lt;a href=&#34;https://www.sciencedirect.com/science/article/abs/pii/S1007570413005030?via%3Dihub&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.sciencedirect.com/science/article/abs/pii/S1007570413005030?via%3Dihub&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[17] &lt;a href=&#34;https://www.qeios.com/read/K65HZS&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.qeios.com/read/K65HZS&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[18] &lt;a href=&#34;https://medium.com/@rusabhshah17/chaos-based-image-encryption-algorithm-9f4870805a1d&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://medium.com/@rusabhshah17/chaos-based-image-encryption-algorithm-9f4870805a1d&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[19] &lt;a href=&#34;https://www.researchgate.net/publication/340674341_An_Image_Encryption_Algorithm_Based_on_Random_Walk_and_Hyperchaotic_Systems&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.researchgate.net/publication/340674341_An_Image_Encryption_Algorithm_Based_on_Random_Walk_and_Hyperchaotic_Systems&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[20] &lt;a href=&#34;https://espanol.libretexts.org/Matematicas/Computacion_Cientifica_Simulaciones_y_Modelado/Libro%3A_Introducci%C3%B3n_al_Modelado_y_An%C3%A1lisis_de_Sistemas_Complejos_%28Sayama%29/09%3A_Caos/9.03%3A_Exponente_de_Lyapunov&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://espanol.libretexts.org/Matematicas/Computacion_Cientifica_Simulaciones_y_Modelado/Libro%3A_Introducci%C3%B3n_al_Modelado_y_An%C3%A1lisis_de_Sistemas_Complejos_(Sayama)/09%3A_Caos/9.03%3A_Exponente_de_Lyapunov&lt;/a&gt;&lt;/p&gt;
 
       </description>
     </item>
     
     <item>
       <title>Reversing</title>
-      <link>/blogs/os-internals/</link>
+      <link>//localhost:1313/blogs/os-internals/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/blogs/os-internals/</guid>
+      <guid>//localhost:1313/blogs/os-internals/</guid>
       <description>
         
         
@@ -1390,10 +1472,10 @@ Where:&lt;/p&gt;
     
     <item>
       <title>TJCTF 2025 | 7/8 Forensics challenges</title>
-      <link>/writeups/tjctf-2025/</link>
+      <link>//localhost:1313/writeups/tjctf-2025/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/writeups/tjctf-2025/</guid>
+      <guid>//localhost:1313/writeups/tjctf-2025/</guid>
       <description>
         
         

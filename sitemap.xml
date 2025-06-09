@@ -2,24 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/</loc>
+    <loc>//localhost:1313/</loc>
   </url><url>
-    <loc>/blogs/</loc>
+    <loc>//localhost:1313/blogs/</loc>
   </url><url>
-    <loc>/hardening/</loc>
+    <loc>//localhost:1313/hardening/</loc>
   </url><url>
-    <loc>/categories/</loc>
+    <loc>//localhost:1313/categories/</loc>
   </url><url>
-    <loc>/blogs/forensics/cbe-fundamentals/</loc>
+    <loc>//localhost:1313/blogs/forensics/cbe-fundamentals/</loc>
   </url><url>
-    <loc>/blogs/forensics/</loc>
+    <loc>//localhost:1313/blogs/forensics/</loc>
   </url><url>
-    <loc>/blogs/os-internals/</loc>
+    <loc>//localhost:1313/blogs/os-internals/</loc>
   </url><url>
-    <loc>/tags/</loc>
+    <loc>//localhost:1313/tags/</loc>
   </url><url>
-    <loc>/writeups/tjctf-2025/</loc>
+    <loc>//localhost:1313/writeups/tjctf-2025/</loc>
   </url><url>
-    <loc>/writeups/</loc>
+    <loc>//localhost:1313/writeups/</loc>
   </url>
 </urlset>
