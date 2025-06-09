@@ -245,14 +245,7 @@ Substitution-box (S-box) [4] and chaotic maps [5–13].&lt;/em&gt;&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;By reading this, you can think&amp;hellip;&lt;/p&gt;
 &lt;h3&gt;Is pixel permutation enough?&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;is-pixel-permutation-enough&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#is-pixel-permutation-enough&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;This is a very clear and brief question about the comparation between shuffling and encryption, and the fast question is: no. Buy why is it not enought? Well, permutation only changes the positions of pixels, meaning that their values still the same. Furthermore permutation is inherently deterministic and reversible.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Évariste Galois&lt;/strong&gt; a French mathematician who developed &lt;em&gt;Galois theory&lt;/em&gt; deals extensively with permutations and their algebraic structure. In his thory implicitly relies on the fact that permutation could be inherently deterministic and reversing, he didn&amp;rsquo;t said contextualy:&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;Permutation is inherently deterministic and reversible&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;But we can take his explanation to conclude in this thinking.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;uamm_a_2325330_f0002_b.jpg&#34; alt=&#34;&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;If you want a detailed explanation of this theory check out this article: &lt;a href=&#34;https://www.tandfonline.com/doi/full/10.1080/00029890.2024.2325330#abstract&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.tandfonline.com/doi/full/10.1080/00029890.2024.2325330#abstract&lt;/a&gt;&lt;/p&gt;
+    &lt;a href=&#34;#is-pixel-permutation-enough&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;This is a very clear and brief question about the comparation between shuffling and encryption, and the fast answer is: no. Buy why is it not enought? Well, permutation only changes the positions of pixels, meaning that their values still the same. Furthermore permutation is inherently deterministic and reversible.&lt;/p&gt;
 &lt;p&gt;Reading and investigating I found the following conclusion:&lt;/p&gt;
 &lt;p&gt;$$
 \forall a, b \in S,, \pi(a) = \pi(b) \Rightarrow a = b

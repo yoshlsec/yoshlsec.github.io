@@ -22,7 +22,7 @@
 
   <meta itemprop="name" content="Chaos Based Encryption applied to stegoanalysis">
   <meta itemprop="description" content="In this article we will cover basics concepts about the image file type format and how to detect and insert critical information with a CBE algorithm, in base to Lazaros Moysis brief content.">
-  <meta itemprop="wordCount" content="6940">
+  <meta itemprop="wordCount" content="6872">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Chaos Based Encryption applied to stegoanalysis">
   <meta name="twitter:description" content="In this article we will cover basics concepts about the image file type format and how to detect and insert critical information with a CBE algorithm, in base to Lazaros Moysis brief content.">
@@ -826,14 +826,7 @@ Substitution-box (S-box) [4] and chaotic maps [5–13].</em></p>
 </ul>
 <p>By reading this, you can think&hellip;</p>
 <h3>Is pixel permutation enough?<span class="hx-absolute -hx-mt-20" id="is-pixel-permutation-enough"></span>
-    <a href="#is-pixel-permutation-enough" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>This is a very clear and brief question about the comparation between shuffling and encryption, and the fast question is: no. Buy why is it not enought? Well, permutation only changes the positions of pixels, meaning that their values still the same. Furthermore permutation is inherently deterministic and reversible.</p>
-<p><strong>Évariste Galois</strong> a French mathematician who developed <em>Galois theory</em> deals extensively with permutations and their algebraic structure. In his thory implicitly relies on the fact that permutation could be inherently deterministic and reversing, he didn&rsquo;t said contextualy:</p>
-<blockquote>
-  <p>Permutation is inherently deterministic and reversible</p>
-</blockquote>
-<p>But we can take his explanation to conclude in this thinking.</p>
-<p><img src="uamm_a_2325330_f0002_b.jpg" alt="" loading="lazy" /></p>
-<p>If you want a detailed explanation of this theory check out this article: <a href="https://www.tandfonline.com/doi/full/10.1080/00029890.2024.2325330#abstract" target="_blank" rel="noopener">https://www.tandfonline.com/doi/full/10.1080/00029890.2024.2325330#abstract</a></p>
+    <a href="#is-pixel-permutation-enough" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>This is a very clear and brief question about the comparation between shuffling and encryption, and the fast answer is: no. Buy why is it not enought? Well, permutation only changes the positions of pixels, meaning that their values still the same. Furthermore permutation is inherently deterministic and reversible.</p>
 <p>Reading and investigating I found the following conclusion:</p>
 <p>$$
 \forall a, b \in S,, \pi(a) = \pi(b) \Rightarrow a = b
