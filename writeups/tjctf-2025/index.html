@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+<html lang="en"><head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="robots" content="index, follow" />
   <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
@@ -11,30 +11,28 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
 <title>TJCTF 2025 | 7/8 Forensics challenges – yoshl - IT enjoyer</title>
-  <meta name="description" content="
-TJCTF is an international cybersecurity competition hosted by TJCSC, a group of students from Thomas Jefferson High School for Science and Technology in Northern Virginia. The competition consists of a variety of computer science and cybersecurity challenges in an online, jeopardy-style format. You’ll earn points through solving challenges in categories such as binary exploitation, reverse engineering, cryptography, and web. For more information, please join our Discord to learn more about the competition and get notified when the event nears!" /><link rel="canonical" href="//localhost:1313/writeups/tjctf-2025/" itemprop="url" />
+  <meta name="description" content="TJCTF is an international cybersecurity competition hosted by TJCSC, a group of students from Thomas Jefferson High School for Science and Technology in Northern Virginia. The competition consists of a variety of computer science and cybersecurity challenges in an online, jeopardy-style format. You’ll earn points through solving challenges in categories such as binary exploitation, reverse engineering, cryptography, and web. For more information, please join our Discord to learn more about the competition and get notified when the event nears!" /><link rel="canonical" href="/writeups/tjctf-2025/" itemprop="url" />
 
 <meta property="og:title" content="TJCTF 2025 | 7/8 Forensics challenges" />
-<meta property="og:description" content="
-
-  TJCTF is an international cybersecurity competition hosted by TJCSC, a group of students from Thomas Jefferson High School for Science and Technology in Northern Virginia. The competition consists of a variety of computer science and cybersecurity challenges in an online, jeopardy-style format. You’ll earn points through solving challenges in categories such as binary exploitation, reverse engineering, cryptography, and web. For more information, please join our Discord to learn more about the competition and get notified when the event nears!" />
+<meta property="og:description" content="TJCTF is an international cybersecurity competition hosted by TJCSC, a group of students from Thomas Jefferson High School for Science and Technology in Northern Virginia. The competition consists of a variety of computer science and cybersecurity challenges in an online, jeopardy-style format. You’ll earn points through solving challenges in categories such as binary exploitation, reverse engineering, cryptography, and web. For more information, please join our Discord to learn more about the competition and get notified when the event nears!" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="//localhost:1313/writeups/tjctf-2025/" /><meta property="article:section" content="writeups" />
+<meta property="og:url" content="/writeups/tjctf-2025/" /><meta property="article:section" content="writeups" />
 
 
 
   <meta itemprop="name" content="TJCTF 2025 | 7/8 Forensics challenges">
   <meta itemprop="description" content="TJCTF is an international cybersecurity competition hosted by TJCSC, a group of students from Thomas Jefferson High School for Science and Technology in Northern Virginia. The competition consists of a variety of computer science and cybersecurity challenges in an online, jeopardy-style format. You’ll earn points through solving challenges in categories such as binary exploitation, reverse engineering, cryptography, and web. For more information, please join our Discord to learn more about the competition and get notified when the event nears!">
-  <meta itemprop="wordCount" content="2434">
+  <meta itemprop="wordCount" content="2364">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="TJCTF 2025 | 7/8 Forensics challenges">
   <meta name="twitter:description" content="TJCTF is an international cybersecurity competition hosted by TJCSC, a group of students from Thomas Jefferson High School for Science and Technology in Northern Virginia. The competition consists of a variety of computer science and cybersecurity challenges in an online, jeopardy-style format. You’ll earn points through solving challenges in categories such as binary exploitation, reverse engineering, cryptography, and web. For more information, please join our Discord to learn more about the competition and get notified when the event nears!">
 
-    <link href="/css/compiled/main.css" rel="stylesheet" />
+    <link rel="preload" href="/css/compiled/main.min.e0bb0f28123bf084d555fc9253c6d2aa1443b2dfcde6044741a207eabdc3ddb8.css" as="style" integrity="sha256-4LsPKBI78ITVVfySU8bSqhRDst/N5gRHQaIH6r3D3bg=" />
+    <link href="/css/compiled/main.min.e0bb0f28123bf084d555fc9253c6d2aa1443b2dfcde6044741a207eabdc3ddb8.css" rel="stylesheet" integrity="sha256-4LsPKBI78ITVVfySU8bSqhRDst/N5gRHQaIH6r3D3bg=" />
 
 
 
-  <link href="/css/custom.css" rel="stylesheet" />
+  <link href="/css/custom.min.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css" rel="stylesheet" integrity="sha256-47DEQpj8HBSa&#43;/TImW&#43;5JCeuQeRkm5NMpJWZG3hSuFU=" />
 
 
   <script>
@@ -214,7 +212,7 @@ TJCTF is an international cybersecurity competition hosted by TJCSC, a group of 
       hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
     href="/writeups/l3akctf-2025/"
     
-  >L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges
+  >L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges
     </a>
               
             </li><li class="hx-flex hx-flex-col open"><a
@@ -326,7 +324,7 @@ TJCTF is an international cybersecurity competition hosted by TJCSC, a group of 
         <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#forensicsthats-pietty-cool">forensics/thats-pietty-cool
         </a>
       </li></ul>
-      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400"><a class="hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50" href="https://yoshlsec.github.io/writeups/TJCTF%202025/index.md" target="_blank" rel="noreferrer">Edit this page on GitHub →</a>
+      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400">
         <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
           <span>Scroll to top</span>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
@@ -351,9 +349,9 @@ TJCTF is an international cybersecurity competition hosted by TJCSC, a group of 
         <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"></div>
         <div class="content">
           <p><img src="image.png" alt="Profile status - 23rd in Open division" loading="lazy" /></p>
-<blockquote>
-  <p>TJCTF is an international cybersecurity competition hosted by TJCSC, a group of students from Thomas Jefferson High School for Science and Technology in Northern Virginia. The competition consists of a variety of computer science and cybersecurity challenges in an online, jeopardy-style format. You’ll earn points through solving challenges in categories such as binary exploitation, reverse engineering, cryptography, and web. For more information, please join our Discord to learn more about the competition and get notified when the event nears!</p>
-</blockquote>
+<p>Future weight: <strong>63.09</strong> <br>
+Rating weight: <strong>51.29</strong> <br>
+Event organizers: <strong>tjcsc</strong></p>
 <h2>forensics/hidden-message<span class="hx-absolute -hx-mt-20" id="forensicshidden-message"></span>
     <a href="#forensicshidden-message" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="image-1.png" alt="alt text" loading="lazy" /></p>
 <p>An easy stego challenge where we apply some basics tools to obtain hidden information, in this case is used <a href="https://github.com/zed-0xff/zsteg" target="_blank" rel="noopener"><em>zsteg</em></a> to analyze LSB layers and color channel anomalies, extracting hidden data from PNG and BMP images.</p>
@@ -926,9 +924,9 @@ $$</p>
 
         </div><div class="hx-mt-16"></div><div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
         href="/writeups/l3akctf-2025/"
-        title="L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges"
+        title="L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges"
         class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-ml-auto ltr:hx-pl-4 ltr:hx-text-right rtl:hx-mr-auto rtl:hx-pr-4 rtl:hx-text-left"
-      >L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges<svg class="hx-inline hx-h-5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div></main>
+      >L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges<svg class="hx-inline hx-h-5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div></main>
     </article>
   </div>
 
@@ -945,9 +943,9 @@ $$</p>
       class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
     ></div></footer>
     
-    <script defer src="/js/main.js" integrity=""></script>
+    <script defer src="/js/main.min.0942239592f0795dc7213dd1057fd229d7edc19c0ef1a285396eb292d9ca9842.js" integrity="sha256-CUIjlZLweV3HIT3RBX/SKdftwZwO8aKFOW6yktnKmEI="></script>
 <script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
-    <script defer src="/en.search.js" integrity=""></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
+    <script defer src="/en.search.min.7918d81999396a56d9ff1b7a986d6474e66bd5acdbbe01e8bac129f5ef345a88.js" integrity="sha256-eRjYGZk5albZ/xt6mG1kdOZr1azbvgHousEp9e80Wog="></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
 <script defer src="/lib/katex/katex.min.9f45307c5794ed247a0d095f3a62e52ef2215a67b2327203a7fd919959ae79d1.js" integrity="sha256-n0UwfFeU7SR6DQlfOmLlLvIhWmeyMnIDp/2RmVmuedE="></script>
 <script defer src="/lib/katex/auto-render.min.7b57d427ac6270677daf8d8380ded2cc73336f9149a167b8e1fe0d6ef66604ae.js" integrity="sha256-e1fUJ6xicGd9r42DgN7SzHMzb5FJoWe44f4NbvZmBK4="></script>
 <script defer src="/lib/katex/mhchem.min.f0ca03df194b8c3d6017ff455db6a0ef98857905663fa311a6cded788b15340b.js" integrity="sha256-8MoD3xlLjD1gF/9FXbag75iFeQVmP6MRps3teIsVNAs="></script>

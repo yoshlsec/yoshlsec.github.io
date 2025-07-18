@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+<html lang="en"><head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="robots" content="index, follow" />
   <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
@@ -10,48 +10,39 @@
 <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
-<title>L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges – yoshl - IT enjoyer</title>
-  <meta name="description" content="Despite I did not participate in this CTF, I was encouraged to try these challenges afterward; basic forensic concepts will be assumed as known and will not be explained.
-More information from organizers:
-ctftime: https://ctftime.org/team/220336 CTF Web: https://ctf.l3ak.team/challenges Main Web: https://ctf.l3ak.team/challenges
-forensics/BOMbardino crocodile Information Gathering Within the file given we found a .eml extension, with an email conversation between bluecrustacean@proton.me and notwarlocksmurf@proton.me, the content was in base64 encoded with the following content:" /><link rel="canonical" href="//localhost:1313/writeups/l3akctf-2025/" itemprop="url" />
+<title>L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges – yoshl - IT enjoyer</title>
+  <meta name="description" content="L3akCTF is an international online cybersecurity competition hosted by the L3ak team. The event runs from Friday, July 11th, 2025 at 17:00 UTC to Sunday, July 13th, 2025 at 17:00 UTC. This jeopardy-style CTF features a wide range of challenges designed for all skill levels, from beginners to seasoned experts.
 
-<meta property="og:title" content="L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges" />
-<meta property="og:description" content="Despite I did not participate in this CTF, I was encouraged to try these challenges afterward; basic forensic concepts will be assumed  as known and will not be explained.
+Participants will tackle over 60 carefully crafted challenges across 10 categories, including cryptography, web exploitation, reverse engineering, binary exploitation, forensics, OSINT, mobile security, hardware/RF, hash cracking, and miscellaneous topics.
+" /><link rel="canonical" href="/writeups/l3akctf-2025/" itemprop="url" />
 
-  More information from organizers:
-ctftime: https://ctftime.org/team/220336 
-CTF Web: https://ctf.l3ak.team/challenges 
-Main Web: https://ctf.l3ak.team/challenges
+<meta property="og:title" content="L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges" />
+<meta property="og:description" content="L3akCTF is an international online cybersecurity competition hosted by the L3ak team. The event runs from Friday, July 11th, 2025 at 17:00 UTC to Sunday, July 13th, 2025 at 17:00 UTC. This jeopardy-style CTF features a wide range of challenges designed for all skill levels, from beginners to seasoned experts.
 
-
-forensics/BOMbardino crocodile
-    
-Information Gathering
-    Within the file given we found a .eml extension, with an email conversation between bluecrustacean@proton.me and notwarlocksmurf@proton.me, the content was in base64 encoded with the following content:" />
+Participants will tackle over 60 carefully crafted challenges across 10 categories, including cryptography, web exploitation, reverse engineering, binary exploitation, forensics, OSINT, mobile security, hardware/RF, hash cracking, and miscellaneous topics.
+" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="//localhost:1313/writeups/l3akctf-2025/" /><meta property="article:section" content="writeups" />
+<meta property="og:url" content="/writeups/l3akctf-2025/" /><meta property="article:section" content="writeups" />
 
 
 
-  <meta itemprop="name" content="L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges">
-  <meta itemprop="description" content="Despite I did not participate in this CTF, I was encouraged to try these challenges afterward; basic forensic concepts will be assumed as known and will not be explained.
-More information from organizers:
-ctftime: https://ctftime.org/team/220336 CTF Web: https://ctf.l3ak.team/challenges Main Web: https://ctf.l3ak.team/challenges
-forensics/BOMbardino crocodile Information Gathering Within the file given we found a .eml extension, with an email conversation between bluecrustacean@proton.me and notwarlocksmurf@proton.me, the content was in base64 encoded with the following content:">
-  <meta itemprop="wordCount" content="6252">
+  <meta itemprop="name" content="L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges">
+  <meta itemprop="description" content="L3akCTF is an international online cybersecurity competition hosted by the L3ak team. The event runs from Friday, July 11th, 2025 at 17:00 UTC to Sunday, July 13th, 2025 at 17:00 UTC. This jeopardy-style CTF features a wide range of challenges designed for all skill levels, from beginners to seasoned experts.
+
+Participants will tackle over 60 carefully crafted challenges across 10 categories, including cryptography, web exploitation, reverse engineering, binary exploitation, forensics, OSINT, mobile security, hardware/RF, hash cracking, and miscellaneous topics.">
+  <meta itemprop="wordCount" content="6217">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges">
-  <meta name="twitter:description" content="Despite I did not participate in this CTF, I was encouraged to try these challenges afterward; basic forensic concepts will be assumed as known and will not be explained.
-More information from organizers:
-ctftime: https://ctftime.org/team/220336 CTF Web: https://ctf.l3ak.team/challenges Main Web: https://ctf.l3ak.team/challenges
-forensics/BOMbardino crocodile Information Gathering Within the file given we found a .eml extension, with an email conversation between bluecrustacean@proton.me and notwarlocksmurf@proton.me, the content was in base64 encoded with the following content:">
+  <meta name="twitter:title" content="L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges">
+  <meta name="twitter:description" content="L3akCTF is an international online cybersecurity competition hosted by the L3ak team. The event runs from Friday, July 11th, 2025 at 17:00 UTC to Sunday, July 13th, 2025 at 17:00 UTC. This jeopardy-style CTF features a wide range of challenges designed for all skill levels, from beginners to seasoned experts.
 
-    <link href="/css/compiled/main.css" rel="stylesheet" />
+Participants will tackle over 60 carefully crafted challenges across 10 categories, including cryptography, web exploitation, reverse engineering, binary exploitation, forensics, OSINT, mobile security, hardware/RF, hash cracking, and miscellaneous topics.">
+
+    <link rel="preload" href="/css/compiled/main.min.e0bb0f28123bf084d555fc9253c6d2aa1443b2dfcde6044741a207eabdc3ddb8.css" as="style" integrity="sha256-4LsPKBI78ITVVfySU8bSqhRDst/N5gRHQaIH6r3D3bg=" />
+    <link href="/css/compiled/main.min.e0bb0f28123bf084d555fc9253c6d2aa1443b2dfcde6044741a207eabdc3ddb8.css" rel="stylesheet" integrity="sha256-4LsPKBI78ITVVfySU8bSqhRDst/N5gRHQaIH6r3D3bg=" />
 
 
 
-  <link href="/css/custom.css" rel="stylesheet" />
+  <link href="/css/custom.min.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css" rel="stylesheet" integrity="sha256-47DEQpj8HBSa&#43;/TImW&#43;5JCeuQeRkm5NMpJWZG3hSuFU=" />
 
 
   <script>
@@ -231,7 +222,7 @@ forensics/BOMbardino crocodile Information Gathering Within the file given we fo
       sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
     href="/writeups/l3akctf-2025/"
     
-  >L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges
+  >L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges
     </a>
   
     <ul class='hx-flex hx-flex-col hx-gap-1 hx-relative before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] dark:before:hx-bg-neutral-800 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-pr-3 rtl:before:hx-right-0 ltr:hx-ml-3 rtl:hx-mr-3'><li>
@@ -483,7 +474,7 @@ forensics/BOMbardino crocodile Information Gathering Within the file given we fo
         <a class="ltr:hx-pl-16 rtl:hx-pr-16 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#the-flag">The Flag
         </a>
       </li></ul>
-      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400"><a class="hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50" href="https://yoshlsec.github.io/writeups/L3akCTF%202025/index.md" target="_blank" rel="noreferrer">Edit this page on GitHub →</a>
+      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400">
         <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
           <span>Scroll to top</span>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
@@ -501,19 +492,14 @@ forensics/BOMbardino crocodile Information Gathering Within the file given we fo
   <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
         <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
           <a href="/writeups/">Writeups done with Caliphal Hounds</a>
-        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges</div>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges</div>
   </div>
 
-        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges</h1>
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges</h1>
         <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"></div>
         <div class="content">
-          <p>Despite I did not participate in this CTF, I was encouraged to try these challenges afterward; basic forensic concepts will be assumed  as known and will not be explained.</p>
-<blockquote>
-  <p>More information from organizers:</p>
-<p>ctftime: <a href="https://ctftime.org/team/220336" target="_blank" rel="noopener">https://ctftime.org/team/220336</a> <br>
-CTF Web: <a href="https://ctf.l3ak.team/challenges" target="_blank" rel="noopener">https://ctf.l3ak.team/challenges</a> <br>
-Main Web: <a href="https://ctf.l3ak.team/challenges" target="_blank" rel="noopener">https://ctf.l3ak.team/challenges</a></p>
-</blockquote>
+          <p>Rating weight: <strong>24.43</strong><br>
+Event organizers: <strong>L3ak</strong></p>
 <p><img src="Pasted-image-20250716124345.png" alt="alt text" loading="lazy" /></p>
 <h2>forensics/BOMbardino crocodile<span class="hx-absolute -hx-mt-20" id="forensicsbombardino-crocodile"></span>
     <a href="#forensicsbombardino-crocodile" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="Pasted-image-20250716124358.png" alt="alt text" loading="lazy" /></p>
@@ -1215,8 +1201,8 @@ maybe you&#39;ll find yourself.
 <p>With the following CyberChef Recipe:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
-<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="err">From_Base</span><span class="mi">64</span><span class="err">(&#39;A-Za-z</span><span class="mi">0-9</span><span class="err">+/=&#39;,</span><span class="kc">true</span><span class="err">,</span><span class="kc">false</span><span class="err">)</span>
-</span></span><span class="line"><span class="cl"><span class="err">AES_Decrypt(</span><span class="p">{</span><span class="err">&#39;option&#39;:&#39;UTF8&#39;,&#39;string&#39;:&#39;0123456789abcdef&#39;</span><span class="p">}</span><span class="err">,</span><span class="p">{</span><span class="err">&#39;option&#39;:&#39;UTF8&#39;,&#39;string&#39;:&#39;abcdef9876543210&#39;</span><span class="p">}</span><span class="err">,&#39;CBC&#39;,&#39;Raw&#39;,&#39;Raw&#39;,</span><span class="p">{</span><span class="err">&#39;option&#39;:&#39;Hex&#39;,&#39;string&#39;:&#39;&#39;</span><span class="p">}</span><span class="err">,</span><span class="p">{</span><span class="err">&#39;option&#39;:&#39;Hex&#39;,&#39;string&#39;:&#39;&#39;</span><span class="p">}</span><span class="err">)</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+<div><pre><code>From_Base64(&#39;A-Za-z0-9&#43;/=&#39;,true,false)
+AES_Decrypt({&#39;option&#39;:&#39;UTF8&#39;,&#39;string&#39;:&#39;0123456789abcdef&#39;},{&#39;option&#39;:&#39;UTF8&#39;,&#39;string&#39;:&#39;abcdef9876543210&#39;},&#39;CBC&#39;,&#39;Raw&#39;,&#39;Raw&#39;,{&#39;option&#39;:&#39;Hex&#39;,&#39;string&#39;:&#39;&#39;},{&#39;option&#39;:&#39;Hex&#39;,&#39;string&#39;:&#39;&#39;})</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
   <button
     class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
     title="Copy code"
@@ -2208,9 +2194,9 @@ A14: Microsoft Defender, 7, JavaScript, VBScript</code></pre></div><div class="h
       class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
     ></div></footer>
     
-    <script defer src="/js/main.js" integrity=""></script>
+    <script defer src="/js/main.min.0942239592f0795dc7213dd1057fd229d7edc19c0ef1a285396eb292d9ca9842.js" integrity="sha256-CUIjlZLweV3HIT3RBX/SKdftwZwO8aKFOW6yktnKmEI="></script>
 <script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
-    <script defer src="/en.search.js" integrity=""></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
+    <script defer src="/en.search.min.7918d81999396a56d9ff1b7a986d6474e66bd5acdbbe01e8bac129f5ef345a88.js" integrity="sha256-eRjYGZk5albZ/xt6mG1kdOZr1azbvgHousEp9e80Wog="></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
 <script defer src="/lib/katex/katex.min.9f45307c5794ed247a0d095f3a62e52ef2215a67b2327203a7fd919959ae79d1.js" integrity="sha256-n0UwfFeU7SR6DQlfOmLlLvIhWmeyMnIDp/2RmVmuedE="></script>
 <script defer src="/lib/katex/auto-render.min.7b57d427ac6270677daf8d8380ded2cc73336f9149a167b8e1fe0d6ef66604ae.js" integrity="sha256-e1fUJ6xicGd9r42DgN7SzHMzb5FJoWe44f4NbvZmBK4="></script>
 <script defer src="/lib/katex/mhchem.min.f0ca03df194b8c3d6017ff455db6a0ef98857905663fa311a6cded788b15340b.js" integrity="sha256-8MoD3xlLjD1gF/9FXbag75iFeQVmP6MRps3teIsVNAs="></script>

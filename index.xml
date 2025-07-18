@@ -1,12 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>yoshl - IT enjoyer – </title>
-    <link>//localhost:1313/</link>
+    <link>/</link>
     <description>Recent content on yoshl - IT enjoyer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     
-	  <atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -15,10 +15,10 @@
     
     <item>
       <title>BOOK HARDENINGA</title>
-      <link>//localhost:1313/hardening/</link>
+      <link>/hardening/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/hardening/</guid>
+      <guid>/hardening/</guid>
       <description>
         
         
@@ -28,10 +28,10 @@
     
     <item>
       <title>Chaos Based Encryption applied to stegoanalysis</title>
-      <link>//localhost:1313/blogs/forensics/cbe-fundamentals/</link>
+      <link>/blogs/forensics/cbe-fundamentals/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/blogs/forensics/cbe-fundamentals/</guid>
+      <guid>/blogs/forensics/cbe-fundamentals/</guid>
       <description>
         
         
@@ -1501,21 +1501,16 @@ $\quad t_n = 0.4 - \dfrac{6}{1 + x_n^2 + y_n^2}$&lt;/p&gt;
     </item>
     
     <item>
-      <title>L3akCTF 2025 Post Mortem | 5/6 Forensics Challenges</title>
-      <link>//localhost:1313/writeups/l3akctf-2025/</link>
+      <title>L3akCTF 2025 (Post Mortem) | 5/6 Forensics Challenges</title>
+      <link>/writeups/l3akctf-2025/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/writeups/l3akctf-2025/</guid>
+      <guid>/writeups/l3akctf-2025/</guid>
       <description>
         
         
-        &lt;p&gt;Despite I did not participate in this CTF, I was encouraged to try these challenges afterward; basic forensic concepts will be assumed  as known and will not be explained.&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;More information from organizers:&lt;/p&gt;
-&lt;p&gt;ctftime: &lt;a href=&#34;https://ctftime.org/team/220336&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://ctftime.org/team/220336&lt;/a&gt; &lt;br&gt;
-CTF Web: &lt;a href=&#34;https://ctf.l3ak.team/challenges&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://ctf.l3ak.team/challenges&lt;/a&gt; &lt;br&gt;
-Main Web: &lt;a href=&#34;https://ctf.l3ak.team/challenges&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://ctf.l3ak.team/challenges&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+        &lt;p&gt;Rating weight: &lt;strong&gt;24.43&lt;/strong&gt;&lt;br&gt;
+Event organizers: &lt;strong&gt;L3ak&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;Pasted-image-20250716124345.png&#34; alt=&#34;alt text&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
 &lt;h2&gt;forensics/BOMbardino crocodile&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;forensicsbombardino-crocodile&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#forensicsbombardino-crocodile&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;Pasted-image-20250716124358.png&#34; alt=&#34;alt text&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
@@ -2217,8 +2212,8 @@ maybe you&amp;#39;ll find yourself.
 &lt;p&gt;With the following CyberChef Recipe:&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
-&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;From_Base&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;64&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;(&amp;#39;A-Za-z&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0-9&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;+/=&amp;#39;,&lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;AES_Decrypt(&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&amp;#39;option&amp;#39;:&amp;#39;UTF8&amp;#39;,&amp;#39;string&amp;#39;:&amp;#39;0123456789abcdef&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&amp;#39;option&amp;#39;:&amp;#39;UTF8&amp;#39;,&amp;#39;string&amp;#39;:&amp;#39;abcdef9876543210&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;,&amp;#39;CBC&amp;#39;,&amp;#39;Raw&amp;#39;,&amp;#39;Raw&amp;#39;,&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&amp;#39;option&amp;#39;:&amp;#39;Hex&amp;#39;,&amp;#39;string&amp;#39;:&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&amp;#39;option&amp;#39;:&amp;#39;Hex&amp;#39;,&amp;#39;string&amp;#39;:&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+&lt;div&gt;&lt;pre&gt;&lt;code&gt;From_Base64(&amp;#39;A-Za-z0-9&amp;#43;/=&amp;#39;,true,false)
+AES_Decrypt({&amp;#39;option&amp;#39;:&amp;#39;UTF8&amp;#39;,&amp;#39;string&amp;#39;:&amp;#39;0123456789abcdef&amp;#39;},{&amp;#39;option&amp;#39;:&amp;#39;UTF8&amp;#39;,&amp;#39;string&amp;#39;:&amp;#39;abcdef9876543210&amp;#39;},&amp;#39;CBC&amp;#39;,&amp;#39;Raw&amp;#39;,&amp;#39;Raw&amp;#39;,{&amp;#39;option&amp;#39;:&amp;#39;Hex&amp;#39;,&amp;#39;string&amp;#39;:&amp;#39;&amp;#39;},{&amp;#39;option&amp;#39;:&amp;#39;Hex&amp;#39;,&amp;#39;string&amp;#39;:&amp;#39;&amp;#39;})&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
   &lt;button
     class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
     title=&#34;Copy code&#34;
@@ -3194,10 +3189,10 @@ A14: Microsoft Defender, 7, JavaScript, VBScript&lt;/code&gt;&lt;/pre&gt;&lt;/di
     
     <item>
       <title>Reversing</title>
-      <link>//localhost:1313/blogs/os-internals/</link>
+      <link>/blogs/os-internals/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/blogs/os-internals/</guid>
+      <guid>/blogs/os-internals/</guid>
       <description>
         
         
@@ -3207,17 +3202,17 @@ A14: Microsoft Defender, 7, JavaScript, VBScript&lt;/code&gt;&lt;/pre&gt;&lt;/di
     
     <item>
       <title>TJCTF 2025 | 7/8 Forensics challenges</title>
-      <link>//localhost:1313/writeups/tjctf-2025/</link>
+      <link>/writeups/tjctf-2025/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/writeups/tjctf-2025/</guid>
+      <guid>/writeups/tjctf-2025/</guid>
       <description>
         
         
         &lt;p&gt;&lt;img src=&#34;image.png&#34; alt=&#34;Profile status - 23rd in Open division&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;TJCTF is an international cybersecurity competition hosted by TJCSC, a group of students from Thomas Jefferson High School for Science and Technology in Northern Virginia. The competition consists of a variety of computer science and cybersecurity challenges in an online, jeopardy-style format. You’ll earn points through solving challenges in categories such as binary exploitation, reverse engineering, cryptography, and web. For more information, please join our Discord to learn more about the competition and get notified when the event nears!&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;Future weight: &lt;strong&gt;63.09&lt;/strong&gt; &lt;br&gt;
+Rating weight: &lt;strong&gt;51.29&lt;/strong&gt; &lt;br&gt;
+Event organizers: &lt;strong&gt;tjcsc&lt;/strong&gt;&lt;/p&gt;
 &lt;h2&gt;forensics/hidden-message&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;forensicshidden-message&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#forensicshidden-message&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;image-1.png&#34; alt=&#34;alt text&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;An easy stego challenge where we apply some basics tools to obtain hidden information, in this case is used &lt;a href=&#34;https://github.com/zed-0xff/zsteg&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;zsteg&lt;/em&gt;&lt;/a&gt; to analyze LSB layers and color channel anomalies, extracting hidden data from PNG and BMP images.&lt;/p&gt;
