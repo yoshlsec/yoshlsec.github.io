@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
+<title>WHY2025 CTF | Full Forensics &#43; Reversing Bonus – yoshl - IT enjoyer</title>
+  <meta name="description" content="Get ready to hack! The CTF is back at WHY2025! Brought to you by the same team behind the legendary CTFs at OHM2013, SHA2017, and MCH2022. After a well-earned break, we’re back—bigger, better, and more challenging than ever! Just like in 2022, we will have both online and on-site challenges, making the CTF accessible to everyone. Whether you’re a seasoned hacker or a total beginner, there’s a challenge waiting for you. For event info go to https://why2025.org/" /><link rel="canonical" href="/why2025-ctf/" itemprop="url" />
+
+<meta property="og:title" content="WHY2025 CTF | Full Forensics &#43; Reversing Bonus" />
+<meta property="og:description" content="Get ready to hack! The CTF is back at WHY2025! Brought to you by the same team behind the legendary CTFs at OHM2013, SHA2017, and MCH2022. After a well-earned break, we’re back—bigger, better, and more challenging than ever! Just like in 2022, we will have both online and on-site challenges, making the CTF accessible to everyone. Whether you’re a seasoned hacker or a total beginner, there’s a challenge waiting for you. For event info go to https://why2025.org/" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/why2025-ctf/" /><meta property="article:section" content="" />
+
+
+
+  <meta itemprop="name" content="WHY2025 CTF | Full Forensics &#43; Reversing Bonus">
+  <meta itemprop="description" content="Get ready to hack! The CTF is back at WHY2025! Brought to you by the same team behind the legendary CTFs at OHM2013, SHA2017, and MCH2022. After a well-earned break, we’re back—bigger, better, and more challenging than ever! Just like in 2022, we will have both online and on-site challenges, making the CTF accessible to everyone. Whether you’re a seasoned hacker or a total beginner, there’s a challenge waiting for you. For event info go to https://why2025.org/">
+  <meta itemprop="wordCount" content="2996">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="WHY2025 CTF | Full Forensics &#43; Reversing Bonus">
+  <meta name="twitter:description" content="Get ready to hack! The CTF is back at WHY2025! Brought to you by the same team behind the legendary CTFs at OHM2013, SHA2017, and MCH2022. After a well-earned break, we’re back—bigger, better, and more challenging than ever! Just like in 2022, we will have both online and on-site challenges, making the CTF accessible to everyone. Whether you’re a seasoned hacker or a total beginner, there’s a challenge waiting for you. For event info go to https://why2025.org/">
+
+    <link rel="preload" href="/css/compiled/main.min.e0bb0f28123bf084d555fc9253c6d2aa1443b2dfcde6044741a207eabdc3ddb8.css" as="style" integrity="sha256-4LsPKBI78ITVVfySU8bSqhRDst/N5gRHQaIH6r3D3bg=" />
+    <link href="/css/compiled/main.min.e0bb0f28123bf084d555fc9253c6d2aa1443b2dfcde6044741a207eabdc3ddb8.css" rel="stylesheet" integrity="sha256-4LsPKBI78ITVVfySU8bSqhRDst/N5gRHQaIH6r3D3bg=" />
+
+
+
+  <link href="/css/custom.min.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css" rel="stylesheet" integrity="sha256-47DEQpj8HBSa&#43;/TImW&#43;5JCeuQeRkm5NMpJWZG3hSuFU=" />
+
+
+  <script>
+     
+    const defaultTheme = 'system';
+
+    const setDarkTheme = () => {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+    const setLightTheme = () => {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+    }
+
+    if ("color-theme" in localStorage) {
+      localStorage.getItem("color-theme") === "dark" ? setDarkTheme() : setLightTheme();
+    } else {
+      defaultTheme === "dark" ? setDarkTheme() : setLightTheme();
+      if (defaultTheme === "system") {
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? setDarkTheme() : setLightTheme();
+      }
+    }
+  </script>
+
+  
+</head>
+<body dir="ltr"><div class="nav-container hx-sticky hx-top-0 hx-z-20 hx-w-full hx-bg-transparent print:hx-hidden">
+  <div class="nav-container-blur hx-pointer-events-none hx-absolute hx-z-[-1] hx-h-full hx-w-full hx-bg-white dark:hx-bg-dark hx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] contrast-more:hx-shadow-[0_0_0_1px_#000] dark:hx-shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] contrast-more:dark:hx-shadow-[0_0_0_1px_#fff]"></div>
+
+  <nav class="hx-mx-auto hx-flex hx-items-center hx-justify-end hx-gap-2 hx-h-16 hx-px-6 hx-max-w-[90rem]">
+    <a class="hx-flex hx-items-center hover:hx-opacity-75 ltr:hx-mr-auto rtl:hx-ml-auto" href="/">
+        <span class="hx-mr-2 hx-font-extrabold hx-inline hx-select-none" title="yoshl - IT enjoyer">yoshl - IT enjoyer</span>
+    </a><div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+<button type="button" aria-label="Menu" class="hamburger-menu -hx-mr-2 hx-rounded hx-p-2 active:hx-bg-gray-400/20 md:hx-hidden"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class='hx-mx-auto hx-flex max-w-full'>
+    <div class="mobile-menu-overlay [transition:background-color_1.5s_ease] hx-fixed hx-inset-0 hx-z-10 hx-bg-black/80 dark:hx-bg-black/60 hx-hidden"></div>
+<aside class="sidebar-container hx-flex hx-flex-col print:hx-hidden md:hx-top-16 md:hx-shrink-0 md:hx-w-64 md:hx-self-start max-md:[transform:translate3d(0,-100%,0)] md:hx-sticky">
+  
+  <div class="hx-px-4 hx-pt-4 md:hx-hidden">
+    <div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+  </div>
+  <div class="hextra-scrollbar hx-overflow-y-auto hx-overflow-x-hidden hx-p-4 hx-grow md:hx-h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx-flex hx-flex-col hx-gap-1 md:hx-hidden">
+      
+      
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/blogs/"
+    
+  >Chaos-Based-Encryption Saga
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/blogs/cbe-fundamentals/"
+    
+  >Chaos Based Encryption applied to stegoanalysis
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/blogs/cbe-creation/"
+    
+  >Creation your own Chaos System
+    </a>
+              
+            </li></ul>
+      </div></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/tjctf-2025/"
+    
+  >TJCTF 2025 | 7/8 Forensics challenges
+    </a></li>
+    </ul>
+
+    <ul class="hx-flex hx-flex-col hx-gap-1 max-md:hx-hidden">
+        
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/blogs/"
+    
+  >Chaos-Based-Encryption Saga
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/blogs/cbe-fundamentals/"
+    
+  >Chaos Based Encryption applied to stegoanalysis
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/blogs/cbe-creation/"
+    
+  >Creation your own Chaos System
+    </a>
+              
+            </li></ul>
+      </div></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/tjctf-2025/"
+    
+  >TJCTF 2025 | 7/8 Forensics challenges
+    </a></li>
+        
+      </ul>
+    </div>
+  
+  
+    <div class="  hx-sticky hx-bottom-0 hx-bg-white dark:hx-bg-dark hx-mx-4 hx-py-4 hx-shadow-[0_-12px_16px_#fff] hx-flex hx-items-center hx-gap-2 dark:hx-border-neutral-800 dark:hx-shadow-[0_-12px_16px_#111] contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-shadow-none hx-border-t" data-toggle-animation="show"><div class="hx-flex hx-grow hx-flex-col"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div></div></aside>
+    
+<nav class="hextra-toc hx-order-last hx-hidden hx-w-64 hx-shrink-0 xl:hx-block print:hx-hidden hx-px-4" aria-label="table of contents">
+    <div class="hextra-scrollbar hx-sticky hx-top-16 hx-overflow-y-auto hx-pr-4 hx-pt-6 hx-text-sm [hyphens:auto] hx-max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:hx--mr-4 rtl:hx--ml-4"><p class="hx-mb-4 hx-font-semibold hx-tracking-tight">On this page</p><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#forensics-index">Forensics Index
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#forensicspainted-black">forensics/Painted Black
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#detecting-macro">Detecting Macro
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#retrieving-encrypted-content">Retrieving encrypted content
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#obtaining-applicationusername">Obtaining Application.UserName
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#scripting">Scripting
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#common-error">Common error
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#forensicsbitlocked">forensics/Bitlocked
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#mapping-the-device">Mapping the device
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#dislocker">Dislocker
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#bruteforce-script">Bruteforce Script
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#opening-autopsy">Opening autopsy
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#forensicstoshredyousay">forensics/ToShredYouSay
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#forensicsthe-wizard">forensics/The Wizard
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#file-recognition">File recognition
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#understanding-viminfo-logic">Understanding .viminfo logic
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#scripting-the-logic">Scripting the logic
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#forensicsiot-breach">forensics/IOT breach
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#device-recognition">Device recognition
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#lighttpd-accesslog">lighttpd access.log
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#perl-script">Perl Script
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#perl-execution--cbc-key">Perl Execution | CBC key
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#decrypting-files">Decrypting files
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#reversing-index">Reversing Index
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#reversinglazy-code-10">reversing/Lazy Code 1.0
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#main-code">Main code
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#data-used-in-main-code">Data used in main code
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#solver-written-in-c">Solver written in C
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#reversinglazy-code-20">reversing/Lazy Code 2.0
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#main-code-1">Main code
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#encrypted-flag-data">Encrypted Flag data
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#xor-keys-data">Xor keys data
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#solver-written-in-c-1">Solver written in C
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#reversing3-ball-mark">reversing/3 Ball Mark
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#conclusion">Conclusion
+        </a>
+      </li></ul>
+      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400">
+        <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx-w-full hx-break-words hx-flex hx-min-h-[calc(100vh-var(--navbar-height))] hx-min-w-0 hx-justify-center hx-pb-8 hx-pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx-w-full hx-min-w-0 hx-max-w-6xl hx-px-6 hx-pt-4 md:hx-px-12">
+        
+  <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current"><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">WHY2025 CTF | Full Forensics &#43; Reversing Bonus</div>
+  </div>
+
+        <div class="content">
+          <h1>WHY2025 CTF | Full Forensics &#43; Reversing Bonus</h1>
+          <p><img src="Pasted_image_20250811222959.png" alt="" loading="lazy" /></p>
+<h2>Forensics Index<span class="hx-absolute -hx-mt-20" id="forensics-index"></span>
+    <a href="#forensics-index" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="Pasted-image-20250812234512.png" alt="" loading="lazy" /></p>
+<h2>forensics/Painted Black<span class="hx-absolute -hx-mt-20" id="forensicspainted-black"></span>
+    <a href="#forensicspainted-black" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="Pasted-image-20250810181750.png" alt="" loading="lazy" /></p>
+<h3>Detecting Macro<span class="hx-absolute -hx-mt-20" id="detecting-macro"></span>
+    <a href="#detecting-macro" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>We have given a <em>Microsoft Word 2007+</em> document, as the extension is <em>.docm</em> being a standart of <em>Microsoft Word Macro-Enabled</em>. Knowing this we apply the tools suite from <em>olevba</em>, to be able to list all macros inside the file:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$&gt; olevba <span class="k">case</span>-2025-0412-public.docm -ac --deobf
+</span></span><span class="line"><span class="cl">olevba 0.60.2 on Python 3.11.2 - http://decalage.info/python/oletools
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================================</span>
+</span></span><span class="line"><span class="cl">FILE: <span class="k">case</span>-2025-0412-public.docm
+</span></span><span class="line"><span class="cl">Type: OpenXML
+</span></span><span class="line"><span class="cl">WARNING  For now, VBA stomping cannot be detected <span class="k">for</span> files in memory
+</span></span><span class="line"><span class="cl">-------------------------------------------------------------------------------
+</span></span><span class="line"><span class="cl">VBA MACRO ThisDocument.cls
+</span></span><span class="line"><span class="cl">in file: word/vbaProject.bin - OLE stream: <span class="s1">&#39;VBA/ThisDocument&#39;</span>
+</span></span><span class="line"><span class="cl">- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+</span></span><span class="line"><span class="cl">Sub PaintItBlack<span class="o">()</span>
+</span></span><span class="line"><span class="cl">    Dim selectedText As String
+</span></span><span class="line"><span class="cl">    Dim encryptedText As String
+</span></span><span class="line"><span class="cl">    Dim key As String
+</span></span><span class="line"><span class="cl">    Dim xorChar, keyPos
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nv">selectedText</span> <span class="o">=</span> Selection.Text
+</span></span><span class="line"><span class="cl">    <span class="nv">key</span> <span class="o">=</span> Replace<span class="o">(</span>LCase<span class="o">(</span>Application.UserName<span class="o">)</span>, <span class="s2">&#34; &#34;</span>, <span class="s2">&#34;&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">encryptedText</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    For <span class="nv">i</span> <span class="o">=</span> <span class="m">1</span> To Len<span class="o">(</span>selectedText<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">keyPos</span> <span class="o">=</span> i Mod Len<span class="o">(</span>key<span class="o">)</span> + <span class="m">1</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">xorChar</span> <span class="o">=</span> Asc<span class="o">(</span>Mid<span class="o">(</span>selectedText, i, 1<span class="o">))</span> Xor Asc<span class="o">(</span>Mid<span class="o">(</span>key, keyPos, 1<span class="o">))</span> Xor <span class="p">&amp;</span>H7B
+</span></span><span class="line"><span class="cl">        <span class="nv">encryptedText</span> <span class="o">=</span> encryptedText <span class="p">&amp;</span> Chr<span class="o">(</span>xorChar<span class="o">)</span>
+</span></span><span class="line"><span class="cl">    Next i
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Selection.Text <span class="o">=</span> encryptedText
+</span></span><span class="line"><span class="cl">    Selection.Shading.BackgroundPatternColor <span class="o">=</span> wdColorBlack
+</span></span><span class="line"><span class="cl">    Selection.Font.ColorIndex <span class="o">=</span> wdBlack
+</span></span><span class="line"><span class="cl">End Sub</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Retrieving encrypted content<span class="hx-absolute -hx-mt-20" id="retrieving-encrypted-content"></span>
+    <a href="#retrieving-encrypted-content" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>At first glance, while reading the script, we realize that it is harmless and is simply decrypting certain parts of the document using the author&rsquo;s name. To understood more the code, we open the file in a online docm viewer such as <a href="https://products.groupdocs.app/viewer/docm" target="_blank" rel="noopener">https://products.groupdocs.app/viewer/docm</a>:</p>
+<p>![](Pasted image 20250812235825.png)</p>
+<p>By doing hovering into the painted text, some xored data will be found, also it is possible to identify it if you toggle to dark mode the file content, function that can be done with extensions like <em>Black Reader</em>:</p>
+<p>![](Pasted image 20250813000128.png)</p>
+<p>To obtain the raw content of the painted text, I used the command <em>docx2txt</em>:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$&gt; docx2txt <span class="k">case</span>-2025-0412-public.docm
+</span></span><span class="line"><span class="cl">$&gt; cat <span class="k">case</span>-2025-0412-public.docm.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Ravenbrook police
+</span></span><span class="line"><span class="cl">department
+</span></span><span class="line"><span class="cl">--------------------------------------------------------------------------------
+</span></span><span class="line"><span class="cl">Search and Seizure Warrant
+</span></span><span class="line"><span class="cl">Case No.: 2025-0412 Issued By: Swywy<span class="o">}</span>wcm3U<span class="sb">`</span><span class="o">}</span>a<span class="o">{</span>l2Hlpf<span class="sb">`</span>rm Date: 2025-05-01
+</span></span><span class="line"><span class="cl">Subject: Search and Seizure of Items Related to Unauthorized Cyber Intrusion
+</span></span><span class="line"><span class="cl">Suspect: A<span class="o">{</span>nfu<span class="o">{</span>&gt;Yi<span class="o">}}</span>j<span class="o">{</span>ev Address: %#:2Iaqgdy~qdf-Sll25Zrlizu<span class="sb">`</span>b<span class="o">}</span>q%&gt;<span class="o">[</span>P3.&lt;<span class="c1">#/</span>
+</span></span><span class="line"><span class="cl">By order of the Ravenbrook Police Department, authorized officers have conducted a search of the above premises under suspicion of unlawful cyber activities, including but not limited to unauthorized access to protected systems.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">The following items were seized as part of the investigation:
+</span></span><span class="line"><span class="cl"> Computers <span class="o">(</span>one desktop and one laptop<span class="o">)</span>
+</span></span><span class="line"><span class="cl"> An external harddrive labeled q~luaj*-:<span class="s2">&#34;#j!rs4v,k| &lt;u-9&#39;</span><span class="nv">$wity8$9</span><span class="s2">!.q
+</span></span></span><span class="line"><span class="cl"><span class="s2"> USB Storage Devices
+</span></span></span><span class="line"><span class="cl"><span class="s2"> Routers &amp; Network Equipment
+</span></span></span><span class="line"><span class="cl"><span class="s2"> Handwritten Notes &amp; Documents Pertaining to Cyber Intrusion
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">All confiscated materials will be held at the Ravenbrook Police Department Cybercrime Division for forensic examination. Failure to comply with this warrant or obstruction of law enforcement officers will result in legal consequences.
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">Signed: Detective X~ddsh&gt;Gm}idu`, Ravenbrook Police Department</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Obtaining Application.UserName<span class="hx-absolute -hx-mt-20" id="obtaining-applicationusername"></span>
+    <a href="#obtaining-applicationusername" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>From there you can extract some encrypted data. Paying attention in the VBA Script, we need the <code>Application.UserName</code>, for this task I thought into the metadata of the file, with <em>exiftool</em> we found the name: <em>Olivia Renshaw</em>:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$&gt; exiftool <span class="k">case</span>-2025-0412-public.docm
+</span></span><span class="line"><span class="cl">ExifTool Version Number         : 12.57
+</span></span><span class="line"><span class="cl">File Name                       : <span class="k">case</span>-2025-0412-public.docm
+</span></span><span class="line"><span class="cl">Directory                       : .
+</span></span><span class="line"><span class="cl">File Size                       : <span class="m">1722</span> kB
+</span></span><span class="line"><span class="cl">File Modification Date/Time     : 2025:05:09 01:47:38+02:00
+</span></span><span class="line"><span class="cl">File Access Date/Time           : 2025:08:12 23:57:31+02:00
+</span></span><span class="line"><span class="cl">File Inode Change Date/Time     : 2025:08:12 23:57:08+02:00
+</span></span><span class="line"><span class="cl">File Permissions                : -rwxrwxrwx
+</span></span><span class="line"><span class="cl">File Type                       : DOCM
+</span></span><span class="line"><span class="cl">File Type Extension             : docm
+</span></span><span class="line"><span class="cl">MIME Type                       : application/vnd.ms-word.document.macroEnabled.12
+</span></span><span class="line"><span class="cl">Zip Required Version            : <span class="m">20</span>
+</span></span><span class="line"><span class="cl">Zip Bit Flag                    : 0x0006
+</span></span><span class="line"><span class="cl">Zip Compression                 : Deflated
+</span></span><span class="line"><span class="cl">Zip Modify Date                 : 1980:01:01 00:00:00
+</span></span><span class="line"><span class="cl">Zip CRC                         : 0x07b58c22
+</span></span><span class="line"><span class="cl">Zip Compressed Size             : <span class="m">426</span>
+</span></span><span class="line"><span class="cl">Zip Uncompressed Size           : <span class="m">1764</span>
+</span></span><span class="line"><span class="cl">Zip File Name                   : <span class="o">[</span>Content_Types<span class="o">]</span>.xml
+</span></span><span class="line"><span class="cl">Title                           :
+</span></span><span class="line"><span class="cl">Subject                         :
+</span></span><span class="line"><span class="cl">Creator                         : Olivia Renshaw
+</span></span><span class="line"><span class="cl">Keywords                        :
+</span></span><span class="line"><span class="cl">Description                     :
+</span></span><span class="line"><span class="cl">Last Modified By                : Olivia Renshaw
+</span></span><span class="line"><span class="cl">Revision Number                 : <span class="m">2</span>
+</span></span><span class="line"><span class="cl">Create Date                     : 2025:05:08 23:37:00Z
+</span></span><span class="line"><span class="cl">Modify Date                     : 2025:05:08 23:39:00Z
+</span></span><span class="line"><span class="cl">Template                        : Normal.dotm
+</span></span><span class="line"><span class="cl">Total Edit Time                 : <span class="m">1</span> minute
+</span></span><span class="line"><span class="cl">Pages                           : <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Words                           : <span class="m">163</span>
+</span></span><span class="line"><span class="cl">Characters                      : <span class="m">933</span>
+</span></span><span class="line"><span class="cl">Application                     : Microsoft Office Word
+</span></span><span class="line"><span class="cl">Doc Security                    : None
+</span></span><span class="line"><span class="cl">Lines                           : <span class="m">7</span>
+</span></span><span class="line"><span class="cl">Paragraphs                      : <span class="m">2</span>
+</span></span><span class="line"><span class="cl">Scale Crop                      : No
+</span></span><span class="line"><span class="cl">Company                         : Ravenbrook Police Department
+</span></span><span class="line"><span class="cl">Links Up To Date                : No
+</span></span><span class="line"><span class="cl">Characters With Spaces          : <span class="m">1094</span>
+</span></span><span class="line"><span class="cl">Shared Doc                      : No
+</span></span><span class="line"><span class="cl">Hyperlinks Changed              : No
+</span></span><span class="line"><span class="cl">App Version                     : 16.0000</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Scripting<span class="hx-absolute -hx-mt-20" id="scripting"></span>
+    <a href="#scripting" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Knowing all of this, we create the following Python Script:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">decrypt</span><span class="p">(</span><span class="n">encrypted_text</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">decrypted</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">key_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">encrypted_text</span><span class="p">)):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">key_index</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">key_len</span>
+</span></span><span class="line"><span class="cl">        <span class="n">key_char</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="n">key_index</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">original_char</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">encrypted_text</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">^</span> <span class="nb">ord</span><span class="p">(</span><span class="n">key_char</span><span class="p">)</span> <span class="o">^</span> <span class="mi">123</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">decrypted</span> <span class="o">+=</span> <span class="n">original_char</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">decrypted</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">key</span> <span class="o">=</span> <span class="s2">&#34;oliviarenshaw&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">encrypted_strings</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;Swywy}wcm3U`}a{l2Hlpf`rm&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;A{nfu{&gt;Yi}}j{ev&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;%#:2Iaqgdy~qdf-Sll25Zrlizu`b}q%&gt;[P3.&lt;#/&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;q~luaj*-:</span><span class="se">\&#34;</span><span class="s2">#j!rs4v,k| &lt;u-9&#39;$wity8$9!.q&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;X~ddsh&gt;Gm}idu`&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">enc</span> <span class="ow">in</span> <span class="n">encrypted_strings</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">decrypt</span><span class="p">(</span><span class="n">enc</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>To obtain the flag:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$&gt; python3 solver.py
+</span></span><span class="line"><span class="cl">Detective Olivia Renshaw
+</span></span><span class="line"><span class="cl">Victor Langford
+</span></span><span class="line"><span class="cl"><span class="m">217</span> Shadowcrest Ave, Ravenbrook, NX <span class="m">4078</span>
+</span></span><span class="line"><span class="cl">flag<span class="o">{</span>c48219f5ea9d6bb54f7533edfc1a1124<span class="o">}</span>
+</span></span><span class="line"><span class="cl">Olivia Renshaw</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h4>Common error<span class="hx-absolute -hx-mt-20" id="common-error"></span>
+    <a href="#common-error" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>If you are trying by yourself and obtain a different output or the flag splitted, it may occur while copy and pasting the data, there is buggy byte: <code>&lt;0x7f&gt;</code>, I detected it with sublime text haha.</p>
+<h2>forensics/Bitlocked<span class="hx-absolute -hx-mt-20" id="forensicsbitlocked"></span>
+    <a href="#forensicsbitlocked" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="Pasted-image-20250810200158.png" alt="" loading="lazy" /></p>
+<p>Simple bitlocker bruteforce with an incompleted photo of the key recovery.</p>
+<p><img src="image.png" alt="" loading="lazy" /></p>
+<h3>Mapping the device<span class="hx-absolute -hx-mt-20" id="mapping-the-device"></span>
+    <a href="#mapping-the-device" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>As we have given an <code>.001</code> file extension, we could use directly <code>dislocker</code> to the file but in that moment I colapsed and used: <code>kpartx</code> command to map the partitions from the disk image thus you can mount the device.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$&gt; sudo kpartx -av SD_card.001
+</span></span><span class="line"><span class="cl">add map loop0p1 <span class="o">(</span>254:0<span class="o">)</span>: <span class="m">0</span> <span class="m">7854080</span> linear 7:0 <span class="m">8192</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<blockquote>
+  <p>PD: It will be located in <code>loop0p1</code> if you are using UEFI mode, else it will be on a <code>sda1</code> directory</p>
+</blockquote>
+<h3>Dislocker<span class="hx-absolute -hx-mt-20" id="dislocker"></span>
+    <a href="#dislocker" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Knowing the dislocker arguments to decrypt the device with the Recovery Key, we are able to create a python bruteforce script:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo dislocker -V &lt;device.dd&gt;  -p&lt;key&gt; -- &lt;Mount Point&gt;</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Bruteforce Script<span class="hx-absolute -hx-mt-20" id="bruteforce-script"></span>
+    <a href="#bruteforce-script" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Once this, create the script.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">subprocess</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">shutil</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">keyBase</span> <span class="o">=</span> <span class="s2">&#34;718894-682847-228371-253055-328559-381458-030668-04&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">file</span> <span class="o">=</span> <span class="s2">&#34;/dev/mapper/loop0p1&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">mntPoint</span> <span class="o">=</span> <span class="s2">&#34;/tmp/dislocker_test&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">mntPoint</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sufix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">keyBase</span><span class="si">}{</span><span class="n">sufix</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Trying: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">mntPoint</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mntPoint</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="s2">&#34;sudo&#34;</span><span class="p">,</span> <span class="s2">&#34;dislocker&#34;</span><span class="p">,</span> <span class="s2">&#34;-V&#34;</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&#34;-p</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">,</span> <span class="s2">&#34;--&#34;</span><span class="p">,</span> <span class="n">mntPoint</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Key found!: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p><img src="CB72E6EF-9964-4C80-B8ED-85B0BD3F7F3B.png" alt="" loading="lazy" /></p>
+<p>After some time bruteforcing from <code>049999</code> to <code>040000</code> we found the key was: <code>718894-682847-228371-253055-328559-381458-030668-047839</code></p>
+<h3>Opening autopsy<span class="hx-absolute -hx-mt-20" id="opening-autopsy"></span>
+    <a href="#opening-autopsy" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Finally with <em>autopsy</em>, or any related tool such as <em>FTK Imager</em> you will be able to locate <code>flag.txt</code></p>
+<p><img src="Pasted-image-20250810200210.png" alt="" loading="lazy" /></p>
+<h2>forensics/ToShredYouSay<span class="hx-absolute -hx-mt-20" id="forensicstoshredyousay"></span>
+    <a href="#forensicstoshredyousay" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="Pasted-image-20250810194354.png" alt="" loading="lazy" /></p>
+<p>To be honest, I didn&rsquo;t pwn this challenge it was my teammate <em>tillamen</em> from <em>Caliphal Hounds</em>. In the challenge they give you the following image:</p>
+<p><img src="extracted-000.jpg" alt="" loading="lazy" /></p>
+<p>And via the CTF logo you have to un-shred the image, so he printed the photo and do some manual art to obtain the following master piece:</p>
+<p><img src="rn_image_picker_lib_temp_579babb1-fc90-4a44-9bce-fda411bb54f1.jpg" alt="" loading="lazy" /></p>
+<p>Being the flag: <code>flag{dd0755b73e4b7dfd0e06f927874e1511}</code>. Congrats tillo!</p>
+<h2>forensics/The Wizard<span class="hx-absolute -hx-mt-20" id="forensicsthe-wizard"></span>
+    <a href="#forensicsthe-wizard" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="Pasted-image-20250810181800.png" alt="" loading="lazy" /></p>
+<h3>File recognition<span class="hx-absolute -hx-mt-20" id="file-recognition"></span>
+    <a href="#file-recognition" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In this challenge a home directory is provided:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$&gt; tar xvf thewizard.tgz
+</span></span><span class="line"><span class="cl">thewizard/
+</span></span><span class="line"><span class="cl">thewizard/.bashrc
+</span></span><span class="line"><span class="cl">thewizard/.bash_logout
+</span></span><span class="line"><span class="cl">thewizard/.pwfault
+</span></span><span class="line"><span class="cl">thewizard/.viminfo
+</span></span><span class="line"><span class="cl">thewizard/.profile</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>The only useful information was in <code>.viminfo</code> where it extract data from <code>.pwfault</code> to obtain the flag, anyways here the content of <code>.viminfo</code>:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># This viminfo file was generated by Vim 8.2.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># You may edit it if you&#39;re careful!</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Viminfo version</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>1,4
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Value of &#39;encoding&#39; when this file was written</span>
+</span></span><span class="line"><span class="cl">*encoding<span class="o">=</span>utf-8
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># hlsearch on (H) or off (h):</span>
+</span></span><span class="line"><span class="cl">~h
+</span></span><span class="line"><span class="cl"><span class="c1"># Last Search Pattern:</span>
+</span></span><span class="line"><span class="cl">~MSle0/?
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Last Substitute Search Pattern:</span>
+</span></span><span class="line"><span class="cl">~MSle0~<span class="p">&amp;</span>.$
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Last Substitute String:</span>
+</span></span><span class="line"><span class="cl">$<span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Command Line History (newest to oldest):</span>
+</span></span><span class="line"><span class="cl">:q!
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,0,1750169805,,<span class="s2">&#34;q!&#34;</span>
+</span></span><span class="line"><span class="cl">:%s/.$/<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,0,1750169794,,<span class="s2">&#34;%s/.</span>$<span class="s2">/}&#34;</span>
+</span></span><span class="line"><span class="cl">:%s/^...../flag<span class="o">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,0,1750169789,,<span class="s2">&#34;%s/^...../flag{&#34;</span>
+</span></span><span class="line"><span class="cl">:s/dd/
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,0,1750169783,,<span class="s2">&#34;s/dd/&#34;</span>
+</span></span><span class="line"><span class="cl">:%s/<span class="se">\n</span>//
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,0,1750169778,,<span class="s2">&#34;%s/\\n//&#34;</span>
+</span></span><span class="line"><span class="cl">:%s,<span class="o">[</span>^a-f0-9<span class="o">]</span>,,g
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,0,1750169774,,<span class="s2">&#34;%s,[^a-f0-9],,g&#34;</span>
+</span></span><span class="line"><span class="cl">::v/?/d
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,0,1750169769,,<span class="s2">&#34;:v/?/d&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Search String History (newest to oldest):</span>
+</span></span><span class="line"><span class="cl">? .$
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,1,1750169794,,<span class="s2">&#34;.</span>$<span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">? ^.....
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,1,1750169789,,<span class="s2">&#34;^.....&#34;</span>
+</span></span><span class="line"><span class="cl">? dd
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,1,1750169783,,<span class="s2">&#34;dd&#34;</span>
+</span></span><span class="line"><span class="cl">? <span class="se">\n</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,1,1750169778,,<span class="s2">&#34;\\n&#34;</span>
+</span></span><span class="line"><span class="cl">? <span class="o">[</span>^a-f0-9<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,1,1750169774,,<span class="s2">&#34;[^a-f0-9]&#34;</span>
+</span></span><span class="line"><span class="cl">? ?
+</span></span><span class="line"><span class="cl"><span class="p">|</span>2,1,1750169769,,<span class="s2">&#34;?&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Expression History (newest to oldest):</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Input Line History (newest to oldest):</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Debug Line History (newest to oldest):</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Registers:</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;&#34;</span><span class="m">1</span> LINE  <span class="m">0</span>
+</span></span><span class="line"><span class="cl">  <span class="o">[=</span><span class="nv">Pb7F0</span><span class="o">=</span>GP2%G<span class="o">(</span>zi!%h::,zLl<span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>3,1,1,1,1,0,1750169770,<span class="s2">&#34;[=Pb7F0=GP2%G(zi!%h::,zLl&amp;&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;2  LINE  0
+</span></span></span><span class="line"><span class="cl"><span class="s2">  wraC0,i0IkQN^,wIpKUgD:&lt;g5#
+</span></span></span><span class="line"><span class="cl"><span class="s2">|3,0,2,1,1,0,1750169770,&#34;</span>wraC0,i0IkQN^,wIpKUgD:&lt;g5#<span class="s2">&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">&#34;</span><span class="m">3</span>  LINE  <span class="m">0</span>
+</span></span><span class="line"><span class="cl">  <span class="p">;</span>0AHQQ8~&lt;L<span class="o">{</span>3^_z%/I/pkOdcSW
+</span></span><span class="line"><span class="cl"><span class="p">|</span>3,0,3,1,1,0,1750169770,<span class="s2">&#34;;0AHQQ8~&lt;L{3^_z%/I/pkOdcSW&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;4  LINE  0
+</span></span></span><span class="line"><span class="cl"><span class="s2">  ml7@zu^fbae:OG7,{jPiiq[H3-
+</span></span></span><span class="line"><span class="cl"><span class="s2">|3,0,4,1,1,0,1750169770,&#34;</span>ml7@zu^fbae:OG7,<span class="o">{</span>jPiiq<span class="o">[</span>H3-<span class="s2">&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">&#34;</span><span class="m">5</span>  LINE  <span class="m">0</span>
+</span></span><span class="line"><span class="cl">  IkW&gt;#H&gt;YXf&gt;<span class="p">;</span><span class="se">\=</span>S-Sa7aup<span class="o">=</span>d3k
+</span></span><span class="line"><span class="cl"><span class="p">|</span>3,0,5,1,1,0,1750169770,<span class="s2">&#34;IkW&gt;#H&gt;YXf&gt;;\\=S-Sa7aup=d3k&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;6  LINE  0
+</span></span></span><span class="line"><span class="cl"><span class="s2">  y7q+01%Tk&#34;</span>V<span class="nv">$#</span>I_FK5ST<span class="p">;&amp;</span>Q<span class="nv">$WE</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>3,0,6,1,1,0,1750169770,<span class="s2">&#34;y7q+01%Tk\&#34;V</span><span class="nv">$#</span><span class="s2">I_FK5ST;&amp;Q</span><span class="nv">$WE</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;7  LINE  0
+</span></span></span><span class="line"><span class="cl"><span class="s2">  J&amp;&lt;ou+;Q+5NCVI=i.mt^KRvvUE
+</span></span></span><span class="line"><span class="cl"><span class="s2">|3,0,7,1,1,0,1750169770,&#34;</span>J<span class="p">&amp;</span>&lt;ou+<span class="p">;</span>Q+5NCVI<span class="o">=</span>i.mt^KRvvUE<span class="s2">&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">&#34;</span><span class="m">8</span>  LINE  <span class="m">0</span>
+</span></span><span class="line"><span class="cl">  eE.u<span class="se">\H</span>g6<span class="s2">&#34;#Mem:4reCy[QB;:9K
+</span></span></span><span class="line"><span class="cl"><span class="s2">|3,0,8,1,1,0,1750169770,&#34;</span>eE.u<span class="se">\\</span>Hg6<span class="se">\&#34;</span><span class="c1">#Mem:4reCy[QB;:9K&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;9  LINE  0
+</span></span></span><span class="line"><span class="cl"><span class="s2">  Y{zM&lt;!*32kpTPJ`R7bHUV~]3O</span>$<span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">|3,0,9,1,1,0,1750169770,&#34;</span>Y<span class="o">{</span>zM&lt;!*32kpTPJ<span class="sb">`</span>R7bHUV~<span class="o">]</span>3O<span class="s2">$&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2"># File marks:
+</span></span></span><span class="line"><span class="cl"><span class="s2">&#39;0  1  0  ~/.pwfault
+</span></span></span><span class="line"><span class="cl"><span class="s2">|4,48,1,0,1750169805,&#34;</span>~/.pwfault<span class="s2">&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2"># Jumplist (newest first):
+</span></span></span><span class="line"><span class="cl"><span class="s2">-&#39;  1  0  ~/.pwfault
+</span></span></span><span class="line"><span class="cl"><span class="s2">|4,39,1,0,1750169805,&#34;</span>~/.pwfault<span class="s2">&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2"># History of marks within files (newest to oldest):
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">&gt; ~/.pwfault
+</span></span></span><span class="line"><span class="cl"><span class="s2">  * 1750169794  0
+</span></span></span><span class="line"><span class="cl"><span class="s2">  &#34;</span> <span class="m">1</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">  . <span class="m">1</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">  + <span class="m">2</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">  + <span class="m">1</span> <span class="m">7</span>
+</span></span><span class="line"><span class="cl">  + <span class="m">2</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">  + <span class="m">1</span> <span class="m">0</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Understanding .viminfo logic<span class="hx-absolute -hx-mt-20" id="understanding-viminfo-logic"></span>
+    <a href="#understanding-viminfo-logic" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>The vim file follows this steps sequece, based in the command timestamps:</p>
+<ol>
+<li>:v/?/d      -&gt; delete lines NOT matching &ldquo;?&rdquo;  (i.e., keep only lines containing &lsquo;?&rsquo;)</li>
+<li>:%s,[^a-f0-9],,g  -&gt; remove all characters not a-f or 0-9 (global)</li>
+<li>:%s/\n//   -&gt; remove all newlines (join lines)</li>
+<li>:s/dd/     -&gt; remove the first occurrence of &lsquo;dd&rsquo; on each line (here file is single line by now)</li>
+<li>:%s/^&hellip;../flag{  -&gt; replace first 5 characters with &lsquo;flag{&rsquo;</li>
+<li>:%s/.$/}   -&gt; replace last character of the file with &lsquo;}&rsquo;</li>
+</ol>
+<h3>Scripting the logic<span class="hx-absolute -hx-mt-20" id="scripting-the-logic"></span>
+    <a href="#scripting-the-logic" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Thus create a Python Script:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">re</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">pwfault</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;.pwfault&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">lines</span> <span class="o">=</span> <span class="n">pwfault</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">ln</span> <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">ln</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">step1</span> <span class="o">=</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">step2</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^a-f0-9]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">step1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">step3</span> <span class="o">=</span> <span class="n">step2</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">step4</span> <span class="o">=</span> <span class="n">step3</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&#34;dd&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">step4</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">step5</span> <span class="o">=</span> <span class="s1">&#39;flag{&#39;</span> <span class="o">+</span> <span class="n">step4</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">step5</span> <span class="o">=</span> <span class="s1">&#39;flag{&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">step5</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">final</span> <span class="o">=</span> <span class="n">step5</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">final</span> <span class="o">=</span> <span class="s1">&#39;}&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Lines kept (contain &#39;?&#39;):</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">step1</span><span class="p">,</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;After removing non-hex chars:</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">step2</span><span class="p">,</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;After joining lines (no newlines):</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">step3</span><span class="p">,</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;After removing first &#39;dd&#39; occurrence:</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">step4</span><span class="p">,</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;After replacing first 5 chars with &#39;flag{&#39;:</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">step5</span><span class="p">,</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Final result after replacing last char with &#39;}&#39;:</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">final</span><span class="p">,</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">hex_candidate</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[0-9a-f]+&#39;</span><span class="p">,</span> <span class="n">final</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="n">hex_candidate</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">decoded</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">final</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Decoded from hex -&gt;&#34;</span><span class="p">,</span> <span class="n">decoded</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Could not decode hex to UTF-8:&#34;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Having the following output:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$&gt; python3 solver.py
+</span></span><span class="line"><span class="cl">Lines kept <span class="o">(</span>contain <span class="s1">&#39;?&#39;</span><span class="o">)</span>:
+</span></span><span class="line"><span class="cl"> f<span class="o">)</span><span class="c1">#-nA1~wex3z$Ix0*K^a0?ImR</span>
+</span></span><span class="line"><span class="cl">.!Y<span class="o">}</span>h.<span class="sb">`</span>:?u<span class="se">\G</span>fM@6?d,<span class="o">]</span>pZGdT&gt;
+</span></span><span class="line"><span class="cl">jeZ!BS<span class="o">{</span>Ur?pxt*q@$.?<span class="se">\S</span>+jJKy
+</span></span><span class="line"><span class="cl">Vz#@^Fw?#Up<span class="p">|</span>@LF8SrkL3UM<span class="o">[</span>nX
+</span></span><span class="line"><span class="cl">OBk?<span class="s2">&#34;Ovlek;p1/lz</span>$<span class="s2">=iN(h./fI
+</span></span></span><span class="line"><span class="cl"><span class="s2">P?1=C8Ud</span><span class="nv">$Z</span><span class="s2">-Ew;+z0Ap/shp4oc
+</span></span></span><span class="line"><span class="cl"><span class="s2">W&amp;k]&amp;([X&gt;tz*:1UTRZfs?Tg-sA
+</span></span></span><span class="line"><span class="cl"><span class="s2">-CVwhU!L9C`}?K&gt;W)!&#39;-(&#34;</span>Jmh<span class="s2">&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">XEjZ3V8M</span><span class="nv">$3</span><span class="s2">.vaFA30CB?DT7EDs
+</span></span></span><span class="line"><span class="cl"><span class="s2">_5{1-%M:gl?^kO[%1vUI*WCBFV
+</span></span></span><span class="line"><span class="cl"><span class="s2">6Q`</span>$<span class="s2">%_O/8wSHOewxq/p?|+~:9h
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">After removing non-hex chars:
+</span></span></span><span class="line"><span class="cl"><span class="s2"> f1e30a0f6dde83e1f18d04c1f9383a30751168e9
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">After joining lines (no newlines):
+</span></span></span><span class="line"><span class="cl"><span class="s2"> f1e30a0f6dde83e1f18d04c1f9383a30751168e9
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">After removing first &#39;dd&#39; occurrence:
+</span></span></span><span class="line"><span class="cl"><span class="s2"> f1e30a0f6e83e1f18d04c1f9383a30751168e9
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">After replacing first 5 chars with &#39;flag{&#39;:
+</span></span></span><span class="line"><span class="cl"><span class="s2"> flag{a0f6e83e1f18d04c1f9383a30751168e9
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">Final result after replacing last char with &#39;}&#39;:
+</span></span></span><span class="line"><span class="cl"><span class="s2"> flag{a0f6e83e1f18d04c1f9383a30751168e}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Honestly a beautiful output for a second blood :)</p>
+<h2>forensics/IOT breach<span class="hx-absolute -hx-mt-20" id="forensicsiot-breach"></span>
+    <a href="#forensicsiot-breach" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="Pasted-image-20250810181739.png" alt="" loading="lazy" /></p>
+<h3>Device recognition<span class="hx-absolute -hx-mt-20" id="device-recognition"></span>
+    <a href="#device-recognition" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Disk forensics! A <em>DOS/MBR boot</em> file with some ransomware attack. This time we will be using <em>Autopsy</em> to read the device content. At first glance, <code>files</code> directory is listed on the root system <code>/</code> with an index of <code>.enc</code> jpg images.</p>
+<p><img src="1A99B201-F78D-426C-B4EB-7A8A2E92DAB6.png" alt="" loading="lazy" /></p>
+<h3>lighttpd access.log<span class="hx-absolute -hx-mt-20" id="lighttpd-accesslog"></span>
+    <a href="#lighttpd-accesslog" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>As we didn&rsquo;t find any suspicious file in <code>/home</code> and <code>/root</code> directories, and nothing relevant inside the bash history, I move on into <em>services log</em>, here the http service: <code>lighttpd</code> was interesting. In <code>/var/log/lighttpd/access.log</code> some base64 data was embedded in http requests.</p>
+<p><img src="69B66EBA-FEFB-4BA6-A4EE-4000EBF02051.png" alt="" loading="lazy" /></p>
+<h3>Perl Script<span class="hx-absolute -hx-mt-20" id="perl-script"></span>
+    <a href="#perl-script" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>With some regex filtering and cyberchef we obtain a base64 encrypyted payload:</p>
+<p><img src="1BA0312E-BA66-4791-B970-814D1DE3E02F.png" alt="" loading="lazy" /></p>
+<p>From this perl code we obtain the cypher method and an <em>IV</em></p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-perl" data-lang="perl"><span class="line"><span class="cl"><span class="k">my</span> <span class="nv">$cipher</span> <span class="o">=</span> <span class="nn">Crypt::Mode::CBC</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span><span class="s">&#34;AES&#34;</span><span class="p">);</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-perl" data-lang="perl"><span class="line"><span class="cl"><span class="k">my</span> <span class="nv">$encrypted</span> <span class="o">=</span> <span class="nv">$cipher</span><span class="o">-&gt;</span><span class="n">encrypt</span><span class="p">(</span><span class="nv">$data</span><span class="p">,</span> <span class="nv">$password</span><span class="p">,</span> <span class="s">&#34;R4ND0MivR4ND0Miv&#34;</span><span class="p">);</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Perl Execution | CBC key<span class="hx-absolute -hx-mt-20" id="perl-execution--cbc-key"></span>
+    <a href="#perl-execution--cbc-key" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Flexing my custom command we urldecode one http request with the <code>$password</code> used in the <em>perl binary</em>:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$&gt; urldecode <span class="s1">&#39;10.0.0.1 10.5.5.246 - [11/Jun/2025:01:13:02 +0200] &#34;GET /cgi-bin/ping.pl?hostname=a%3Bcd%20/files%20%26%26%20perl%20enc.pl%20L0s3%40llYourF1l3s HTTP/1.1&#34; 200 1677 &#34;-&#34; &#34;python-requests/2.21.0&#34;&#39;</span>
+</span></span><span class="line"><span class="cl">10.0.0.1 10.5.5.246 - <span class="o">[</span>11/Jun/2025:01:13:02 +0200<span class="o">]</span> <span class="s2">&#34;GET /cgi-bin/ping.pl?hostname=a;cd /files &amp;&amp; perl enc.pl L0s3@llYourF1l3s HTTP/1.1&#34;</span> <span class="m">200</span> <span class="m">1677</span> <span class="s2">&#34;-&#34;</span> <span class="s2">&#34;python-requests/2.21.0&#34;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">urldecode <span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">echo</span> -n <span class="nv">$@</span> <span class="p">|</span> python3 -c <span class="s2">&#34;import sys; from urllib.parse import unquote; print(unquote(sys.stdin.read()));&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Being <code>L0s3@llYourF1l3s</code> the key from AES CBC.</p>
+<h3>Decrypting files<span class="hx-absolute -hx-mt-20" id="decrypting-files"></span>
+    <a href="#decrypting-files" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>To conclude the challenge, you can create a fast bash script to decrypt all encoded files inside <code>/files/</code> directory.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="nv">PASS</span><span class="o">=</span><span class="s2">&#34;L0s3@llYourF1l3s&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">IV</span><span class="o">=</span><span class="s2">&#34;R4ND0MivR4ND0Miv&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> i in <span class="k">$(</span>seq -w <span class="m">1</span> 16<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">INFILE</span><span class="o">=</span><span class="s2">&#34;kitten</span><span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="s2">.jpg.enc&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">OUTFILE</span><span class="o">=</span><span class="s2">&#34;kitten</span><span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="s2">.jpg&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">[[</span> -f <span class="s2">&#34;</span><span class="nv">$INFILE</span><span class="s2">&#34;</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">echo</span> <span class="s2">&#34;[*] Decrypting </span><span class="nv">$INFILE</span><span class="s2"> -&gt; </span><span class="nv">$OUTFILE</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">        openssl enc -d -aes-128-cbc <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>            -in <span class="s2">&#34;</span><span class="nv">$INFILE</span><span class="s2">&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>            -out <span class="s2">&#34;</span><span class="nv">$OUTFILE</span><span class="s2">&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>            -K <span class="k">$(</span><span class="nb">echo</span> -n <span class="s2">&#34;</span><span class="nv">$PASS</span><span class="s2">&#34;</span> <span class="p">|</span> xxd -p<span class="k">)</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>            -iv <span class="k">$(</span><span class="nb">echo</span> -n <span class="s2">&#34;</span><span class="nv">$IV</span><span class="s2">&#34;</span> <span class="p">|</span> xxd -p<span class="k">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">echo</span> <span class="s2">&#34;[!] </span><span class="nv">$INFILE</span><span class="s2"> does not exist, skipping...&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">fi</span>
+</span></span><span class="line"><span class="cl"><span class="k">done</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>The file <code>kitten08.jpg</code> was the flag written.</p>
+<p><img src="kitten08.jpg" alt="" loading="lazy" /></p>
+<h2>Reversing Index<span class="hx-absolute -hx-mt-20" id="reversing-index"></span>
+    <a href="#reversing-index" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="Pasted-image-20250813010645.png" alt="" loading="lazy" /></p>
+<p>Sad ending, I still asking to organizers ctf for reversing files, but I don&rsquo;t have any file from the category, only some solvers that I will share with you :). Anyways sorry for the bad writeups you will see forward, but I need to introduce reversing content in my web, at least on ctf blogs.</p>
+<h2>reversing/Lazy Code 1.0<span class="hx-absolute -hx-mt-20" id="reversinglazy-code-10"></span>
+    <a href="#reversinglazy-code-10" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>From IDA we extracted the following loop-code and function:</p>
+<h3>Main code<span class="hx-absolute -hx-mt-20" id="main-code"></span>
+    <a href="#main-code" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Decrypting step %d/1000....</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">xor_string</span><span class="p">(</span><span class="n">encrypted_flag</span><span class="p">,</span> <span class="n">xors</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="mh">0x1BuLL</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[!] Yawn.... I&#39;m tired... sleeping for %d seconds</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">sleeping_time</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">sleep</span><span class="p">(</span><span class="n">sleeping_time</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Pfff... I&#39;m done, here is your flag: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">encrypted_flag</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">_BYTE</span> <span class="o">*</span><span class="kr">__fastcall</span> <span class="nf">xor_string</span><span class="p">(</span><span class="kr">__int64</span> <span class="n">a1</span><span class="p">,</span> <span class="kt">char</span> <span class="n">a2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_BYTE</span> <span class="o">*</span><span class="n">result</span><span class="p">;</span> <span class="c1">// rax
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// [rsp+Ch] [rbp-4h]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">38</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">_BYTE</span> <span class="o">*</span><span class="p">)(</span><span class="n">i</span> <span class="o">+</span> <span class="n">a1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">result</span> <span class="o">^=</span> <span class="n">a2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Data used in main code<span class="hx-absolute -hx-mt-20" id="data-used-in-main-code"></span>
+    <a href="#data-used-in-main-code" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Having the <em>encrypted_flag</em> value:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-r" data-lang="r"><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">0000000140003000</span> <span class="n">encrypted_flag</span>  <span class="n">db</span> <span class="m">15</span><span class="n">h</span><span class="p">,</span> <span class="m">1</span><span class="n">Fh</span><span class="p">,</span> <span class="m">12</span><span class="n">h</span><span class="p">,</span> <span class="m">14</span><span class="n">h</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">10</span><span class="n">h</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="s">&#39;E&#39;</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="m">15</span><span class="n">h</span><span class="p">,</span> <span class="m">4</span> <span class="nf">dup</span><span class="p">(</span><span class="s">&#39;F&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">0000000140003000</span>                                         <span class="p">;</span> <span class="n">DATA</span> <span class="n">XREF</span><span class="o">:</span> <span class="n">main</span><span class="m">+7</span><span class="bp">F</span>↑<span class="n">o</span>
+</span></span><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">0000000140003000</span>                                         <span class="p">;</span> <span class="n">main</span><span class="o">+</span><span class="n">C3</span>↑<span class="n">o</span>
+</span></span><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">000000014000300</span><span class="n">E</span>                 <span class="n">db</span> <span class="s">&#39;G&#39;</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="s">&#39;D&#39;</span><span class="p">,</span> <span class="s">&#39;B&#39;</span><span class="p">,</span> <span class="m">15</span><span class="n">h</span><span class="p">,</span> <span class="m">2</span> <span class="nf">dup</span><span class="p">(</span><span class="m">16</span><span class="n">h</span><span class="p">),</span> <span class="m">2</span> <span class="nf">dup</span><span class="p">(</span><span class="m">17</span><span class="n">h</span><span class="p">),</span> <span class="s">&#39;D&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">0000000140003018</span>                 <span class="n">db</span> <span class="m">10</span><span class="n">h</span><span class="p">,</span> <span class="m">2</span> <span class="nf">dup</span><span class="p">(</span><span class="s">&#39;@&#39;</span><span class="p">),</span> <span class="m">12</span><span class="n">h</span><span class="p">,</span> <span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="m">15</span><span class="n">h</span><span class="p">,</span> <span class="m">11</span><span class="n">h</span><span class="p">,</span> <span class="s">&#39;D&#39;</span><span class="p">,</span> <span class="s">&#39;@&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">0000000140003022</span>                 <span class="n">db</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="s">&#39;B&#39;</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="m">0</span><span class="n">Eh</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="m">19</span><span class="n">h</span> <span class="nf">dup</span><span class="p">(</span><span class="m">0</span><span class="p">)</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>And <em>xors</em> value:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-r" data-lang="r"><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">0000000140003040</span> <span class="n">xors</span>            <span class="n">dd</span> <span class="m">12</span><span class="n">h</span><span class="p">,</span> <span class="m">2</span><span class="n">Bh</span><span class="p">,</span> <span class="m">47</span><span class="n">h</span><span class="p">,</span> <span class="m">76</span><span class="n">h</span><span class="p">,</span> <span class="m">66</span><span class="n">h</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">0</span><span class="n">Bh</span><span class="p">,</span> <span class="m">36</span><span class="n">h</span><span class="p">,</span> <span class="m">21</span><span class="n">h</span><span class="p">,</span> <span class="m">6</span><span class="n">Ch</span><span class="p">,</span> <span class="m">37</span><span class="n">h</span>
+</span></span><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">0000000140003040</span>                                         <span class="p">;</span> <span class="n">DATA</span> <span class="n">XREF</span><span class="o">:</span> <span class="n">main</span><span class="m">+6</span><span class="n">D</span>↑<span class="n">o</span>
+</span></span><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">000000014000306</span><span class="n">C</span>                 <span class="n">dd</span> <span class="m">31</span><span class="n">h</span><span class="p">,</span> <span class="m">1</span><span class="n">Bh</span><span class="p">,</span> <span class="m">5</span><span class="n">Bh</span><span class="p">,</span> <span class="m">13</span><span class="n">h</span><span class="p">,</span> <span class="m">67</span><span class="n">h</span><span class="p">,</span> <span class="m">43</span><span class="n">h</span><span class="p">,</span> <span class="m">1</span><span class="n">Eh</span><span class="p">,</span> <span class="m">9</span><span class="p">,</span> <span class="m">27</span><span class="n">h</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">79</span><span class="n">h</span><span class="p">,</span> <span class="m">4</span><span class="n">Bh</span>
+</span></span><span class="line"><span class="cl"><span class="n">.data</span><span class="o">:</span><span class="m">000000014000309</span><span class="n">C</span>                 <span class="n">dd</span> <span class="m">0</span><span class="n">Dh</span><span class="p">,</span> <span class="m">3</span><span class="n">Dh</span><span class="p">,</span> <span class="m">52</span><span class="n">h</span><span class="p">,</span> <span class="m">5</span><span class="n">Bh</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Solver written in C<span class="hx-absolute -hx-mt-20" id="solver-written-in-c"></span>
+    <a href="#solver-written-in-c" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>We are able to create the following script to recreate the function functionality without having to wait any second..</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">encrypted_flag</span><span class="p">[</span><span class="mi">39</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="mh">0x15</span><span class="p">,</span> <span class="mh">0x1F</span><span class="p">,</span> <span class="mh">0x12</span><span class="p">,</span> <span class="mh">0x14</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="mh">0x4A</span><span class="p">,</span> <span class="mh">0x45</span><span class="p">,</span> <span class="mh">0x43</span><span class="p">,</span> <span class="mh">0x15</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="mh">0x46</span><span class="p">,</span> <span class="mh">0x46</span><span class="p">,</span> <span class="mh">0x46</span><span class="p">,</span> <span class="mh">0x46</span><span class="p">,</span> <span class="mh">0x47</span><span class="p">,</span> <span class="mh">0x4B</span><span class="p">,</span> <span class="mh">0x44</span><span class="p">,</span> <span class="mh">0x42</span><span class="p">,</span> <span class="mh">0x15</span><span class="p">,</span> <span class="mh">0x16</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="mh">0x16</span><span class="p">,</span> <span class="mh">0x17</span><span class="p">,</span> <span class="mh">0x17</span><span class="p">,</span> <span class="mh">0x44</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mh">0x12</span><span class="p">,</span> <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0x43</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="mh">0x15</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x44</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mh">0x4A</span><span class="p">,</span> <span class="mh">0x42</span><span class="p">,</span> <span class="mh">0x4A</span><span class="p">,</span> <span class="mh">0x0E</span><span class="p">,</span> <span class="mh">0x73</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">xors</span><span class="p">[</span><span class="mi">27</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="mh">0x12</span><span class="p">,</span> <span class="mh">0x2B</span><span class="p">,</span> <span class="mh">0x47</span><span class="p">,</span> <span class="mh">0x76</span><span class="p">,</span> <span class="mh">0x66</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x0B</span><span class="p">,</span> <span class="mh">0x36</span><span class="p">,</span> <span class="mh">0x21</span><span class="p">,</span> <span class="mh">0x6C</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="mh">0x37</span><span class="p">,</span> <span class="mh">0x31</span><span class="p">,</span> <span class="mh">0x1B</span><span class="p">,</span> <span class="mh">0x5B</span><span class="p">,</span> <span class="mh">0x13</span><span class="p">,</span> <span class="mh">0x67</span><span class="p">,</span> <span class="mh">0x43</span><span class="p">,</span> <span class="mh">0x1E</span><span class="p">,</span> <span class="mh">0x09</span><span class="p">,</span> <span class="mh">0x27</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x79</span><span class="p">,</span> <span class="mh">0x4B</span><span class="p">,</span> <span class="mh">0x0D</span><span class="p">,</span> <span class="mh">0x3D</span><span class="p">,</span> <span class="mh">0x52</span><span class="p">,</span> <span class="mh">0x5B</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">xor_string</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">,</span> <span class="kt">char</span> <span class="n">key</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">38</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">^=</span> <span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">xor_string</span><span class="p">(</span><span class="n">encrypted_flag</span><span class="p">,</span> <span class="n">xors</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="mi">27</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Pfff... I&#39;m done, here is your flag: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">encrypted_flag</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h2>reversing/Lazy Code 2.0<span class="hx-absolute -hx-mt-20" id="reversinglazy-code-20"></span>
+    <a href="#reversinglazy-code-20" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Same stuff than the first part but with different <em>encrypted_flag</em> value:</p>
+<h3>Main code<span class="hx-absolute -hx-mt-20" id="main-code-1"></span>
+    <a href="#main-code-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="kr">__fastcall</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// [rsp+8h] [rbp-8h]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Decrypting step %d/1000....</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">xor_string</span><span class="p">(</span><span class="n">encrypted_flag</span><span class="p">,</span> <span class="n">xors</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="mh">0x1BuLL</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[!] Yawn.... I&#39;m tired... sleeping for %d seconds</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">sleeping_time</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">sleep</span><span class="p">(</span><span class="n">sleeping_time</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Pfff... I&#39;m done, here is your flag: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">encrypted_flag</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">_BYTE</span> <span class="o">*</span><span class="kr">__fastcall</span> <span class="nf">xor_string</span><span class="p">(</span><span class="kr">__int64</span> <span class="n">a1</span><span class="p">,</span> <span class="kt">char</span> <span class="n">a2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_BYTE</span> <span class="o">*</span><span class="n">result</span><span class="p">;</span> <span class="c1">// rax
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// [rsp+18h] [rbp-4h]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">38</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">_BYTE</span> <span class="o">*</span><span class="p">)(</span><span class="n">i</span> <span class="o">+</span> <span class="n">a1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">result</span> <span class="o">^=</span> <span class="n">a2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Encrypted Flag data<span class="hx-absolute -hx-mt-20" id="encrypted-flag-data"></span>
+    <a href="#encrypted-flag-data" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004020</span> <span class="n">encrypted_flag</span>  <span class="n">db</span> <span class="err">&#39;</span><span class="o">*</span> <span class="o">-+</span><span class="mf">7.</span><span class="err">&#39;</span>             <span class="p">;</span> <span class="n">DATA</span> <span class="nl">XREF</span><span class="p">:</span> <span class="n">main</span><span class="o">+</span><span class="mi">83</span><span class="err">↑</span><span class="n">o</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004020</span>                                         <span class="p">;</span> <span class="n">main</span><span class="o">+</span><span class="n">CC</span><span class="err">↑</span><span class="n">o</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004026</span>                 <span class="n">db</span>  <span class="mf">7F</span><span class="n">h</span> <span class="p">;</span> <span class="err"></span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004027</span>                 <span class="n">db</span>  <span class="mi">2</span><span class="n">Ah</span> <span class="p">;</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000402</span><span class="mi">8</span>                 <span class="n">db</span>  <span class="mi">28</span><span class="n">h</span> <span class="p">;</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000402</span><span class="mi">9</span>                 <span class="n">db</span>  <span class="mi">2</span><span class="n">Dh</span> <span class="p">;</span> <span class="o">-</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000402</span><span class="n">A</span>                 <span class="n">db</span>  <span class="mi">78</span><span class="n">h</span> <span class="p">;</span> <span class="n">x</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000402</span><span class="n">B</span>                 <span class="n">db</span>  <span class="mi">7</span><span class="n">Dh</span> <span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000402</span><span class="n">C</span>                 <span class="n">db</span>  <span class="mi">7</span><span class="n">Ah</span> <span class="p">;</span> <span class="n">z</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000402</span><span class="n">D</span>                 <span class="n">db</span>  <span class="mi">28</span><span class="n">h</span> <span class="p">;</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000402</span><span class="n">E</span>                 <span class="n">db</span>  <span class="mi">2</span><span class="n">Dh</span> <span class="p">;</span> <span class="o">-</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mf">000000000000402F</span>                 <span class="n">db</span>  <span class="mi">29</span><span class="n">h</span> <span class="p">;</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004030</span>                 <span class="n">db</span>  <span class="mi">2</span><span class="n">Eh</span> <span class="p">;</span> <span class="p">.</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004031</span>                 <span class="n">db</span>  <span class="mi">28</span><span class="n">h</span> <span class="p">;</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004032</span>                 <span class="n">db</span>  <span class="mi">29</span><span class="n">h</span> <span class="p">;</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004033</span>                 <span class="n">db</span>  <span class="mi">2</span><span class="n">Ah</span> <span class="p">;</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004034</span>                 <span class="n">db</span>  <span class="mi">7</span><span class="n">Bh</span> <span class="p">;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004035</span>                 <span class="n">db</span>  <span class="mi">2</span><span class="n">Dh</span> <span class="p">;</span> <span class="o">-</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004036</span>                 <span class="n">db</span>  <span class="mi">79</span><span class="n">h</span> <span class="p">;</span> <span class="n">y</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004037</span>                 <span class="n">db</span>  <span class="mi">28</span><span class="n">h</span> <span class="p">;</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000403</span><span class="mi">8</span>                 <span class="n">db</span>  <span class="mi">7</span><span class="n">Bh</span> <span class="p">;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000403</span><span class="mi">9</span>                 <span class="n">db</span>  <span class="mi">75</span><span class="n">h</span> <span class="p">;</span> <span class="n">u</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000403</span><span class="n">A</span>                 <span class="n">db</span>  <span class="mi">28</span><span class="n">h</span> <span class="p">;</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000403</span><span class="n">B</span>                 <span class="n">db</span>  <span class="mi">29</span><span class="n">h</span> <span class="p">;</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000403</span><span class="n">C</span>                 <span class="n">db</span>  <span class="mi">2</span><span class="n">Eh</span> <span class="p">;</span> <span class="p">.</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000403</span><span class="n">D</span>                 <span class="n">db</span>  <span class="mi">7</span><span class="n">Ch</span> <span class="p">;</span> <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000403</span><span class="n">E</span>                 <span class="n">db</span>  <span class="mi">7</span><span class="n">Bh</span> <span class="p">;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mf">000000000000403F</span>                 <span class="n">db</span>  <span class="mf">2F</span><span class="n">h</span> <span class="p">;</span> <span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004040</span>                 <span class="n">db</span>  <span class="mi">78</span><span class="n">h</span> <span class="p">;</span> <span class="n">x</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004041</span>                 <span class="n">db</span>  <span class="mf">7F</span><span class="n">h</span> <span class="p">;</span> <span class="err"></span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004042</span>                 <span class="n">db</span>  <span class="mf">7F</span><span class="n">h</span> <span class="p">;</span> <span class="err"></span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004043</span>                 <span class="n">db</span>  <span class="mi">7</span><span class="n">Bh</span> <span class="p">;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004044</span>                 <span class="n">db</span>  <span class="mi">79</span><span class="n">h</span> <span class="p">;</span> <span class="n">y</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004045</span>                 <span class="n">db</span>  <span class="mi">31</span><span class="n">h</span> <span class="p">;</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004046</span>                 <span class="n">db</span>  <span class="mi">4</span><span class="n">Ch</span> <span class="p">;</span> <span class="n">L</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004047</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000404</span><span class="mi">8</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000404</span><span class="mi">9</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000404</span><span class="n">A</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000404</span><span class="n">B</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000404</span><span class="n">C</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000404</span><span class="n">D</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000404</span><span class="n">E</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mf">000000000000404F</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004050</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004051</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004052</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004053</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004054</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004055</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004056</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004057</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000405</span><span class="mi">8</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000405</span><span class="mi">9</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000405</span><span class="n">A</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000405</span><span class="n">B</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000405</span><span class="n">C</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000405</span><span class="n">D</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">000000000000405</span><span class="n">E</span>                 <span class="n">db</span>    <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mf">000000000000405F</span>                 <span class="n">db</span>    <span class="mi">0</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Xor keys data<span class="hx-absolute -hx-mt-20" id="xor-keys-data"></span>
+    <a href="#xor-keys-data" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004060</span>                 <span class="n">public</span> <span class="n">xors</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004060</span> <span class="p">;</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">xors</span><span class="p">[</span><span class="mi">27</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004060</span> <span class="n">xors</span>            <span class="n">dd</span> <span class="mi">17</span><span class="n">h</span><span class="p">,</span> <span class="mi">2</span><span class="n">Bh</span><span class="p">,</span> <span class="mi">57</span><span class="n">h</span><span class="p">,</span> <span class="mf">6F</span><span class="n">h</span><span class="p">,</span> <span class="mi">7</span><span class="n">Ah</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">21</span><span class="n">h</span><span class="p">,</span> <span class="mi">2</span><span class="n">Dh</span><span class="p">,</span> <span class="mi">1</span><span class="n">Dh</span><span class="p">,</span> <span class="mi">67</span><span class="n">h</span><span class="p">,</span> <span class="mi">2</span><span class="n">Bh</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">0000000000004060</span>                                         <span class="p">;</span> <span class="n">DATA</span> <span class="nl">XREF</span><span class="p">:</span> <span class="n">main</span><span class="o">+</span><span class="mi">71</span><span class="err">↑</span><span class="n">o</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">00000000000040</span><span class="mi">8</span><span class="n">C</span>                 <span class="n">dd</span> <span class="mi">56</span><span class="n">h</span><span class="p">,</span> <span class="mi">16</span><span class="n">h</span><span class="p">,</span> <span class="mi">63</span><span class="n">h</span><span class="p">,</span> <span class="mi">5</span><span class="n">Bh</span><span class="p">,</span> <span class="mi">67</span><span class="n">h</span><span class="p">,</span> <span class="mi">38</span><span class="n">h</span><span class="p">,</span> <span class="mi">1</span><span class="n">Dh</span><span class="p">,</span> <span class="mi">0</span><span class="n">Bh</span><span class="p">,</span> <span class="mi">0</span><span class="n">Ah</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">70</span><span class="n">h</span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="nl">data</span><span class="p">:</span><span class="mo">00000000000040</span><span class="n">B8</span>                 <span class="n">dd</span> <span class="mi">47</span><span class="n">h</span><span class="p">,</span> <span class="mi">12</span><span class="n">h</span><span class="p">,</span> <span class="mi">36</span><span class="n">h</span><span class="p">,</span> <span class="mi">0</span><span class="n">Ch</span><span class="p">,</span> <span class="mi">63</span><span class="n">h</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Solver written in C<span class="hx-absolute -hx-mt-20" id="solver-written-in-c-1"></span>
+    <a href="#solver-written-in-c-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">encrypted_flag</span><span class="p">[</span><span class="mi">39</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="sc">&#39;*&#39;</span><span class="p">,</span> <span class="sc">&#39; &#39;</span><span class="p">,</span> <span class="sc">&#39;-&#39;</span><span class="p">,</span> <span class="sc">&#39;+&#39;</span><span class="p">,</span> <span class="sc">&#39;7&#39;</span><span class="p">,</span> <span class="sc">&#39;.&#39;</span><span class="p">,</span> <span class="mh">0x7F</span><span class="p">,</span> <span class="sc">&#39;*&#39;</span><span class="p">,</span> <span class="sc">&#39;(&#39;</span><span class="p">,</span> <span class="sc">&#39;-&#39;</span><span class="p">,</span> <span class="sc">&#39;x&#39;</span><span class="p">,</span> <span class="sc">&#39;}&#39;</span><span class="p">,</span> <span class="sc">&#39;z&#39;</span><span class="p">,</span> <span class="sc">&#39;(&#39;</span><span class="p">,</span> <span class="sc">&#39;-&#39;</span><span class="p">,</span> <span class="sc">&#39;)&#39;</span><span class="p">,</span> <span class="sc">&#39;.&#39;</span><span class="p">,</span> <span class="sc">&#39;(&#39;</span><span class="p">,</span> <span class="sc">&#39;)&#39;</span><span class="p">,</span> <span class="sc">&#39;*&#39;</span><span class="p">,</span> <span class="sc">&#39;{&#39;</span><span class="p">,</span> <span class="sc">&#39;-&#39;</span><span class="p">,</span> <span class="sc">&#39;y&#39;</span><span class="p">,</span> <span class="sc">&#39;(&#39;</span><span class="p">,</span> <span class="sc">&#39;{&#39;</span><span class="p">,</span> <span class="sc">&#39;u&#39;</span><span class="p">,</span> <span class="sc">&#39;(&#39;</span><span class="p">,</span> <span class="sc">&#39;)&#39;</span><span class="p">,</span> <span class="sc">&#39;.&#39;</span><span class="p">,</span> <span class="sc">&#39;|&#39;</span><span class="p">,</span> <span class="sc">&#39;{&#39;</span><span class="p">,</span> <span class="sc">&#39;/&#39;</span><span class="p">,</span> <span class="sc">&#39;x&#39;</span><span class="p">,</span> <span class="mh">0x7F</span><span class="p">,</span> <span class="mh">0x7F</span><span class="p">,</span> <span class="sc">&#39;{&#39;</span><span class="p">,</span> <span class="sc">&#39;y&#39;</span><span class="p">,</span> <span class="sc">&#39;1&#39;</span><span class="p">,</span> <span class="sc">&#39;L&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">xors</span><span class="p">[</span><span class="mi">27</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="mh">0x17</span><span class="p">,</span> <span class="mh">0x2B</span><span class="p">,</span> <span class="mh">0x57</span><span class="p">,</span> <span class="mh">0x6F</span><span class="p">,</span> <span class="mh">0x7A</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x21</span><span class="p">,</span> <span class="mh">0x2D</span><span class="p">,</span> <span class="mh">0x1D</span><span class="p">,</span> <span class="mh">0x67</span><span class="p">,</span> <span class="mh">0x2B</span><span class="p">,</span> <span class="mh">0x56</span><span class="p">,</span> <span class="mh">0x16</span><span class="p">,</span> <span class="mh">0x63</span><span class="p">,</span> <span class="mh">0x5B</span><span class="p">,</span> <span class="mh">0x67</span><span class="p">,</span> <span class="mh">0x38</span><span class="p">,</span> <span class="mh">0x1D</span><span class="p">,</span> <span class="mh">0x0B</span><span class="p">,</span> <span class="mh">0x0A</span><span class="p">,</span> <span class="mh">0x03</span><span class="p">,</span> <span class="mh">0x70</span><span class="p">,</span> <span class="mh">0x47</span><span class="p">,</span> <span class="mh">0x12</span><span class="p">,</span> <span class="mh">0x36</span><span class="p">,</span> <span class="mh">0x0C</span><span class="p">,</span> <span class="mh">0x63</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">xor_string</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">,</span> <span class="kt">char</span> <span class="n">key</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">38</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">^=</span> <span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">xor_string</span><span class="p">(</span><span class="n">encrypted_flag</span><span class="p">,</span> <span class="n">xors</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="mi">27</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Pfff... I&#39;m done, here is your flag: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">encrypted_flag</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h2>reversing/3 Ball Mark<span class="hx-absolute -hx-mt-20" id="reversing3-ball-mark"></span>
+    <a href="#reversing3-ball-mark" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Those who lie to others deceive themselves. I completed this challenge doing a manual bruteforce I tried 2 times to guess a number between 1 and 3, 10 times in a row, and obtained the flag, because it was always the same pattern. The solver of this challenge was literaly a bruteforce of the digits.</p>
+<p>The 100 easiest points of my career</p>
+<hr>
+<h2>Conclusion<span class="hx-absolute -hx-mt-20" id="conclusion"></span>
+    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>I hope you liked and enjoyed the writeups, see you in others CTFs playing with Caliphal Hounds! (and who knows maybe with Lil L3ak&hellip;)</p>
+
+        </div>
+        <div class="hx-mt-16"></div>
+        <div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
+        href="/tjctf-2025/"
+        title="TJCTF 2025 | 7/8 Forensics challenges"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-pr-4 rtl:hx-pl-4"
+      ><svg class="hx-inline hx-h-5 hx-shrink-0 ltr:hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>TJCTF 2025 | 7/8 Forensics challenges</a></div>
+        
+      </main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx-bg-gray-100 hx-pb-[env(safe-area-inset-bottom)] dark:hx-bg-neutral-900 print:hx-bg-transparent"><div
+      class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
+    ></div></footer>
+    
+    <script defer src="/js/main.min.0942239592f0795dc7213dd1057fd229d7edc19c0ef1a285396eb292d9ca9842.js" integrity="sha256-CUIjlZLweV3HIT3RBX/SKdftwZwO8aKFOW6yktnKmEI="></script>
+<script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
+    <script defer src="/en.search.min.7918d81999396a56d9ff1b7a986d6474e66bd5acdbbe01e8bac129f5ef345a88.js" integrity="sha256-eRjYGZk5albZ/xt6mG1kdOZr1azbvgHousEp9e80Wog="></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
+<script defer src="/lib/katex/katex.min.9f45307c5794ed247a0d095f3a62e52ef2215a67b2327203a7fd919959ae79d1.js" integrity="sha256-n0UwfFeU7SR6DQlfOmLlLvIhWmeyMnIDp/2RmVmuedE="></script>
+<script defer src="/lib/katex/auto-render.min.7b57d427ac6270677daf8d8380ded2cc73336f9149a167b8e1fe0d6ef66604ae.js" integrity="sha256-e1fUJ6xicGd9r42DgN7SzHMzb5FJoWe44f4NbvZmBK4="></script>
+<script defer src="/lib/katex/mhchem.min.f0ca03df194b8c3d6017ff455db6a0ef98857905663fa311a6cded788b15340b.js" integrity="sha256-8MoD3xlLjD1gF/9FXbag75iFeQVmP6MRps3teIsVNAs="></script>
+<script>
+  
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+        {left: "\\begin{align}", right: "\\end{align}", display: true},
+        {left: "\\begin{alignat}", right: "\\end{alignat}", display: true},
+        {left: "\\begin{gather}", right: "\\end{gather}", display: true},
+        {left: "\\begin{CD}", right: "\\end{CD}", display: true},
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  });
+</script>
+
+  </body>
+</html>
