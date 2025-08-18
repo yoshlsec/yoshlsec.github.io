@@ -2,26 +2,28 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/</loc>
-  </url><url>
-    <loc>/desktop-app---cyberchef/</loc>
-  </url><url>
-    <loc>/categories/</loc>
+    <loc>/cbe-blogs/</loc>
   </url><url>
     <loc>/cbe-blogs/cbe-fundamentals/</loc>
   </url><url>
-    <loc>/cbe-blogs/</loc>
-  </url><url>
     <loc>/cbe-blogs/cbe-creation/</loc>
   </url><url>
-    <loc>/l3akctf-2025/</loc>
+    <loc>/cbe-blogs/cbe-decochators/</loc>
   </url><url>
     <loc>/manuallyupx/</loc>
   </url><url>
-    <loc>/tags/</loc>
+    <loc>/desktop-app---cyberchef/</loc>
+  </url><url>
+    <loc>/why2025-ctf/</loc>
+  </url><url>
+    <loc>/l3akctf-2025/</loc>
   </url><url>
     <loc>/tjctf-2025/</loc>
   </url><url>
-    <loc>/why2025-ctf/</loc>
+    <loc>/</loc>
+  </url><url>
+    <loc>/categories/</loc>
+  </url><url>
+    <loc>/tags/</loc>
   </url>
 </urlset>
