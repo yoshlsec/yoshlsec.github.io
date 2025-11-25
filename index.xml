@@ -1,12 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>yoshl - IT enjoyer – </title>
-    <link>/</link>
+    <link>//localhost:1313/</link>
     <description>Recent content on yoshl - IT enjoyer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     
-	  <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -15,10 +15,10 @@
     
     <item>
       <title>Bringing CyberChef to Localhost</title>
-      <link>/desktop-app---cyberchef/</link>
+      <link>//localhost:1313/desktop-app---cyberchef/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/desktop-app---cyberchef/</guid>
+      <guid>//localhost:1313/desktop-app---cyberchef/</guid>
       <description>
         
         
