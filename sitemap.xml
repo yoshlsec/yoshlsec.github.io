@@ -2,36 +2,36 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/cbe-blogs/</loc>
+    <loc>//localhost:1313/cbe-blogs/</loc>
   </url><url>
-    <loc>/winint-compilation/winint-understading-processes/</loc>
+    <loc>//localhost:1313/winint-compilation/winint-understading-processes/</loc>
   </url><url>
-    <loc>/cbe-blogs/cbe-fundamentals/</loc>
+    <loc>//localhost:1313/cbe-blogs/cbe-fundamentals/</loc>
   </url><url>
-    <loc>/winint-compilation/</loc>
+    <loc>//localhost:1313/winint-compilation/</loc>
   </url><url>
-    <loc>/cbe-blogs/cbe-creation/</loc>
+    <loc>//localhost:1313/cbe-blogs/cbe-creation/</loc>
   </url><url>
-    <loc>/cbe-blogs/cbe-decochators/</loc>
+    <loc>//localhost:1313/cbe-blogs/cbe-decochators/</loc>
   </url><url>
-    <loc>/vm-reversing/</loc>
+    <loc>//localhost:1313/vm-reversing/</loc>
   </url><url>
-    <loc>/manuallyupx/</loc>
+    <loc>//localhost:1313/manuallyupx/</loc>
   </url><url>
-    <loc>/desktop-app---cyberchef/</loc>
+    <loc>//localhost:1313/desktop-app---cyberchef/</loc>
   </url><url>
-    <loc>/why2025-ctf/</loc>
+    <loc>//localhost:1313/why2025-ctf/</loc>
   </url><url>
-    <loc>/l3akctf-2025/</loc>
+    <loc>//localhost:1313/l3akctf-2025/</loc>
   </url><url>
-    <loc>/tjctf-2025/</loc>
+    <loc>//localhost:1313/tjctf-2025/</loc>
   </url><url>
-    <loc>/</loc>
+    <loc>//localhost:1313/</loc>
   </url><url>
-    <loc>/winint-compilation/marc/</loc>
+    <loc>//localhost:1313/winint-compilation/marc/</loc>
   </url><url>
-    <loc>/categories/</loc>
+    <loc>//localhost:1313/categories/</loc>
   </url><url>
-    <loc>/tags/</loc>
+    <loc>//localhost:1313/tags/</loc>
   </url>
 </urlset>
