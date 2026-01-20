@@ -10,20 +10,20 @@
 <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
-<title>Chaos-Based-Encryption Saga – yoshl - IT enjoyer</title>
-  <meta name="description" content="Learn what is Chaos-Based-Encryption (CBE in forwards), how it works, real examples. How to create your own CBE, Bypasssing EDR with this cipher, and more!" /><link rel="canonical" href="/cbe-blogs/" itemprop="url" />
+<title>WinInt Compilation – yoshl - IT enjoyer</title>
+  <meta name="description" content="WinInt stands for Windows Internals, a recopilation of blogs that I will be creating focused on windows reversing, anti-virus bypass and some kernel exploiting in HEVD." /><link rel="canonical" href="/winint-compilation/" itemprop="url" />
 
-<meta property="og:title" content="Chaos-Based-Encryption Saga" />
-<meta property="og:description" content="Learn what is Chaos-Based-Encryption (CBE in forwards), how it works, real examples. How to create your own CBE, Bypasssing EDR with this cipher, and more!" />
+<meta property="og:title" content="WinInt Compilation" />
+<meta property="og:description" content="WinInt stands for Windows Internals, a recopilation of blogs that I will be creating focused on windows reversing, anti-virus bypass and some kernel exploiting in HEVD." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="/cbe-blogs/" />
+<meta property="og:url" content="/winint-compilation/" />
 
-  <meta itemprop="name" content="Chaos-Based-Encryption Saga">
-  <meta itemprop="description" content="Learn what is Chaos-Based-Encryption (CBE in forwards), how it works, real examples. How to create your own CBE, Bypasssing EDR with this cipher, and more!">
-  <meta itemprop="wordCount" content="14">
+  <meta itemprop="name" content="WinInt Compilation">
+  <meta itemprop="description" content="WinInt stands for Windows Internals, a recopilation of blogs that I will be creating focused on windows reversing, anti-virus bypass and some kernel exploiting in HEVD.">
+  <meta itemprop="wordCount" content="28">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Chaos-Based-Encryption Saga">
-  <meta name="twitter:description" content="Learn what is Chaos-Based-Encryption (CBE in forwards), how it works, real examples. How to create your own CBE, Bypasssing EDR with this cipher, and more!">
+  <meta name="twitter:title" content="WinInt Compilation">
+  <meta name="twitter:description" content="WinInt stands for Windows Internals, a recopilation of blogs that I will be creating focused on windows reversing, anti-virus bypass and some kernel exploiting in HEVD.">
 
     <link rel="preload" href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" as="style" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
     <link href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" rel="stylesheet" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
@@ -124,15 +124,14 @@
     <ul class="hx-flex hx-flex-col hx-gap-1 md:hx-hidden">
       
       
-          <li class="open"><a
+          <li class=""><a
     class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
     href="/cbe-blogs/"
     
   >Chaos-Based-Encryption Saga
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
-    </a>
-  <div class="ltr:hx-pr-0 hx-overflow-hidden">
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
         <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
     class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
@@ -159,14 +158,15 @@
               
             </li></ul>
       </div></li>
-          <li class=""><a
+          <li class="open"><a
     class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+      sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
     href="/winint-compilation/"
     
   >WinInt Compilation
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
-    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+    </a>
+  <div class="ltr:hx-pr-0 hx-overflow-hidden">
         <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
     class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
@@ -238,12 +238,12 @@
     <article class="hx-w-full hx-break-words hx-flex hx-min-h-[calc(100vh-var(--navbar-height))] hx-min-w-0 hx-justify-center hx-pb-8 hx-pr-[calc(env(safe-area-inset-right)-1.5rem)]">
       <main class="hx-w-full hx-min-w-0 hx-max-w-6xl hx-px-6 hx-pt-4 md:hx-px-12">
         <br class="hx-mt-1.5 hx-text-sm" />
-        <h1 class="hx-text-center hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">Chaos-Based-Encryption Saga</h1>
-        <div class="content"><div class="hx-overflow-x-auto hx-mt-6 hx-flex hx-rounded-lg hx-border hx-py-2 ltr:hx-pr-4 rtl:hx-pl-4 contrast-more:hx-border-current contrast-more:dark:hx-border-current hx-border-blue-200 hx-bg-blue-100 hx-text-blue-900 dark:hx-border-blue-200/30 dark:hx-bg-blue-900/30 dark:hx-text-blue-200">
-  <div class="ltr:hx-pl-3 ltr:hx-pr-2 rtl:hx-pr-3 rtl:hx-pl-2"><div class="hx-select-none hx-text-xl" style="font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';">ℹ️</div></div>
+        <h1 class="hx-text-center hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">WinInt Compilation</h1>
+        <div class="content"><div class="hx-overflow-x-auto hx-mt-6 hx-flex hx-rounded-lg hx-border hx-py-2 ltr:hx-pr-4 rtl:hx-pl-4 contrast-more:hx-border-current contrast-more:dark:hx-border-current hx-border-orange-100 hx-bg-orange-50 hx-text-orange-800 dark:hx-border-orange-400/30 dark:hx-bg-orange-400/20 dark:hx-text-orange-300">
+  <div class="ltr:hx-pl-3 ltr:hx-pr-2 rtl:hx-pr-3 rtl:hx-pl-2"></div>
 
   <div class="hx-w-full hx-min-w-0 hx-leading-7">
-    <div class="hx-mt-6 hx-leading-7 first:hx-mt-0">Note: Some posts are still in progress. Explanations or code may be updated.</div>
+    <div class="hx-mt-6 hx-leading-7 first:hx-mt-0">Note: Some posts are still in progress. Explanations may be inaccurate due to my limited knowledge of the area, if you notice anything incorrect, please let me know.</div>
   </div>
 </div>
 
@@ -251,25 +251,17 @@
 <hr>
 </div>
           <div class="hx-mb-10">
-            <h3><a style="color: inherit; text-decoration: none;" class="hx-block hx-font-semibold hx-mt-8 hx-text-2xl " href="/cbe-blogs/cbe-fundamentals/">Pt 1 - Chaos Based Encryption applied to stegoanalysis</a></h3><p class="hx-opacity-80 hx-mt-4 hx-leading-7">In this article we will cover basics concepts about the image file type format and how to detect and insert critical information with a CBE algorithm, in base to Lazaros Moysis brief content.</p>
+            <h3><a style="color: inherit; text-decoration: none;" class="hx-block hx-font-semibold hx-mt-8 hx-text-2xl " href="/winint-compilation/winint-understading-processes/">Elementary: Understanding Processes</a></h3><p class="hx-opacity-80 hx-mt-4 hx-leading-7">In this blog we will cover how windows process works, their structure and how we can pivot to nt-authority system or any user through WinDbg. No exploitation here, it is only to get acquainted in the environment for future exploits!</p>
             <p class="hx-opacity-80 hx-mt-1 hx-leading-7">
-              <a class="hx-text-[color:hsl(var(--primary-hue),100%,50%)] hx-underline hx-underline-offset-2 hx-decoration-from-font" href="/cbe-blogs/cbe-fundamentals/">Read more →</a>
+              <a class="hx-text-[color:hsl(var(--primary-hue),100%,50%)] hx-underline hx-underline-offset-2 hx-decoration-from-font" href="/winint-compilation/winint-understading-processes/">Read more →</a>
             </p>
             <p class="hx-opacity-50 hx-text-sm hx-mt-4 hx-leading-7"></p>
           </div>
         
           <div class="hx-mb-10">
-            <h3><a style="color: inherit; text-decoration: none;" class="hx-block hx-font-semibold hx-mt-8 hx-text-2xl " href="/cbe-blogs/cbe-creation/">Pt 2.1 - Creation your own Chaos System</a></h3><p class="hx-opacity-80 hx-mt-4 hx-leading-7">Learn how to create your own chaos system, 1-Dimension, 2-Dimensions, 3, 4??? Here you will learn all you need to create a stable system. Maybe you want to avoid heuristic rules ;)</p>
+            <h3><a style="color: inherit; text-decoration: none;" class="hx-block hx-font-semibold hx-mt-8 hx-text-2xl " href="/winint-compilation/marc/"></a></h3><p class="hx-opacity-80 hx-mt-4 hx-leading-7"></p>
             <p class="hx-opacity-80 hx-mt-1 hx-leading-7">
-              <a class="hx-text-[color:hsl(var(--primary-hue),100%,50%)] hx-underline hx-underline-offset-2 hx-decoration-from-font" href="/cbe-blogs/cbe-creation/">Read more →</a>
-            </p>
-            <p class="hx-opacity-50 hx-text-sm hx-mt-4 hx-leading-7"></p>
-          </div>
-        
-          <div class="hx-mb-10">
-            <h3><a style="color: inherit; text-decoration: none;" class="hx-block hx-font-semibold hx-mt-8 hx-text-2xl " href="/cbe-blogs/cbe-decochators/">Pt 2.2 - Decochators Pypi Package</a></h3><p class="hx-opacity-80 hx-mt-4 hx-leading-7">Python 3.11&#43; Library for analysis and visualization of chaotic system. More info in https://pypi.org/project/decochators/</p>
-            <p class="hx-opacity-80 hx-mt-1 hx-leading-7">
-              <a class="hx-text-[color:hsl(var(--primary-hue),100%,50%)] hx-underline hx-underline-offset-2 hx-decoration-from-font" href="/cbe-blogs/cbe-decochators/">Read more →</a>
+              <a class="hx-text-[color:hsl(var(--primary-hue),100%,50%)] hx-underline hx-underline-offset-2 hx-decoration-from-font" href="/winint-compilation/marc/">Read more →</a>
             </p>
             <p class="hx-opacity-50 hx-text-sm hx-mt-4 hx-leading-7"></p>
           </div>

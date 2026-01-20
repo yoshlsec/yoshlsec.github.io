@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
+<title>Elementary: Understanding Processes – yoshl - IT enjoyer</title>
+  <meta name="description" content="In this blog we will cover how windows process works, their structure and how we can pivot to nt-authority system or any user through WinDbg. No exploitation here, it is only to get acquainted in the environment for future exploits!" /><link rel="canonical" href="/winint-compilation/winint-understading-processes/" itemprop="url" />
+
+<meta property="og:title" content="Elementary: Understanding Processes" />
+<meta property="og:description" content="In this blog we will cover how windows process works, their structure and how we can pivot to nt-authority system or any user through WinDbg. No exploitation here, it is only to get acquainted in the environment for future exploits!" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/winint-compilation/winint-understading-processes/" /><meta property="article:section" content="winint-compilation" />
+
+
+
+  <meta itemprop="name" content="Elementary: Understanding Processes">
+  <meta itemprop="description" content="In this blog we will cover how windows process works, their structure and how we can pivot to nt-authority system or any user through WinDbg. No exploitation here, it is only to get acquainted in the environment for future exploits!">
+  <meta itemprop="wordCount" content="2514">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Elementary: Understanding Processes">
+  <meta name="twitter:description" content="In this blog we will cover how windows process works, their structure and how we can pivot to nt-authority system or any user through WinDbg. No exploitation here, it is only to get acquainted in the environment for future exploits!">
+
+    <link rel="preload" href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" as="style" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
+    <link href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" rel="stylesheet" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
+
+
+
+  <link href="/css/custom.min.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css" rel="stylesheet" integrity="sha256-47DEQpj8HBSa&#43;/TImW&#43;5JCeuQeRkm5NMpJWZG3hSuFU=" />
+
+
+  <script>
+     
+    const defaultTheme = 'system';
+
+    const setDarkTheme = () => {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+    const setLightTheme = () => {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+    }
+
+    if ("color-theme" in localStorage) {
+      localStorage.getItem("color-theme") === "dark" ? setDarkTheme() : setLightTheme();
+    } else {
+      defaultTheme === "dark" ? setDarkTheme() : setLightTheme();
+      if (defaultTheme === "system") {
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? setDarkTheme() : setLightTheme();
+      }
+    }
+  </script>
+
+  
+</head>
+<body dir="ltr"><div class="nav-container hx-sticky hx-top-0 hx-z-20 hx-w-full hx-bg-transparent print:hx-hidden">
+  <div class="nav-container-blur hx-pointer-events-none hx-absolute hx-z-[-1] hx-h-full hx-w-full hx-bg-white dark:hx-bg-dark hx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] contrast-more:hx-shadow-[0_0_0_1px_#000] dark:hx-shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] contrast-more:dark:hx-shadow-[0_0_0_1px_#fff]"></div>
+
+  <nav class="hx-mx-auto hx-flex hx-items-center hx-justify-end hx-gap-2 hx-h-16 hx-px-6 hx-max-w-[90rem]">
+    <a class="hx-flex hx-items-center hover:hx-opacity-75 ltr:hx-mr-auto rtl:hx-ml-auto" href="/">
+        <span class="hx-mr-2 hx-font-extrabold hx-inline hx-select-none" title="yoshl - IT enjoyer">yoshl - IT enjoyer</span>
+    </a><div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+<button type="button" aria-label="Menu" class="hamburger-menu -hx-mr-2 hx-rounded hx-p-2 active:hx-bg-gray-400/20 md:hx-hidden"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class="hx-mx-auto hx-flex max-w-full">
+    <div class="mobile-menu-overlay [transition:background-color_1.5s_ease] hx-fixed hx-inset-0 hx-z-10 hx-bg-black/80 dark:hx-bg-black/60 hx-hidden"></div>
+<aside class="sidebar-container hx-flex hx-flex-col print:hx-hidden md:hx-top-16 md:hx-shrink-0 md:hx-w-64 md:hx-self-start max-md:[transform:translate3d(0,-100%,0)] md:hx-hidden xl:hx-block">
+  
+  <div class="hx-px-4 hx-pt-4 md:hx-hidden">
+    <div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+  </div>
+  <div class="hextra-scrollbar hx-overflow-y-auto hx-overflow-x-hidden hx-p-4 hx-grow md:hx-h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx-flex hx-flex-col hx-gap-1 md:hx-hidden">
+      
+      
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/"
+    
+  >Chaos-Based-Encryption Saga
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-fundamentals/"
+    
+  >Pt 1 - Chaos Based Encryption applied to stegoanalysis
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-creation/"
+    
+  >Pt 2.1 - Creation your own Chaos System
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-decochators/"
+    
+  >Pt 2.2 - Decochators Pypi Package
+    </a>
+              
+            </li></ul>
+      </div></li>
+          <li class="open"><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/"
+    
+  >WinInt Compilation
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col open"><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
+    href="/winint-compilation/winint-understading-processes/"
+    
+  >Elementary: Understanding Processes
+    </a>
+  
+    <ul class='hx-flex hx-flex-col hx-gap-1 hx-relative before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] dark:before:hx-bg-neutral-800 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-pr-3 rtl:before:hx-right-0 ltr:hx-ml-3 rtl:hx-mr-3'><li>
+              <a
+                href="#getting-started"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Getting Started</a>
+            </li>
+          <li>
+              <a
+                href="#process-token-hijacking"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Process Token Hijacking</a>
+            </li>
+          <li>
+              <a
+                href="#sid-replacement"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >SID Replacement</a>
+            </li>
+          <li>
+              <a
+                href="#brief-conclusion"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >(Brief) Conclusion</a>
+            </li>
+          </ul>
+  
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/marc/"
+    
+  >Marc
+    </a>
+              
+            </li></ul>
+      </div></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/vm-reversing/"
+    
+  >Virtual Machine (Reversing x86)
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/manuallyupx/"
+    
+  >Manually Unpacking UPX | PE &amp; PE&#43; (x86/x64 Tips)
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/why2025-ctf/"
+    
+  >WHY2025 CTF | Full Forensics &#43; Reversing Bonus
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/l3akctf-2025/"
+    
+  >L3akCTF 2025 (Post Mortem) | Full Forensics
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/tjctf-2025/"
+    
+  >TJCTF 2025 | 7/8 Forensics
+    </a></li>
+    </ul>
+
+    <div class="max-xl:hx-hidden hx-h-0 hx-w-64 hx-shrink-0"></div></div>
+  
+  
+    <div class="md:hx-hidden  hx-sticky hx-bottom-0 hx-bg-white dark:hx-bg-dark hx-mx-4 hx-py-4 hx-shadow-[0_-12px_16px_#fff] hx-flex hx-items-center hx-gap-2 dark:hx-border-neutral-800 dark:hx-shadow-[0_-12px_16px_#111] contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-shadow-none hx-border-t" data-toggle-animation="show"><div class="hx-flex hx-grow hx-flex-col"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div></div></aside>
+    
+<nav class="hextra-toc hx-order-last hx-hidden hx-w-64 hx-shrink-0 xl:hx-block print:hx-hidden hx-px-4" aria-label="table of contents">
+    <div class="hextra-scrollbar hx-sticky hx-top-16 hx-overflow-y-auto hx-pr-4 hx-pt-6 hx-text-sm [hyphens:auto] hx-max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:hx--mr-4 rtl:hx--ml-4"><p class="hx-mb-4 hx-font-semibold hx-tracking-tight">On this page</p><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#getting-started">Getting Started
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#process-token-hijacking">Process Token Hijacking
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#understanding-structures">Understanding structures
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#kernel-debugging-tip">Kernel debugging Tip
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#looking-the-lowpriv-process">Looking the lowpriv process
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#gathering-ntauth-token">Gathering nt/auth token
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#patching-the-lowpriv-process">Patching the lowpriv process
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#sid-replacement">SID Replacement
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#creating-lowpriv-user">Creating lowpriv user
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#gathering-lowpriv-information">Gathering lowpriv information
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#gathering-admin-information">Gathering admin information
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#calculating-structures-offsets-for-hijack">Calculating structures offsets for hijack
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#replacing-sid-group-pointer">Replacing SID Group pointer
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#attributes-fix">Attributes fix
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#brief-conclusion">(Brief) Conclusion
+        </a>
+      </li></ul>
+      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400">
+        <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx-w-full hx-break-words hx-flex hx-min-h-[calc(100vh-var(--navbar-height))] hx-min-w-0 hx-justify-center hx-pb-8 hx-pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx-w-full hx-min-w-0 hx-max-w-6xl hx-px-6 hx-pt-4 md:hx-px-12">
+        
+  <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
+        <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
+          <a href="/winint-compilation/">WinInt Compilation</a>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">Elementary: Understanding Processes</div>
+  </div>
+
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">Elementary: Understanding Processes</h1>
+        <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"></div>
+        <div class="content">
+          <p>Before diving in windows reversing I want to acknowledge to OpenSecurityTrainig (<a href="https://p.ost2.fyi/dashboard" target="_blank" rel="noopener">ost2</a>) for their <em>free</em> classes of architecture and OS internal, please check them out, to a better understanding of this blog, at least is recommendable know of <em>Windbg</em> (Debuggers 1011-2011-3011 [in ost2]) and Windows Internals (Architecture 2821 [in ost2])</p>
+<p>I would also like to tank m2rc_ who helped me at the end of the blog with the attributes of the SID Hijacking.</p>
+<h2>Getting Started<span class="hx-absolute -hx-mt-20" id="getting-started"></span>
+    <a href="#getting-started" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>The setup we will have is the following:</p>
+<p><img src="image.png" alt="alt text" loading="lazy" /></p>
+<p>First of all you will have to enable the kernel debugging:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cmd" data-lang="cmd"><span class="line"><span class="cl">// Debuggee Machine (IP: 192.168.80.133)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Microsoft Windows [Version 10.0.19045.2965]
+</span></span><span class="line"><span class="cl"><span class="p">(</span>c<span class="p">)</span> Microsoft Corporation. All rights reserved.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">C<span class="p">:</span><span class="nl">\Windows\system32</span><span class="c1">&gt;bcdedit /debug on</span>
+</span></span><span class="line"><span class="cl">The operation completed successfully.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">C<span class="p">:</span><span class="nl">\Windows\system32</span><span class="c1">&gt;bcdedit /dbgsettings net hostip:192.168.1.160 port:50505 key:a.b.c.d</span>
+</span></span><span class="line"><span class="cl">Key=a.b.c.d</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Once through WinDbg (<em>debugger VM</em>) attach the tool with the debugge kernel:</p>
+<p><img src="image-1.png" alt="" loading="lazy" /></p>
+<p>If you can break in windbg and the custom terminal shows:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Debugger Machine (IP: 192.168.80.128)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">nt</span><span class="o">!</span><span class="nl">DbgBreakPointWithStatus</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mf">7e67</span><span class="n">a500</span> <span class="n">cc</span>              <span class="kt">int</span>     <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>We are ready to start debugging.</p>
+<blockquote>
+  <p>Remember to quit the breakpoint to be able to manipulate the debugge machine else it will not respond.</p>
+
+</blockquote>
+<h2>Process Token Hijacking<span class="hx-absolute -hx-mt-20" id="process-token-hijacking"></span>
+    <a href="#process-token-hijacking" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Starting with the most simplest way to escalate privileges in windows (in my opinion) is with a token hijacking, thus assuming there is a non-priviledge <code>cmd.exe</code> process in the debuggee:</p>
+<p><img src="image-2.png" alt="alt text" loading="lazy" /></p>
+<p>With windbg we are able to see the process and gather information about it:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Debugger Machine (IP: 192.168.80.128)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="o">!</span><span class="n">process</span> <span class="mi">0</span> <span class="mi">0</span> <span class="n">cmd</span><span class="p">.</span><span class="n">exe</span>
+</span></span><span class="line"><span class="cl"><span class="n">PROCESS</span> <span class="n">ffffdb85c57e5080</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">SessionId</span><span class="p">:</span> <span class="mi">1</span>  <span class="nl">Cid</span><span class="p">:</span> <span class="mo">015</span><span class="mi">8</span>    <span class="nl">Peb</span><span class="p">:</span> <span class="mi">72749</span><span class="n">c000</span>  <span class="nl">ParentCid</span><span class="p">:</span> <span class="mi">0</span><span class="n">d5c</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">DirBase</span><span class="p">:</span> <span class="mi">61433000</span>  <span class="nl">ObjectTable</span><span class="p">:</span> <span class="n">ffffb38e99843400</span>  <span class="nl">HandleCount</span><span class="p">:</span>  <span class="mf">74.</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">Image</span><span class="p">:</span> <span class="n">cmd</span><span class="p">.</span><span class="n">exe</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Understanding structures<span class="hx-absolute -hx-mt-20" id="understanding-structures"></span>
+    <a href="#understanding-structures" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Now, before seeing the token of the process we do a fast check of the <code>_EPROCESS</code> structure used in windows:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">//0x850 bytes (sizeof)
+</span></span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">_EPROCESS</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">_KPROCESS</span> <span class="n">Pcb</span><span class="p">;</span>                                                   <span class="c1">//0x0
+</span></span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">_EX_PUSH_LOCK</span> <span class="n">ProcessLock</span><span class="p">;</span>                                       <span class="c1">//0x2d8
+</span></span></span><span class="line"><span class="cl">    <span class="n">VOID</span><span class="o">*</span> <span class="n">UniqueProcessId</span><span class="p">;</span>                                                  <span class="c1">//0x2e0
+</span></span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">_LIST_ENTRY</span> <span class="n">ActiveProcessLinks</span><span class="p">;</span>                                  <span class="c1">//0x2e8
+</span></span></span><span class="line"><span class="cl">   <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">_EX_FAST_REF</span> <span class="n">Token</span><span class="p">;</span>                                              <span class="c1">//0x358
+</span></span></span><span class="line"><span class="cl">   <span class="c1">//...
+</span></span></span><span class="line"><span class="cl">    <span class="k">volatile</span> <span class="n">ULONGLONG</span> <span class="n">OwnerProcessId</span><span class="p">;</span>                                      <span class="c1">//0x3f0
+</span></span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">_PEB</span><span class="o">*</span> <span class="n">Peb</span><span class="p">;</span>                                                       <span class="c1">//0x3f8
+</span></span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">_MM_SESSION_SPACE</span><span class="o">*</span> <span class="n">Session</span><span class="p">;</span>                                      <span class="c1">//0x400
+</span></span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="p">};</span> 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>If you want to see the entire structure please check: <a href="https://www.vergiliusproject.com/kernels/x64/windows-10/1809/_EPROCESS" target="_blank" rel="noopener">https://www.vergiliusproject.com/kernels/x64/windows-10/1809/_EPROCESS</a> (verify your windows version), in this scenario, we will focus on the structure <code>_EX_FAST_REF Token; //0x358</code>, which contains the real value of the token:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">//0x8 bytes (sizeof)
+</span></span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">_EX_FAST_REF</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">union</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">VOID</span><span class="o">*</span> <span class="n">Object</span><span class="p">;</span>                                                       <span class="c1">//0x0
+</span></span></span><span class="line"><span class="cl">        <span class="n">ULONGLONG</span> <span class="nl">RefCnt</span><span class="p">:</span><span class="mi">4</span><span class="p">;</span>                                                 <span class="c1">//0x0
+</span></span></span><span class="line"><span class="cl">        <span class="n">ULONGLONG</span> <span class="n">Value</span><span class="p">;</span>                                                    <span class="c1">//0x0
+</span></span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span> 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h4>Kernel debugging Tip<span class="hx-absolute -hx-mt-20" id="kernel-debugging-tip"></span>
+    <a href="#kernel-debugging-tip" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>To use fewer bytes in memory, the kernel structure usually maintains hidden information in the same value, here is an example in the process structure, we have the address: <code>0xffffdb85c57e5080</code> meaning the process location, but if you want to see the structure <code>_EX_FAST_REF</code> for the Token value you add to the address the offset of the structure, in this case <code>0x358</code>:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="nf">hex</span><span class="p">(</span><span class="mh">0xffffdb85c57e5080</span> <span class="o">+</span> <span class="mh">0x358</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="err">&#39;</span><span class="mh">0xffffdb85c57e53d8</span><span class="err">&#39;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Also, in this structure: <code>_EX_FAST_REF</code>, the last 4 bits do not form part of the token value, because the RefCnt aligment are of 4 bits.</p>
+<h3>Looking the lowpriv process<span class="hx-absolute -hx-mt-20" id="looking-the-lowpriv-process"></span>
+    <a href="#looking-the-lowpriv-process" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>We obtain &lsquo;0xffffdb85c57e53d8&rsquo;, theorically this is the information we wanted, so lets check it in windbg, one of the main favorable points of this tool is that has the offsets and structures loaded (usually from the machine symbols) so we will see all more clearly:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Debugger Machine (IP: 192.168.80.128)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dt</span> <span class="n">nt</span><span class="o">!</span><span class="n">_EPROCESS</span> <span class="n">ffffdb85c57e5080</span> <span class="n">TOKEN</span>
+</span></span><span class="line"><span class="cl">   <span class="o">+</span><span class="mh">0x358</span> <span class="nl">Token</span> <span class="p">:</span> <span class="n">_EX_FAST_REF</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Without getting further in windbg explanation we are reading the address the last command return us as a <code>nt!_EPROCESS</code> structure, filtring it to the <code>TOKEN</code> structure, now if we insert the address calculated before:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Debugger Machine (IP: 192.168.80.128)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dt</span> <span class="n">nt</span><span class="o">!</span><span class="n">_EX_FAST_REF</span> <span class="mh">0xffffdb85c57e53d8</span> 
+</span></span><span class="line"><span class="cl">   <span class="o">+</span><span class="mh">0x000</span> <span class="nl">Object</span>           <span class="p">:</span> <span class="mh">0xffffb38e</span><span class="err">`</span><span class="mi">918</span><span class="n">a38f9</span> <span class="n">Void</span>
+</span></span><span class="line"><span class="cl">   <span class="o">+</span><span class="mh">0x000</span> <span class="nl">RefCnt</span>           <span class="p">:</span> <span class="mi">0</span><span class="n">y1001</span>
+</span></span><span class="line"><span class="cl">   <span class="o">+</span><span class="mh">0x000</span> <span class="nl">Value</span>            <span class="p">:</span> <span class="mh">0xffffb38e</span><span class="err">`</span><span class="mi">918</span><span class="n">a38f9</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>We obtain the raw token value, anyways this is not to common in windbg because thanks to the user interface you can be redirect to the structure in a beautiful way:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Debugger Machine (IP: 192.168.80.128)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dx</span> <span class="o">-</span><span class="n">id</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">ffffdb85c57e5080</span> <span class="o">-</span><span class="nf">r1</span> <span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">ntkrnlmp</span><span class="o">!</span><span class="n">_EX_FAST_REF</span> <span class="o">*</span><span class="p">)</span><span class="mh">0xffffdb85c57e53d8</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">ntkrnlmp</span><span class="o">!</span><span class="n">_EX_FAST_REF</span> <span class="o">*</span><span class="p">)</span><span class="mh">0xffffdb85c57e53d8</span><span class="p">))</span>                 <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="n">_EX_FAST_REF</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Object</span>           <span class="p">:</span> <span class="mh">0xffffb38e918a38f8</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">void</span> <span class="o">*</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span> <span class="p">(</span> <span class="mi">3</span><span class="o">:</span> <span class="mi">0</span><span class="p">)]</span> <span class="nl">RefCnt</span>           <span class="p">:</span> <span class="mh">0x9</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kr">__int64</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Value</span>            <span class="p">:</span> <span class="mh">0xffffb38e918a38f8</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kr">__int64</span><span class="p">]</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Continuing with the token hijacking, take note of the <code>ieuser</code> token and the offset is located from the process address:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>// Our Notebook
+
+Process Target (cmd.exe : ieuser) 
+    -&gt; Process: 0xffffdb85c57e5080
+    -&gt; Token offset (const): &#43;0x358
+    -&gt; Token value: 0xffffb38e918a38f8  &amp; ~0xF // As we see in RefCnt:4</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Gathering nt/auth token<span class="hx-absolute -hx-mt-20" id="gathering-ntauth-token"></span>
+    <a href="#gathering-ntauth-token" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>For this method the attacker needs a second token to hijack, in this case we will hijack the <em>NT AUTHORITY/SYSTEM</em> from the process <code>System</code>, now a bit faster:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Debugger Machine (IP: 192.168.80.128)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="o">!</span><span class="n">process</span> <span class="mi">0</span> <span class="mi">0</span> <span class="n">System</span>
+</span></span><span class="line"><span class="cl"><span class="n">PROCESS</span> <span class="n">ffffdb85c0c69280</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">SessionId</span><span class="p">:</span> <span class="n">none</span>  <span class="nl">Cid</span><span class="p">:</span> <span class="mo">0004</span>    <span class="nl">Peb</span><span class="p">:</span> <span class="mo">00000000</span>  <span class="nl">ParentCid</span><span class="p">:</span> <span class="mo">0000</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">DirBase</span><span class="p">:</span> <span class="mo">001</span><span class="n">aa000</span>  <span class="nl">ObjectTable</span><span class="p">:</span> <span class="n">ffffb38e8ce04ac0</span>  <span class="nl">HandleCount</span><span class="p">:</span> <span class="mf">2578.</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">Image</span><span class="p">:</span> <span class="n">System</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dt</span> <span class="n">nt</span><span class="o">!</span><span class="n">_EPROCESS</span> <span class="n">ffffdb85c0c69280</span> <span class="n">TOKEN</span>
+</span></span><span class="line"><span class="cl">   <span class="o">+</span><span class="mh">0x358</span> <span class="nl">Token</span> <span class="p">:</span> <span class="n">_EX_FAST_REF</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dx</span> <span class="o">-</span><span class="n">id</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">ffffdb85c0c69280</span> <span class="o">-</span><span class="nf">r1</span> <span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">ntkrnlmp</span><span class="o">!</span><span class="n">_EX_FAST_REF</span> <span class="o">*</span><span class="p">)</span><span class="mh">0xffffdb85c0c695d8</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">ntkrnlmp</span><span class="o">!</span><span class="n">_EX_FAST_REF</span> <span class="o">*</span><span class="p">)</span><span class="mh">0xffffdb85c0c695d8</span><span class="p">))</span>                 <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="n">_EX_FAST_REF</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Object</span>           <span class="p">:</span> <span class="mh">0xffffb38e8ce06047</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">void</span> <span class="o">*</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span> <span class="p">(</span> <span class="mi">3</span><span class="o">:</span> <span class="mi">0</span><span class="p">)]</span> <span class="nl">RefCnt</span>           <span class="p">:</span> <span class="mh">0x7</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kr">__int64</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Value</span>            <span class="p">:</span> <span class="mh">0xffffb38e8ce06047</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kr">__int64</span><span class="p">]</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Update your notebook:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>// Our Notebook
+
+Process Target (cmd.exe : ieuser) 
+    -&gt; Process: 0xffffdb85c57e5080
+    -&gt; Token offset (const): &#43;0x358
+    -&gt; Token value: 0xffffb38e918a38f8 &amp; ~0xF
+
+Process Victim (System : nt sys)
+    -&gt; Process: 0xffffdb85c0c69280 
+    -&gt; Token value: 0xffffb38e8ce06047 &amp; ~0xF = 0xffffb38e8ce06040</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Patching the lowpriv process<span class="hx-absolute -hx-mt-20" id="patching-the-lowpriv-process"></span>
+    <a href="#patching-the-lowpriv-process" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Patch the token from <code>cmd.exe</code> to point to the System one:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Debugger Machine (IP: 192.168.80.128)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="mh">0xffffdb85c57e5080</span><span class="o">+</span><span class="mi">358</span> <span class="n">l1</span> <span class="c1">// Reading the cmd.exe token
+</span></span></span><span class="line"><span class="cl"><span class="n">ffffdb85</span><span class="err">`</span><span class="n">c57e53d8</span>  <span class="n">ffffb38e</span><span class="err">`</span><span class="mi">918</span><span class="n">a38f8</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">eq</span> <span class="n">ffffdb85c57e5080</span><span class="o">+</span><span class="mi">358</span> <span class="mh">0xffffb38e8ce060407</span> <span class="c1">// Hijacking cmd.exe token with the System token
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="mh">0xffffdb85c57e5080</span><span class="o">+</span><span class="mi">358</span> <span class="n">l1</span> <span class="c1">// Verifying the new cmd.exe token
+</span></span></span><span class="line"><span class="cl"><span class="n">ffffdb85</span><span class="err">`</span><span class="n">c57e53d8</span>  <span class="mh">0xffffb38</span><span class="err">`</span><span class="n">e8ce06040</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Going to the debuggee machine, Since the token is replaced in-place, the already running cmd.exe immediately reflects the new security context.</p>
+<p><img src="image-3.png" alt="alt text" loading="lazy" /></p>
+<p>As I said is a very simple way to escalate privileges but is not for getting X user or X priv, is only to understand how windows structures work and it prepare you for the future exploit or program.</p>
+<h2>SID Replacement<span class="hx-absolute -hx-mt-20" id="sid-replacement"></span>
+    <a href="#sid-replacement" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>This method is not patch the owner SID process to be Local System, that will crash, also know as a <em>deadlock</em>, replacing the user SID directly causes token incosistency and system instability, getting you a blue screen or a deadlock. The User SID is not just an identity, as the token, it is tied to the authentication context of the token.</p>
+<p>Thus, the SID Replacement can be consider a Group SID replacemente or Integrity SID replacement. Remember, for this you need to create a low priv user, because ieuser is in the Admin Group, so he doesnt need to enter the password or any auth to execute as admin,</p>
+<p>On ther other hand, we need to escalate the integrity level (for now to forwards&quot; <em>IL</em>) toa void the MIC block before seeing the Access Control List (<em>ACL</em>), this is because our process can be in a <em>Medium IL</em> and the resource we use, for example: <code>net.exe</code> is on a <em>High IL</em>. This block process is mainly from the User
+Account Contorl (<em>UAC</em> in forwards)</p>
+<h3>Creating lowpriv user<span class="hx-absolute -hx-mt-20" id="creating-lowpriv-user"></span>
+    <a href="#creating-lowpriv-user" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Remember for this attack do not be in a administrator account:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>// Debuggee Machine (IP: 192.168.80.128)</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>As the Token Hijacking, first of all we will create the cmd process and gather a bit of information, also verify that is not in any admin lcoal group with:
+<img src="image-4.png" alt="" loading="lazy" /></p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Debugger Machine (IP: 192.168.80.133)
+</span></span></span><span class="line"><span class="cl"><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Windows</span><span class="err">\</span><span class="n">System32</span><span class="o">&gt;</span> <span class="n">net</span> <span class="n">user</span> <span class="n">lowpriv</span> <span class="n">qwerty123</span> <span class="o">/</span><span class="n">add</span>
+</span></span><span class="line"><span class="cl"><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Windows</span><span class="err">\</span><span class="n">System32</span><span class="o">&gt;</span> <span class="n">net</span> <span class="n">user</span> <span class="n">lowpriv</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Gathering lowpriv information<span class="hx-absolute -hx-mt-20" id="gathering-lowpriv-information"></span>
+    <a href="#gathering-lowpriv-information" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>0: kd&gt; !process 0 0 cmd.exe
+PROCESS ffffde889880c540
+    SessionId: 2  Cid: 24f8    Peb: 141d43f000  ParentCid: 2224
+    DirBase: 116678000  ObjectTable: ffff8001cf253640  HandleCount:  74.
+    Image: cmd.exe
+
+0: kd&gt; !process ffffde889880c540 1
+PROCESS ffffde889880c540
+    SessionId: 2  Cid: 24f8    Peb: 141d43f000  ParentCid: 2224
+    DirBase: 116678000  ObjectTable: ffff8001cf253640  HandleCount:  74.
+    Image: cmd.exe
+    VadRoot ffffde8898b0cee0 Vads 34 Clone 0 Private 196. Modified 0. Locked 8.
+    DeviceMap ffff8001cead5340
+    Token                             ffff8001ceec68c0
+    ElapsedTime                       06:34:34.306
+    UserTime                          00:00:00.000
+    KernelTime                        00:00:00.000
+    QuotaPoolUsage[PagedPool]         42720
+    QuotaPoolUsage[NonPagedPool]      5064
+    Working Set Sizes (now,min,max)  (1000, 50, 345) (4000KB, 200KB, 1380KB)
+    PeakWorkingSetSize                1027
+    VirtualSize                       2101303 Mb
+    PeakVirtualSize                   2101306 Mb
+    PageFaultCount                    1281
+    MemoryPriority                    BACKGROUND
+    BasePriority                      8
+    CommitCharge                      592
+    
+0: kd&gt; !token ffff8001ceec68c0
+_TOKEN 0xffff8001ceec68c0
+TS Session ID: 0x2
+User: S-1-5-21-321011808-3761883066-353627080-1003
+User Groups: 
+ 00 S-1-5-21-321011808-3761883066-353627080-513
+    Attributes - Mandatory Default Enabled 
+ 01 S-1-1-0
+    Attributes - Mandatory Default Enabled 
+ 02 S-1-5-32-545
+    Attributes - Mandatory Default Enabled 
+ 03 S-1-5-4
+    Attributes - Mandatory Default Enabled 
+ 04 S-1-2-1
+    Attributes - Mandatory Default Enabled 
+ 05 S-1-5-11
+    Attributes - Mandatory Default Enabled 
+ 06 S-1-5-15
+    Attributes - Mandatory Default Enabled 
+ 07 S-1-5-113
+    Attributes - Mandatory Default Enabled 
+ 08 S-1-5-5-0-4807673
+    Attributes - Mandatory Default Enabled LogonId 
+ 09 S-1-2-0
+    Attributes - Mandatory Default Enabled 
+ 10 S-1-5-64-10
+    Attributes - Mandatory Default Enabled 
+ 11 S-1-16-8192
+    Attributes - GroupIntegrity GroupIntegrityEnabled 
+Primary Group: S-1-5-21-321011808-3761883066-353627080-513
+Privs: 
+ 19 0x000000013 SeShutdownPrivilege               Attributes - 
+ 23 0x000000017 SeChangeNotifyPrivilege           Attributes - Enabled Default 
+ 25 0x000000019 SeUndockPrivilege                 Attributes - 
+ 33 0x000000021 SeIncreaseWorkingSetPrivilege     Attributes - 
+ 34 0x000000022 SeTimeZonePrivilege               Attributes -
+...</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>In all type of tokens there is a structure pointer: <code>_SID_AND_ATTRIBUTES* RestrictedSids</code> in the offset: <code>0xa0</code>, please check there is no protection or any block into the admin hash you will see forward.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">//0x10 bytes (sizeof)
+</span></span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">_SID_AND_ATTRIBUTES</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">VOID</span><span class="o">*</span> <span class="n">Sid</span><span class="p">;</span>                                                              <span class="c1">//0x0
+</span></span></span><span class="line"><span class="cl">    <span class="n">ULONG</span> <span class="n">Attributes</span><span class="p">;</span>                                                       <span class="c1">//0x8
+</span></span></span><span class="line"><span class="cl"><span class="p">};</span> 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Gathering admin information<span class="hx-absolute -hx-mt-20" id="gathering-admin-information"></span>
+    <a href="#gathering-admin-information" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>While reading: <a href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers</a> you can get the conclusion the SID of an authority system is <code>S-1-5-18</code>, anyways you can obtain it with windbg:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="o">!</span><span class="n">process</span> <span class="n">ffffde888f46d200</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl"><span class="n">PROCESS</span> <span class="n">ffffde888f46d200</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">SessionId</span><span class="p">:</span> <span class="n">none</span>  <span class="nl">Cid</span><span class="p">:</span> <span class="mo">0004</span>    <span class="nl">Peb</span><span class="p">:</span> <span class="mo">00000000</span>  <span class="nl">ParentCid</span><span class="p">:</span> <span class="mo">0000</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">DirBase</span><span class="p">:</span> <span class="mo">001</span><span class="n">aa000</span>  <span class="nl">ObjectTable</span><span class="p">:</span> <span class="n">ffff8001c4404ac0</span>  <span class="nl">HandleCount</span><span class="p">:</span> <span class="mf">3737.</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">Image</span><span class="p">:</span> <span class="n">System</span>
+</span></span><span class="line"><span class="cl">    <span class="n">VadRoot</span> <span class="n">ffffde888f4702e0</span> <span class="n">Vads</span> <span class="mi">8</span> <span class="n">Clone</span> <span class="mi">0</span> <span class="n">Private</span> <span class="mf">22.</span> <span class="n">Modified</span> <span class="mf">71267.</span> <span class="n">Locked</span> <span class="mf">0.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DeviceMap</span> <span class="n">ffff8001c4415900</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Token</span>                             <span class="n">ffff8001c4406040</span>
+</span></span><span class="line"><span class="cl"><span class="p">...</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="o">!</span><span class="n">token</span> <span class="n">ffff8001c4406040</span>
+</span></span><span class="line"><span class="cl"><span class="n">_TOKEN</span> <span class="mh">0xffff8001c4406040</span>
+</span></span><span class="line"><span class="cl"><span class="n">TS</span> <span class="n">Session</span> <span class="nl">ID</span><span class="p">:</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="nl">User</span><span class="p">:</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">18</span>
+</span></span><span class="line"><span class="cl"><span class="n">User</span> <span class="nl">Groups</span><span class="p">:</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">00</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="mi">544</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Default</span> <span class="n">Enabled</span> <span class="n">Owner</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">01</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">02</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">11</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">03</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">16</span><span class="o">-</span><span class="mi">16384</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">GroupIntegrity</span> <span class="n">GroupIntegrityEnabled</span> 
+</span></span><span class="line"><span class="cl"><span class="n">Primary</span> <span class="nl">Group</span><span class="p">:</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">18</span>
+</span></span><span class="line"><span class="cl"><span class="nl">Privs</span><span class="p">:</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">02</span> <span class="mh">0x000000002</span> <span class="n">SeCreateTokenPrivilege</span>            <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">03</span> <span class="mh">0x000000003</span> <span class="n">SeAssignPrimaryTokenPrivilege</span>     <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">04</span> <span class="mh">0x000000004</span> <span class="n">SeLockMemoryPrivilege</span>             <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">05</span> <span class="mh">0x000000005</span> <span class="n">SeIncreaseQuotaPrivilege</span>          <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">07</span> <span class="mh">0x000000007</span> <span class="n">SeTcbPrivilege</span>                    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">08</span> <span class="mh">0x000000008</span> <span class="n">SeSecurityPrivilege</span>               <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">09</span> <span class="mh">0x000000009</span> <span class="n">SeTakeOwnershipPrivilege</span>          <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">10</span> <span class="mh">0x00000000a</span> <span class="n">SeLoadDriverPrivilege</span>             <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">11</span> <span class="mh">0x00000000b</span> <span class="n">SeSystemProfilePrivilege</span>          <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">12</span> <span class="mh">0x00000000c</span> <span class="n">SeSystemtimePrivilege</span>             <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">13</span> <span class="mh">0x00000000d</span> <span class="n">SeProfileSingleProcessPrivilege</span>   <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">14</span> <span class="mh">0x00000000e</span> <span class="n">SeIncreaseBasePriorityPrivilege</span>   <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">15</span> <span class="mh">0x00000000f</span> <span class="n">SeCreatePagefilePrivilege</span>         <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">16</span> <span class="mh">0x000000010</span> <span class="n">SeCreatePermanentPrivilege</span>        <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">17</span> <span class="mh">0x000000011</span> <span class="n">SeBackupPrivilege</span>                 <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">18</span> <span class="mh">0x000000012</span> <span class="n">SeRestorePrivilege</span>                <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">19</span> <span class="mh">0x000000013</span> <span class="n">SeShutdownPrivilege</span>               <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">20</span> <span class="mh">0x000000014</span> <span class="n">SeDebugPrivilege</span>                  <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">21</span> <span class="mh">0x000000015</span> <span class="n">SeAuditPrivilege</span>                  <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">22</span> <span class="mh">0x000000016</span> <span class="n">SeSystemEnvironmentPrivilege</span>      <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">23</span> <span class="mh">0x000000017</span> <span class="n">SeChangeNotifyPrivilege</span>           <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">25</span> <span class="mh">0x000000019</span> <span class="n">SeUndockPrivilege</span>                 <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">28</span> <span class="mh">0x00000001c</span> <span class="n">SeManageVolumePrivilege</span>           <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">29</span> <span class="mh">0x00000001d</span> <span class="n">SeImpersonatePrivilege</span>            <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">30</span> <span class="mh">0x00000001e</span> <span class="n">SeCreateGlobalPrivilege</span>           <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">31</span> <span class="mh">0x00000001f</span> <span class="n">SeTrustedCredManAccessPrivilege</span>   <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">32</span> <span class="mh">0x000000020</span> <span class="n">SeRelabelPrivilege</span>                <span class="n">Attributes</span> <span class="o">-</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">33</span> <span class="mh">0x000000021</span> <span class="n">SeIncreaseWorkingSetPrivilege</span>     <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">34</span> <span class="mh">0x000000022</span> <span class="n">SeTimeZonePrivilege</span>               <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">35</span> <span class="mh">0x000000023</span> <span class="n">SeCreateSymbolicLinkPrivilege</span>     <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span><span class="line"><span class="cl"> <span class="mi">36</span> <span class="mh">0x000000024</span> <span class="n">SeDelegateSessionUserImpersonatePrivilege</span>  <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Enabled</span> <span class="n">Default</span> 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Also you can reach out this microsoft blog for a better understanding of how SID is programmed: <a href="https://devblogs.microsoft.com/oldnewthing/20040315-00/?p=40253" target="_blank" rel="noopener">https://devblogs.microsoft.com/oldnewthing/20040315-00/?p=40253</a>
+In this case, we will focus on SID: <code>S-1-5-32-544</code> as is the BUILTIN\Administrator, it doesn&rsquo;t matter which SID you choose:</p>
+<p><img src="image-6.png" alt="alt text" loading="lazy" /></p>
+<p>That terminal is when you <code>Run as Administrator</code> after putting the password, here is the diff:</p>
+<p><img src="image-7.png" alt="" loading="lazy" /></p>
+<h3>Calculating structures offsets for hijack<span class="hx-absolute -hx-mt-20" id="calculating-structures-offsets-for-hijack"></span>
+    <a href="#calculating-structures-offsets-for-hijack" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Being the priv esc token: <code>ffff8001cf1af900</code>, we can calculate the offset of the SID we want: UserAndGroups[3].</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="o">!</span><span class="n">token</span> <span class="n">ffff8001cf1af900</span>
+</span></span><span class="line"><span class="cl"><span class="n">_TOKEN</span> <span class="mh">0xffff8001cf1af900</span>
+</span></span><span class="line"><span class="cl"><span class="n">TS</span> <span class="n">Session</span> <span class="nl">ID</span><span class="p">:</span> <span class="mh">0x2</span>
+</span></span><span class="line"><span class="cl"><span class="nl">User</span><span class="p">:</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">21</span><span class="o">-</span><span class="mi">321011808</span><span class="o">-</span><span class="mi">3761883066</span><span class="o">-</span><span class="mi">353627080</span><span class="o">-</span><span class="mi">1000</span>
+</span></span><span class="line"><span class="cl"><span class="n">User</span> <span class="nl">Groups</span><span class="p">:</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">00</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">21</span><span class="o">-</span><span class="mi">321011808</span><span class="o">-</span><span class="mi">3761883066</span><span class="o">-</span><span class="mi">353627080</span><span class="o">-</span><span class="mi">513</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">01</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">02</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">114</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> 
+</span></span><span class="line"><span class="cl"> <span class="mo">03</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="mi">544</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> <span class="n">Owner</span> 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Again, if we check the offset of the struct we get: <code>+0x098</code>:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dt</span> <span class="n">nt</span><span class="o">!</span><span class="n">_TOKEN</span> <span class="n">ffff8001cf1af900</span> <span class="n">UserAndGroups</span>
+</span></span><span class="line"><span class="cl">   <span class="o">+</span><span class="mh">0x098</span> <span class="nl">UserAndGroups</span> <span class="p">:</span> <span class="mh">0xffff8001</span><span class="err">`</span><span class="n">cf1afd90</span> <span class="n">_SID_AND_ATTRIBUTES</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dx</span> <span class="o">-</span><span class="n">id</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">ffffde888f46d200</span> <span class="o">-</span><span class="nf">r1</span> <span class="p">((</span><span class="n">ntkrnlmp</span><span class="o">!</span><span class="n">_SID_AND_ATTRIBUTES</span> <span class="o">*</span><span class="p">)</span><span class="mh">0xffff8001cf1afd90</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">((</span><span class="n">ntkrnlmp</span><span class="o">!</span><span class="n">_SID_AND_ATTRIBUTES</span> <span class="o">*</span><span class="p">)</span><span class="mh">0xffff8001cf1afd90</span><span class="p">)</span>                 <span class="o">:</span> <span class="mh">0xffff8001cf1afd90</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="n">_SID_AND_ATTRIBUTES</span> <span class="o">*</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Sid</span>              <span class="p">:</span> <span class="mh">0xffff8001cf1afe80</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">void</span> <span class="o">*</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x008</span><span class="p">]</span> <span class="nl">Attributes</span>       <span class="p">:</span> <span class="mh">0x0</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="nf">dx</span> <span class="p">((</span><span class="n">nt</span><span class="o">!</span><span class="n">_TOKEN</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffff8001cf1af900</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">UserAndGroups</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">((</span><span class="n">nt</span><span class="o">!</span><span class="n">_TOKEN</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffff8001cf1af900</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">UserAndGroups</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>                 <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="n">_SID_AND_ATTRIBUTES</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Sid</span>              <span class="p">:</span> <span class="mh">0xffff8001cf1afec4</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">void</span> <span class="o">*</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x008</span><span class="p">]</span> <span class="nl">Attributes</span>       <span class="p">:</span> <span class="mh">0x7</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">]</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Once the information recopilated at the moment in your notebook:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>process -&gt; token -&gt; sid offset -&gt; sid value
+
+(lowpriv) ffffde889880c540 -&gt; ffff8001ceec68c0 -&gt; ?? -&gt; ??
+S-1-5-15 -&gt; To change
+
+(admin) ffffde8898a71080 -&gt; ffff8001cf1af900 -&gt; 03-&gt; 0xffff8001cf1afec4 
+S-1-5-32-544 -&gt; To hijack</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Inside the lowpric token we found &ldquo;This Organization&rdquo;, uncommon to see, not primary for the system</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mo">06</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">15</span>
+</span></span><span class="line"><span class="cl">   <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>So, the objetive is to reemplaze This Organization (S-1-5-15) to Administrators (S-1-5-32-544), we finish the previuos table:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="nf">dx</span> <span class="p">((</span><span class="n">nt</span><span class="o">!</span><span class="n">_TOKEN</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffff8001ceec68c0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">UserAndGroups</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">((</span><span class="n">nt</span><span class="o">!</span><span class="n">_TOKEN</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffff8001ceec68c0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">UserAndGroups</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>                 <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="n">_SID_AND_ATTRIBUTES</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Sid</span>              <span class="p">:</span> <span class="mh">0xffff8001ceec6e8c</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">void</span> <span class="o">*</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x008</span><span class="p">]</span> <span class="nl">Attributes</span>       <span class="p">:</span> <span class="mh">0x7</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">]</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="p">(</span><span class="n">lowpriv</span><span class="p">)</span> <span class="n">ffffde889880c540</span> <span class="o">-&gt;</span> <span class="n">ffff8001ceec68c0</span> <span class="o">-&gt;</span> <span class="mo">06</span> <span class="o">-&gt;</span> <span class="mh">0xffff8001ceec6e8c</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Replacing SID Group pointer<span class="hx-absolute -hx-mt-20" id="replacing-sid-group-pointer"></span>
+    <a href="#replacing-sid-group-pointer" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Now, its moment to calculate manually for be able to use <code>eq</code> to remplaze de SID, as we know the <code>UserAndGroups</code> structure has a <a href="https://www.vergiliusproject.com/kernels/x64/windows-10/1809/_SID_AND_ATTRIBUTES" target="_blank" rel="noopener">sizeof</a>: 0x10 bytes, as the S-1-5-15 is on index 6 so 0x10*6 + de SID address:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="mh">0xffff8001ceec68c0</span><span class="o">+</span><span class="mh">0x98</span> <span class="n">l1</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6958</span>  <span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6d50</span> <span class="c1">// SID Address
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6d50</span><span class="o">+</span><span class="mi">60</span> <span class="n">l1</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6db0</span>  <span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6e8c</span> <span class="c1">// SID Value
+</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>And we hijack the value:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6d50</span><span class="o">+</span><span class="mi">60</span> <span class="n">l1</span> <span class="c1">// Read again haha
+</span></span></span><span class="line"><span class="cl"><span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6db0</span>  <span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6e8c</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">eq</span> <span class="n">ffff8001ceec6d50</span><span class="o">+</span><span class="mi">60</span> <span class="n">ffff8001</span><span class="err">`</span><span class="n">cf1afec4</span> <span class="c1">// Hijack the SID
+</span></span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">eb</span> <span class="n">ffff8001ceec6d50</span><span class="o">+</span><span class="mi">60</span><span class="o">+</span><span class="mh">0x8</span> <span class="n">f</span> <span class="c1">// Change the attribue value
+</span></span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6d50</span><span class="o">+</span><span class="mi">60</span> <span class="n">l1</span> <span class="c1">// Check the new SID
+</span></span></span><span class="line"><span class="cl"><span class="n">ffff8001</span><span class="err">`</span><span class="n">ceec6db0</span>  <span class="n">ffff8001</span><span class="err">`</span><span class="n">cf1afec4</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h4>Attributes fix<span class="hx-absolute -hx-mt-20" id="attributes-fix"></span>
+    <a href="#attributes-fix" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>If you dont change the attribute value from 0x7 to 0xf, for being group owner in the <code>!token</code> wont appear any change. For more information:</p>
+<p><a href="https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-token_groups" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-token_groups</a></p>
+<p>Now, if the user tries to do an administration action, such as write in the C:/Windows/ folder, he will be able to do it, without restriction.</p>
+<p><img src="image-9.png" alt="" loading="lazy" /></p>
+<p>Despite all, binaries like: whoami wont be recognized by the shell and if you try to execute it with the full path it will crash the OS. One theory is that it is the relationship between the user and the process token, causing a mismatch that leads to the crash, but surely this is not even close to what is really happening.</p>
+<h2>(Brief) Conclusion<span class="hx-absolute -hx-mt-20" id="brief-conclusion"></span>
+    <a href="#brief-conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>The section shown below is not directly related to the sections of the entire blog.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="mh">0xffffb305cb1e9060</span><span class="o">+</span><span class="mh">0x98</span> <span class="n">l1</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e90f8</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e94f0</span>
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e94f0</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e94f0</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95c0</span> <span class="mf">00005f</span><span class="n">ec</span><span class="err">`</span><span class="mo">00000000</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9500</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95dc</span> <span class="mo">00005</span><span class="n">ab6</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9510</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95f8</span> <span class="mo">000</span><span class="n">a8000</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9520</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9604</span> <span class="mo">0000000</span><span class="n">c</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9530</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9614</span> <span class="mo">00005434</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9540</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9620</span> <span class="mo">000</span><span class="n">ad000</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9550</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e962c</span> <span class="mo">0000000</span><span class="n">c</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9560</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9638</span> <span class="mi">5</span><span class="n">ae85a67</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">eq</span> <span class="mh">0xffffb305</span><span class="err">`</span><span class="n">cb1e9520</span> <span class="mh">0xffffb305cb23d630</span>
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">eb</span> <span class="mh">0xffffb305</span><span class="err">`</span><span class="n">cb1e9520</span><span class="o">+</span><span class="mh">0x8</span> <span class="mh">0xf</span>
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e94f0</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e94f0</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95c0</span> <span class="mf">00005f</span><span class="n">ec</span><span class="err">`</span><span class="mo">00000000</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9500</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95dc</span> <span class="mo">00005</span><span class="n">ab6</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9510</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95f8</span> <span class="mo">000</span><span class="n">a8000</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9520</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb23d630</span> <span class="mo">0000000</span><span class="n">c</span><span class="err">`</span><span class="mf">0000000f</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9530</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9614</span> <span class="mo">00005434</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9540</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9620</span> <span class="mo">000</span><span class="n">ad000</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9550</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e962c</span> <span class="mo">0000000</span><span class="n">c</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9560</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9638</span> <span class="mi">5</span><span class="n">ae85a67</span><span class="err">`</span><span class="mo">00000007</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nl">lowpriv</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="o">-</span> <span class="nl">TOKEN</span><span class="p">:</span> <span class="mh">0xffffb305cb1e9060</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="mo">02</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="mi">545</span> <span class="p">(</span><span class="nl">Alias</span><span class="p">:</span> <span class="n">BUILTIN</span><span class="err">\</span><span class="n">Users</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="nf">dx</span> <span class="p">((</span><span class="n">nt</span><span class="o">!</span><span class="n">_TOKEN</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffb305cb1e9060</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">UserAndGroups</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Sid</span>              <span class="p">:</span> <span class="mh">0xffffb305cb1e9604</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">void</span> <span class="o">*</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x008</span><span class="p">]</span> <span class="nl">Attributes</span>       <span class="p">:</span> <span class="mh">0x7</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e94f0</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e94f0</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95c0</span> <span class="mf">00005f</span><span class="n">ec</span><span class="err">`</span><span class="mo">00000000</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9500</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95dc</span> <span class="mo">00005</span><span class="n">ab6</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9510</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e95f8</span> <span class="mo">000</span><span class="n">a8000</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9520</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9604</span> <span class="mo">0000000</span><span class="n">c</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9530</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9614</span> <span class="mo">00005434</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9540</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9620</span> <span class="mo">000</span><span class="n">ad000</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9550</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e962c</span> <span class="mo">0000000</span><span class="n">c</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9560</span>  <span class="n">ffffb305</span><span class="err">`</span><span class="n">cb1e9638</span> <span class="mi">5</span><span class="n">ae85a67</span><span class="err">`</span><span class="mo">00000007</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">admin</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="o">-</span> <span class="nl">TOKEN</span><span class="p">:</span> <span class="mh">0xffffb305cb23d060</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl">    <span class="mo">03</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="mi">544</span> <span class="p">(</span><span class="nl">Alias</span><span class="p">:</span> <span class="n">BUILTIN</span><span class="err">\</span><span class="n">Administrators</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Attributes</span> <span class="o">-</span> <span class="n">Mandatory</span> <span class="n">Default</span> <span class="n">Enabled</span> <span class="n">Owner</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="nf">dx</span> <span class="p">((</span><span class="n">nt</span><span class="o">!</span><span class="n">_TOKEN</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffb305cb23d060</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">UserAndGroups</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x000</span><span class="p">]</span> <span class="nl">Sid</span>              <span class="p">:</span> <span class="mh">0xffffb305cb23d630</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">void</span> <span class="o">*</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">+</span><span class="mh">0x008</span><span class="p">]</span> <span class="nl">Attributes</span>       <span class="p">:</span> <span class="mh">0xf</span> <span class="p">[</span><span class="nl">Type</span><span class="p">:</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">]</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>I hope you enjoyed the write-up. :)</p>
+<p>До скорого.</p>
+
+        </div><div class="hx-mt-16"></div><div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
+        href="/winint-compilation/marc/"
+        title="Marc"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-pr-4 rtl:hx-pl-4"
+      ><svg class="hx-inline hx-h-5 hx-shrink-0 ltr:hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>Marc</a></div></main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx-bg-gray-100 hx-pb-[env(safe-area-inset-bottom)] dark:hx-bg-neutral-900 print:hx-bg-transparent"><div class="hx-mx-auto hx-flex hx-gap-2 hx-py-2 hx-px-4 hx-max-w-screen-xl"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div><hr class="dark:hx-border-neutral-800" /><div
+      class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
+    ></div></footer>
+    
+    <script defer src="/js/main.min.0942239592f0795dc7213dd1057fd229d7edc19c0ef1a285396eb292d9ca9842.js" integrity="sha256-CUIjlZLweV3HIT3RBX/SKdftwZwO8aKFOW6yktnKmEI="></script>
+<script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
+    <script defer src="/en.search.min.7918d81999396a56d9ff1b7a986d6474e66bd5acdbbe01e8bac129f5ef345a88.js" integrity="sha256-eRjYGZk5albZ/xt6mG1kdOZr1azbvgHousEp9e80Wog="></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
+<script defer src="/lib/katex/katex.min.9f45307c5794ed247a0d095f3a62e52ef2215a67b2327203a7fd919959ae79d1.js" integrity="sha256-n0UwfFeU7SR6DQlfOmLlLvIhWmeyMnIDp/2RmVmuedE="></script>
+<script defer src="/lib/katex/auto-render.min.7b57d427ac6270677daf8d8380ded2cc73336f9149a167b8e1fe0d6ef66604ae.js" integrity="sha256-e1fUJ6xicGd9r42DgN7SzHMzb5FJoWe44f4NbvZmBK4="></script>
+<script defer src="/lib/katex/mhchem.min.f0ca03df194b8c3d6017ff455db6a0ef98857905663fa311a6cded788b15340b.js" integrity="sha256-8MoD3xlLjD1gF/9FXbag75iFeQVmP6MRps3teIsVNAs="></script>
+<script>
+  
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+        {left: "\\begin{align}", right: "\\end{align}", display: true},
+        {left: "\\begin{alignat}", right: "\\end{alignat}", display: true},
+        {left: "\\begin{gather}", right: "\\end{gather}", display: true},
+        {left: "\\begin{CD}", right: "\\end{CD}", display: true},
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  });
+</script>
+
+  </body>
+</html>
