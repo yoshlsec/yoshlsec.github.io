@@ -1,12 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>yoshl - IT enjoyer – </title>
-    <link>//localhost:1313/</link>
+    <link>/</link>
     <description>Recent content on yoshl - IT enjoyer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     
-	  <atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -15,10 +15,10 @@
     
     <item>
       <title>Elementary: Understanding Processes</title>
-      <link>//localhost:1313/winint-compilation/winint-understading-processes/</link>
+      <link>/winint-compilation/winint-understading-processes/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/winint-compilation/winint-understading-processes/</guid>
+      <guid>/winint-compilation/winint-understading-processes/</guid>
       <description>
         
         
@@ -76,7 +76,7 @@
 
 &lt;/blockquote&gt;
 &lt;h2&gt;Process Token Hijacking&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;process-token-hijacking&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#process-token-hijacking&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Starting with the most simplest way to escalate privileges in windows (in my opinion) is with a token hijacking, thus assuming there is a non-priviledge &lt;code&gt;cmd.exe&lt;/code&gt; process in the debuggee:&lt;/p&gt;
+    &lt;a href=&#34;#process-token-hijacking&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Starting with the simplest way to escalate privileges in windows (in my opinion) is with a token hijacking, thus assuming there is a non-priviledge &lt;code&gt;cmd.exe&lt;/code&gt; process in the debuggee:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;image-2.png&#34; alt=&#34;alt text&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;With windbg we are able to see the process and gather information about it:&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
@@ -760,10 +760,10 @@ S-1-5-32-544 -&amp;gt; To hijack&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div cla
     
     <item>
       <title>Pt 1 - Chaos Based Encryption applied to stegoanalysis</title>
-      <link>//localhost:1313/cbe-blogs/cbe-fundamentals/</link>
+      <link>/cbe-blogs/cbe-fundamentals/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/cbe-blogs/cbe-fundamentals/</guid>
+      <guid>/cbe-blogs/cbe-fundamentals/</guid>
       <description>
         
         
@@ -2241,10 +2241,10 @@ $\quad t_n = 0.4 - \dfrac{6}{1 + x_n^2 + y_n^2}$&lt;/p&gt;
     
     <item>
       <title>Pt 2.1 - Creation your own Chaos System</title>
-      <link>//localhost:1313/cbe-blogs/cbe-creation/</link>
+      <link>/cbe-blogs/cbe-creation/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/cbe-blogs/cbe-creation/</guid>
+      <guid>/cbe-blogs/cbe-creation/</guid>
       <description>
         
         
@@ -3060,10 +3060,10 @@ $$&lt;/p&gt;
     
     <item>
       <title>Pt 2.2 - Decochators Pypi Package</title>
-      <link>//localhost:1313/cbe-blogs/cbe-decochators/</link>
+      <link>/cbe-blogs/cbe-decochators/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/cbe-blogs/cbe-decochators/</guid>
+      <guid>/cbe-blogs/cbe-decochators/</guid>
       <description>
         
         
@@ -3616,10 +3616,10 @@ TestPyPi Package Link: &lt;a href=&#34;https://test.pypi.org/project/decochators
     
     <item>
       <title>Virtual Machine (Reversing x86)</title>
-      <link>//localhost:1313/vm-reversing/</link>
+      <link>/vm-reversing/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/vm-reversing/</guid>
+      <guid>/vm-reversing/</guid>
       <description>
         
         
@@ -4528,10 +4528,10 @@ Your task is to find input that gives you the success message.&lt;/p&gt;
     
     <item>
       <title>Manually Unpacking UPX | PE &amp; PE&#43; (x86/x64 Tips)</title>
-      <link>//localhost:1313/manuallyupx/</link>
+      <link>/manuallyupx/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/manuallyupx/</guid>
+      <guid>/manuallyupx/</guid>
       <description>
         
         
@@ -4903,10 +4903,10 @@ Import Rebuild success C:\Users\yl\Documents\Retos\CUSTOM\upxed_dump_SCY.exe&lt;
     
     <item>
       <title>Bringing CyberChef to Localhost</title>
-      <link>//localhost:1313/desktop-app---cyberchef/</link>
+      <link>/desktop-app---cyberchef/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/desktop-app---cyberchef/</guid>
+      <guid>/desktop-app---cyberchef/</guid>
       <description>
         
         
@@ -5113,10 +5113,10 @@ This build is based on the official GitHub repository from the UK’s intelligen
     
     <item>
       <title>WHY2025 CTF | Full Forensics &#43; Reversing Bonus</title>
-      <link>//localhost:1313/why2025-ctf/</link>
+      <link>/why2025-ctf/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/why2025-ctf/</guid>
+      <guid>/why2025-ctf/</guid>
       <description>
         
         
@@ -6072,10 +6072,10 @@ This build is based on the official GitHub repository from the UK’s intelligen
     
     <item>
       <title>L3akCTF 2025 (Post Mortem) | Full Forensics</title>
-      <link>//localhost:1313/l3akctf-2025/</link>
+      <link>/l3akctf-2025/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/l3akctf-2025/</guid>
+      <guid>/l3akctf-2025/</guid>
       <description>
         
         
@@ -9054,10 +9054,10 @@ unknown             RunME_0                                 unknown     18000100
     
     <item>
       <title>TJCTF 2025 | 7/8 Forensics</title>
-      <link>//localhost:1313/tjctf-2025/</link>
+      <link>/tjctf-2025/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tjctf-2025/</guid>
+      <guid>/tjctf-2025/</guid>
       <description>
         
         
