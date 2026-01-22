@@ -23,7 +23,7 @@
         
         
         &lt;p&gt;Before diving in windows reversing I want to acknowledge to OpenSecurityTrainig (&lt;a href=&#34;https://p.ost2.fyi/dashboard&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;ost2&lt;/a&gt;) for their &lt;em&gt;free&lt;/em&gt; classes of architecture and OS internal, please check them out, to a better understanding of this blog, at least is recommendable know of &lt;em&gt;Windbg&lt;/em&gt; (Debuggers 1011-2011-3011 [in ost2]) and Windows Internals (Architecture 2821 [in ost2])&lt;/p&gt;
-&lt;p&gt;I would also like to tank m2rc_ who helped me at the end of the blog with the attributes of the SID Hijacking.&lt;/p&gt;
+&lt;p&gt;I would also like to thank m2rc_ who helped me at the end of the blog with the attributes of the SID Hijacking.&lt;/p&gt;
 &lt;h2&gt;Getting Started&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;getting-started&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#getting-started&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;The setup we will have is the following:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;image.png&#34; alt=&#34;alt text&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
