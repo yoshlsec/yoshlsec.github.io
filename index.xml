@@ -316,8 +316,6 @@ Process Victim (System : nt sys)
 &lt;h2&gt;SID Replacement&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sid-replacement&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#sid-replacement&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;This method is not patch the owner SID process to be Local System, that will crash, also know as a &lt;em&gt;deadlock&lt;/em&gt;, replacing the user SID directly causes token incosistency and system instability, getting you a blue screen or a deadlock. The User SID is not just an identity, as the token, it is tied to the authentication context of the token.&lt;/p&gt;
 &lt;p&gt;Thus, the SID Replacement can be consider a Group SID replacemente or Integrity SID replacement. Remember, for this you need to create a low priv user, because ieuser is in the Admin Group, so he doesnt need to enter the password or any auth to execute as admin,&lt;/p&gt;
-&lt;p&gt;On ther other hand, we need to escalate the integrity level (for now to forwards&amp;quot; &lt;em&gt;IL&lt;/em&gt;) toa void the MIC block before seeing the Access Control List (&lt;em&gt;ACL&lt;/em&gt;), this is because our process can be in a &lt;em&gt;Medium IL&lt;/em&gt; and the resource we use, for example: &lt;code&gt;net.exe&lt;/code&gt; is on a &lt;em&gt;High IL&lt;/em&gt;. This block process is mainly from the User
-Account Contorl (&lt;em&gt;UAC&lt;/em&gt; in forwards)&lt;/p&gt;
 &lt;h3&gt;Creating lowpriv user&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;creating-lowpriv-user&#34;&gt;&lt;/span&gt;
     &lt;a href=&#34;#creating-lowpriv-user&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Remember for this attack do not be in a administrator account:&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
@@ -445,7 +443,7 @@ Privs:
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;h3&gt;Gathering admin information&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;gathering-admin-information&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#gathering-admin-information&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;While reading: &lt;a href=&#34;https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers&lt;/a&gt; you can get the conclusion the SID of an authority system is &lt;code&gt;S-1-5-18&lt;/code&gt;, anyways you can obtain it with windbg:&lt;/p&gt;
+    &lt;a href=&#34;#gathering-admin-information&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;While reading: &lt;a href=&#34;https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers&lt;/a&gt; you can get the conclusion the SID of the System process (high priv user) is &lt;code&gt;S-1-5-18&lt;/code&gt;, anyways you can obtain it with windbg:&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;kd&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;process&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ffffde888f46d200&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
@@ -570,7 +568,7 @@ In this case, we will focus on SID: &lt;code&gt;S-1-5-32-544&lt;/code&gt; as is 
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;p&gt;Once the information recopilated at the moment in your notebook:&lt;/p&gt;
+&lt;p&gt;Once the information has been collected in your notebook:&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;pre&gt;&lt;code&gt;process -&amp;gt; token -&amp;gt; sid offset -&amp;gt; sid value
@@ -589,7 +587,7 @@ S-1-5-32-544 -&amp;gt; To hijack&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div cla
   &lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;p&gt;Inside the lowpric token we found &amp;ldquo;This Organization&amp;rdquo;, uncommon to see, not primary for the system&lt;/p&gt;
+&lt;p&gt;Within the low-privilege token, we identified “This Organization,” which is unlikely to be used and could therefore be a suitable target for hijacking.&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;mo&#34;&gt;06&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;S&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;15&lt;/span&gt;
@@ -633,7 +631,7 @@ S-1-5-32-544 -&amp;gt; To hijack&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div cla
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;h3&gt;Replacing SID Group pointer&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;replacing-sid-group-pointer&#34;&gt;&lt;/span&gt;
-    &lt;a href=&#34;#replacing-sid-group-pointer&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Now, its moment to calculate manually for be able to use &lt;code&gt;eq&lt;/code&gt; to remplaze de SID, as we know the &lt;code&gt;UserAndGroups&lt;/code&gt; structure has a &lt;a href=&#34;https://www.vergiliusproject.com/kernels/x64/windows-10/1809/_SID_AND_ATTRIBUTES&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;sizeof&lt;/a&gt;: 0x10 bytes, as the S-1-5-15 is on index 6 so 0x10*6 + de SID address:&lt;/p&gt;
+    &lt;a href=&#34;#replacing-sid-group-pointer&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Now, it is time to manually calculate the offset in order to use eq to replace the SID. As we know, the UserAndGroups structure has a size &lt;a href=&#34;https://www.vergiliusproject.com/kernels/x64/windows-10/1809/_SID_AND_ATTRIBUTES&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;of&lt;/a&gt; 0x10 bytes. Since S-1-5-15 is at index 6, the calculation is 0x10 × 6 plus the SID address:&lt;/p&gt;
 &lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
 
 &lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;kd&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;dq&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;0xffff8001ceec68c0&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;+&lt;/span&gt;&lt;span class=&#34;mh&#34;&gt;0x98&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;l1&lt;/span&gt;

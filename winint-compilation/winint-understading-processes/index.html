@@ -22,7 +22,7 @@
 
   <meta itemprop="name" content="Elementary: Understanding Processes">
   <meta itemprop="description" content="In this blog we will cover how windows process works, their structure and how we can pivot to nt-authority system or any user through WinDbg. No exploitation here, it is only to get acquainted in the environment for future exploits!">
-  <meta itemprop="wordCount" content="2513">
+  <meta itemprop="wordCount" content="2463">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Elementary: Understanding Processes">
   <meta name="twitter:description" content="In this blog we will cover how windows process works, their structure and how we can pivot to nt-authority system or any user through WinDbg. No exploitation here, it is only to get acquainted in the environment for future exploits!">
@@ -637,8 +637,6 @@ Process Victim (System : nt sys)
 <h2>SID Replacement<span class="hx-absolute -hx-mt-20" id="sid-replacement"></span>
     <a href="#sid-replacement" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>This method is not patch the owner SID process to be Local System, that will crash, also know as a <em>deadlock</em>, replacing the user SID directly causes token incosistency and system instability, getting you a blue screen or a deadlock. The User SID is not just an identity, as the token, it is tied to the authentication context of the token.</p>
 <p>Thus, the SID Replacement can be consider a Group SID replacemente or Integrity SID replacement. Remember, for this you need to create a low priv user, because ieuser is in the Admin Group, so he doesnt need to enter the password or any auth to execute as admin,</p>
-<p>On ther other hand, we need to escalate the integrity level (for now to forwards&quot; <em>IL</em>) toa void the MIC block before seeing the Access Control List (<em>ACL</em>), this is because our process can be in a <em>Medium IL</em> and the resource we use, for example: <code>net.exe</code> is on a <em>High IL</em>. This block process is mainly from the User
-Account Contorl (<em>UAC</em> in forwards)</p>
 <h3>Creating lowpriv user<span class="hx-absolute -hx-mt-20" id="creating-lowpriv-user"></span>
     <a href="#creating-lowpriv-user" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Remember for this attack do not be in a administrator account:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
@@ -766,7 +764,7 @@ Privs:
 </div>
 </div>
 <h3>Gathering admin information<span class="hx-absolute -hx-mt-20" id="gathering-admin-information"></span>
-    <a href="#gathering-admin-information" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>While reading: <a href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers</a> you can get the conclusion the SID of an authority system is <code>S-1-5-18</code>, anyways you can obtain it with windbg:</p>
+    <a href="#gathering-admin-information" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>While reading: <a href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers</a> you can get the conclusion the SID of the System process (high priv user) is <code>S-1-5-18</code>, anyways you can obtain it with windbg:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="o">!</span><span class="n">process</span> <span class="n">ffffde888f46d200</span> <span class="mi">1</span>
@@ -891,7 +889,7 @@ In this case, we will focus on SID: <code>S-1-5-32-544</code> as is the BUILTIN\
   </button>
 </div>
 </div>
-<p>Once the information recopilated at the moment in your notebook:</p>
+<p>Once the information has been collected in your notebook:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><pre><code>process -&gt; token -&gt; sid offset -&gt; sid value
@@ -910,7 +908,7 @@ S-1-5-32-544 -&gt; To hijack</code></pre></div><div class="hextra-code-copy-btn-
   </button>
 </div>
 </div>
-<p>Inside the lowpric token we found &ldquo;This Organization&rdquo;, uncommon to see, not primary for the system</p>
+<p>Within the low-privilege token, we identified “This Organization,” which is unlikely to be used and could therefore be a suitable target for hijacking.</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mo">06</span> <span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">15</span>
@@ -954,7 +952,7 @@ S-1-5-32-544 -&gt; To hijack</code></pre></div><div class="hextra-code-copy-btn-
 </div>
 </div>
 <h3>Replacing SID Group pointer<span class="hx-absolute -hx-mt-20" id="replacing-sid-group-pointer"></span>
-    <a href="#replacing-sid-group-pointer" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Now, its moment to calculate manually for be able to use <code>eq</code> to remplaze de SID, as we know the <code>UserAndGroups</code> structure has a <a href="https://www.vergiliusproject.com/kernels/x64/windows-10/1809/_SID_AND_ATTRIBUTES" target="_blank" rel="noopener">sizeof</a>: 0x10 bytes, as the S-1-5-15 is on index 6 so 0x10*6 + de SID address:</p>
+    <a href="#replacing-sid-group-pointer" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Now, it is time to manually calculate the offset in order to use eq to replace the SID. As we know, the UserAndGroups structure has a size <a href="https://www.vergiliusproject.com/kernels/x64/windows-10/1809/_SID_AND_ATTRIBUTES" target="_blank" rel="noopener">of</a> 0x10 bytes. Since S-1-5-15 is at index 6, the calculation is 0x10 × 6 plus the SID address:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="mh">0xffff8001ceec68c0</span><span class="o">+</span><span class="mh">0x98</span> <span class="n">l1</span>
