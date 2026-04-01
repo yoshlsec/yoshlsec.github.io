@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
+<title>Taking Back Control - Windows File Ownership – yoshl - IT enjoyer</title>
+  <meta name="description" content="A deep dive into Widnows file ownership, the NT Security Reference Monitor (*SRM*), and how to programmatically reclaim access to system protected files in System32 from kernel internals to working C code." /><link rel="canonical" href="/winint-compilation/winint-wfownership/" itemprop="url" />
+
+<meta property="og:title" content="Taking Back Control - Windows File Ownership" />
+<meta property="og:description" content="A deep dive into Widnows file ownership, the NT Security Reference Monitor (*SRM*), and how to programmatically reclaim access to system protected files in System32 from kernel internals to working C code." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/winint-compilation/winint-wfownership/" /><meta property="article:section" content="winint-compilation" />
+
+
+
+  <meta itemprop="name" content="Taking Back Control - Windows File Ownership">
+  <meta itemprop="description" content="A deep dive into Widnows file ownership, the NT Security Reference Monitor (*SRM*), and how to programmatically reclaim access to system protected files in System32 from kernel internals to working C code.">
+  <meta itemprop="wordCount" content="2305">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Taking Back Control - Windows File Ownership">
+  <meta name="twitter:description" content="A deep dive into Widnows file ownership, the NT Security Reference Monitor (*SRM*), and how to programmatically reclaim access to system protected files in System32 from kernel internals to working C code.">
+
+    <link rel="preload" href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" as="style" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
+    <link href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" rel="stylesheet" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
+
+
+
+  <link href="/css/custom.min.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css" rel="stylesheet" integrity="sha256-47DEQpj8HBSa&#43;/TImW&#43;5JCeuQeRkm5NMpJWZG3hSuFU=" />
+
+
+  <script>
+     
+    const defaultTheme = 'system';
+
+    const setDarkTheme = () => {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+    const setLightTheme = () => {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+    }
+
+    if ("color-theme" in localStorage) {
+      localStorage.getItem("color-theme") === "dark" ? setDarkTheme() : setLightTheme();
+    } else {
+      defaultTheme === "dark" ? setDarkTheme() : setLightTheme();
+      if (defaultTheme === "system") {
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? setDarkTheme() : setLightTheme();
+      }
+    }
+  </script>
+
+  
+</head>
+<body dir="ltr"><div class="nav-container hx-sticky hx-top-0 hx-z-20 hx-w-full hx-bg-transparent print:hx-hidden">
+  <div class="nav-container-blur hx-pointer-events-none hx-absolute hx-z-[-1] hx-h-full hx-w-full hx-bg-white dark:hx-bg-dark hx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] contrast-more:hx-shadow-[0_0_0_1px_#000] dark:hx-shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] contrast-more:dark:hx-shadow-[0_0_0_1px_#fff]"></div>
+
+  <nav class="hx-mx-auto hx-flex hx-items-center hx-justify-end hx-gap-2 hx-h-16 hx-px-6 hx-max-w-[90rem]">
+    <a class="hx-flex hx-items-center hover:hx-opacity-75 ltr:hx-mr-auto rtl:hx-ml-auto" href="/">
+        <span class="hx-mr-2 hx-font-extrabold hx-inline hx-select-none" title="yoshl - IT enjoyer">yoshl - IT enjoyer</span>
+    </a><div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+<button type="button" aria-label="Menu" class="hamburger-menu -hx-mr-2 hx-rounded hx-p-2 active:hx-bg-gray-400/20 md:hx-hidden"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class="hx-mx-auto hx-flex max-w-full">
+    <div class="mobile-menu-overlay [transition:background-color_1.5s_ease] hx-fixed hx-inset-0 hx-z-10 hx-bg-black/80 dark:hx-bg-black/60 hx-hidden"></div>
+<aside class="sidebar-container hx-flex hx-flex-col print:hx-hidden md:hx-top-16 md:hx-shrink-0 md:hx-w-64 md:hx-self-start max-md:[transform:translate3d(0,-100%,0)] md:hx-hidden xl:hx-block">
+  
+  <div class="hx-px-4 hx-pt-4 md:hx-hidden">
+    <div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+  </div>
+  <div class="hextra-scrollbar hx-overflow-y-auto hx-overflow-x-hidden hx-p-4 hx-grow md:hx-h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx-flex hx-flex-col hx-gap-1 md:hx-hidden">
+      
+      
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/"
+    
+  >Chaos-Based-Encryption Saga
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-fundamentals/"
+    
+  >Pt 1 - Chaos Based Encryption applied to stegoanalysis
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-creation/"
+    
+  >Pt 2.1 - Creation your own Chaos System
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-decochators/"
+    
+  >Pt 2.2 - Decochators Pypi Package
+    </a>
+              
+            </li></ul>
+      </div></li>
+          <li class="open"><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/"
+    
+  >WinInt Compilation
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-understading-processes/"
+    
+  >Elementary: Understanding Processes
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-arbitrarywrite/"
+    
+  >Arbritrary Write - HEVD (ft. Astharot15)
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col open"><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
+    href="/winint-compilation/winint-wfownership/"
+    
+  >Taking Back Control - Windows File Ownership
+    </a>
+  
+    <ul class='hx-flex hx-flex-col hx-gap-1 hx-relative before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] dark:before:hx-bg-neutral-800 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-pr-3 rtl:before:hx-right-0 ltr:hx-ml-3 rtl:hx-mr-3'><li>
+              <a
+                href="#trustedinstallers"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >TrustedInstallers</a>
+            </li>
+          <li>
+              <a
+                href="#security-model-srm-and-security-descriptor"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Security Model: SRM and Security Descriptor</a>
+            </li>
+          <li>
+              <a
+                href="#security-identifiers-under-the-hood"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Security Identifiers under the hood</a>
+            </li>
+          <li>
+              <a
+                href="#token-privileges"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Token Privileges</a>
+            </li>
+          <li>
+              <a
+                href="#full-call-flow"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Full call flow</a>
+            </li>
+          <li>
+              <a
+                href="#script--poc"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Script &#43; POC</a>
+            </li>
+          <li>
+              <a
+                href="#implementation"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Implementation</a>
+            </li>
+          </ul>
+  
+              
+            </li></ul>
+      </div></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/vm-reversing/"
+    
+  >Virtual Machine (Reversing x86)
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/manuallyupx/"
+    
+  >Manually Unpacking UPX | PE &amp; PE&#43; (x86/x64 Tips)
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/why2025-ctf/"
+    
+  >WHY2025 CTF | Full Forensics &#43; Reversing Bonus
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/l3akctf-2025/"
+    
+  >L3akCTF 2025 (Post Mortem) | Full Forensics
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/tjctf-2025/"
+    
+  >TJCTF 2025 | 7/8 Forensics
+    </a></li>
+    </ul>
+
+    <div class="max-xl:hx-hidden hx-h-0 hx-w-64 hx-shrink-0"></div></div>
+  
+  
+    <div class="md:hx-hidden  hx-sticky hx-bottom-0 hx-bg-white dark:hx-bg-dark hx-mx-4 hx-py-4 hx-shadow-[0_-12px_16px_#fff] hx-flex hx-items-center hx-gap-2 dark:hx-border-neutral-800 dark:hx-shadow-[0_-12px_16px_#111] contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-shadow-none hx-border-t" data-toggle-animation="show"><div class="hx-flex hx-grow hx-flex-col"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div></div></aside>
+    
+<nav class="hextra-toc hx-order-last hx-hidden hx-w-64 hx-shrink-0 xl:hx-block print:hx-hidden hx-px-4" aria-label="table of contents">
+    <div class="hextra-scrollbar hx-sticky hx-top-16 hx-overflow-y-auto hx-pr-4 hx-pt-6 hx-text-sm [hyphens:auto] hx-max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:hx--mr-4 rtl:hx--ml-4"><p class="hx-mb-4 hx-font-semibold hx-tracking-tight">On this page</p><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#trustedinstallers">TrustedInstallers
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#security-model-srm-and-security-descriptor">Security Model: SRM and Security Descriptor
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#security-identifiers-under-the-hood">Security Identifiers under the hood
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#token-privileges">Token Privileges
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#setakeownershipprivilege">SeTakeOwnershipPrivilege
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#serestoreprivilege">SeRestorePrivilege
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#full-call-flow">Full call flow
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#script--poc">Script &#43; POC
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#compiling">Compiling
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#image-poc--step-guide">Image POC / Step Guide
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#terminal-guide">Terminal Guide
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#implementation">Implementation
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#forensics-apply">Forensics Apply
+        </a>
+      </li></ul>
+      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400">
+        <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx-w-full hx-break-words hx-flex hx-min-h-[calc(100vh-var(--navbar-height))] hx-min-w-0 hx-justify-center hx-pb-8 hx-pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx-w-full hx-min-w-0 hx-max-w-6xl hx-px-6 hx-pt-4 md:hx-px-12">
+        
+  <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
+        <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
+          <a href="/winint-compilation/">WinInt Compilation</a>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">Taking Back Control - Windows File Ownership</div>
+  </div>
+
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">Taking Back Control - Windows File Ownership</h1>
+        <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"></div>
+        <div class="content">
+          <h2>TrustedInstallers<span class="hx-absolute -hx-mt-20" id="trustedinstallers"></span>
+    <a href="#trustedinstallers" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>If you have ever tried to rename, delete, or modify a driver file inside the <code>System32/drivers</code>&rsquo;s path, you have most likely received a prompt saying: <strong>&ldquo;You require permission from TrustedInstaller&rdquo;</strong>. Even running it as a <em>NT/SYSTEM</em> user is not enough. That is by default.</p>
+<p>Start with Windows Vista, MIcrosoft introduced <strong>Windows Resource Protection (WRP)</strong>, replacing the older System File Checker model. The core idea was and is to create a dedicated service account, in this case: <code>NT SERVICE\TrustedInstaller</code>, and make it the legal <em>Owner</em> of every critical system file.</p>
+<p>I see it as an attempt to mimic the separation of powers in a government, splitting powers so that they are not centralized. Thus a user doesn&rsquo;t have full access to the system and isn&rsquo;t a constant target.</p>
+<p>Administrators get read and execute rights, but nothing more. Modifications is reserved exclusively for Windows Update and isntaller pipelines that run under TrustedInstaller&rsquo;s identity. All of this to ensure that even the compromissed SYSTEM process cannot silently replace <code>ntoskrnl.exe</code> or any driver to make persistence. Furthermore, the <strong>TrustedInstaller account is a service</strong> instead of an user.</p>
+<p>This psot shows you exactly how to take ownership of the file and rewrite its access control list to rename, replace and modify a driver inside the priviledge folder: System32.</p>
+<h2>Security Model: SRM and Security Descriptor<span class="hx-absolute -hx-mt-20" id="security-model-srm-and-security-descriptor"></span>
+    <a href="#security-model-srm-and-security-descriptor" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Windows implements the control access via the <strong>SRM</strong> (Security Reference Monitor), a component that stands inside the kernel (<code>ntoskrnl.exe</code>). Every securable object in Windows: files, registry keys, processes, named pipes; carries a <strong>Security Descriptor</strong> (SD).</p>
+<p>On disk, NTFS stores this is the <code>$Secure</code> metada file referenced from each file&rsquo;s MFT entry via the <code>$STANDARD_INFORMATION</code> attribute.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_SECURITY_DESCRIPTOR</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BYTE</span>  <span class="n">Revision</span><span class="p">;</span>   <span class="c1">// always 1 — version of the SD format
+</span></span></span><span class="line"><span class="cl">    <span class="n">BYTE</span>  <span class="n">Sbz1</span><span class="p">;</span>       <span class="c1">// alignment padding
+</span></span></span><span class="line"><span class="cl">    <span class="n">WORD</span>  <span class="n">Control</span><span class="p">;</span>    <span class="c1">// flags: SE_DACL_PRESENT, SE_OWNER_DEFAULTED, ...
+</span></span></span><span class="line"><span class="cl">    <span class="n">PSID</span>  <span class="n">Owner</span><span class="p">;</span>      <span class="c1">// SID
+</span></span></span><span class="line"><span class="cl">    <span class="n">PSID</span>  <span class="n">Group</span><span class="p">;</span>      <span class="c1">// primary group SID
+</span></span></span><span class="line"><span class="cl">    <span class="n">PACL</span>  <span class="n">Sacl</span><span class="p">;</span>       <span class="c1">// System ACL — audit entries (needs SeSecurityPrivilege)
+</span></span></span><span class="line"><span class="cl">    <span class="n">PACL</span>  <span class="n">Dacl</span><span class="p">;</span>       <span class="c1">// Discretionary ACL (Access Control List) — who can access and how
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">SECURITY_DESCRIPTOR</span><span class="p">;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>The <strong>DACL</strong> (Discretionary Access Control List) is a list of <strong>Access Control Entries</strong> (ACEs). Each ACE pairs a SID with a bitmask of rights [<code>GENERIC_READ</code>, <code>GENERIC_WRITE</code>, <code>DELETE</code>] and a type of flag [either <code>ACCESS_ALLOW_ACE</code> or <code>ACCESS_DENIED_ACE</code>]. The Windows kernel&rsquo;s SRM evaluates these entries top-to-bottom at access time.</p>
+<p>The <em>owner</em> field is the core of this post. An object&rsquo;s owner has two access rights that are independent of the DACL.</p>
+<ol>
+<li>Read the SD (<code>READ_CONTROL</code>)</li>
+<li>Rewrite the DACL (<code>WRITE_DAC</code>)</li>
+</ol>
+<p>This means that if you become the owner, you can grant yourself any permissions you want, even if the original DACL explicitly deniend everything, such as the non-read flag.</p>
+<h2>Security Identifiers under the hood<span class="hx-absolute -hx-mt-20" id="security-identifiers-under-the-hood"></span>
+    <a href="#security-identifiers-under-the-hood" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>A SID is used to uniquely identify a security principal or security group. Security principals can represent any entity that the operating system can authenticate. Examples include a user account, a computer account, or a thread or process that runs in the security context of a user or computer account.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">80</span><span class="o">-</span><span class="mi">956008885</span><span class="o">-</span><span class="mi">3418522649</span><span class="o">-</span><span class="mi">1831038044</span><span class="o">-</span><span class="mi">1853292631</span><span class="o">-</span><span class="mi">2271478464</span>
+</span></span><span class="line"><span class="cl">  <span class="err">│</span> <span class="err">│</span>  <span class="err">│</span>  <span class="err">└────────────────────────────────────────────────────┘</span>
+</span></span><span class="line"><span class="cl">  <span class="err">│</span> <span class="err">│</span>  <span class="err">│</span>                 <span class="n">Sub</span><span class="o">-</span><span class="n">authority</span> <span class="nf">chain</span> <span class="p">(</span><span class="n">identifies</span> <span class="n">the</span> <span class="n">account</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="err">│</span> <span class="err">│</span>  <span class="err">└─</span> <span class="n">Identifier</span> <span class="nf">Authority</span> <span class="p">(</span><span class="mi">5</span> <span class="o">=</span> <span class="n">NT</span> <span class="n">Authority</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="err">│</span> <span class="err">└────</span> <span class="nf">Revision</span> <span class="p">(</span><span class="n">always</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="err">└──────</span> <span class="n">Literal</span> <span class="n">prefix</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Common built-in SIDs:
+</span></span></span><span class="line"><span class="cl"><span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">18</span>          <span class="err">→</span>  <span class="n">NT</span> <span class="n">AUTHORITY</span><span class="err">\</span><span class="n">SYSTEM</span>
+</span></span><span class="line"><span class="cl"><span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">19</span>          <span class="err">→</span>  <span class="n">NT</span> <span class="n">AUTHORITY</span><span class="err">\</span><span class="n">LOCAL</span> <span class="n">SERVICE</span>
+</span></span><span class="line"><span class="cl"><span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">80</span><span class="o">-</span><span class="p">...</span>      <span class="err">→</span>  <span class="n">NT</span> <span class="n">SERVICE</span><span class="err">\</span><span class="nf">TrustedInstaller</span>  <span class="p">(</span><span class="kt">long</span> <span class="n">sub</span><span class="o">-</span><span class="n">authority</span> <span class="n">chain</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">32</span><span class="o">-</span><span class="mi">544</span>      <span class="err">→</span>  <span class="n">BUILTIN</span><span class="err">\</span><span class="n">Administrators</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Each time a user signs in, the system creates an access token for that user. That token contains the users SID, user rights, and the SIDs for any groups the user belongs to.</p>
+<p>On the other hand, TrustedInstaller&rsquo;s SID si a <em>Virtual Service Account SID</em> (VSA), which  it never maps toa  real login session, it exists only as a token princiapl that the SCM (Service Control Managar) can instantiate when running the Windows Modules Installer service, executed: <code>TrustedInstaller.exe</code>.</p>
+<h2>Token Privileges<span class="hx-absolute -hx-mt-20" id="token-privileges"></span>
+    <a href="#token-privileges" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Every process carries an Access Token, as we debated earlier in other posts. Being a kernel object <code>_TOKEN</code> attached to the process that defines its security identity.  Beyond group SIDs, a token cointa sa list of privileges, also named capabilities that grant acces to sensitive operaations of DACL objetcs.</p>
+<p>In this post we mainly focus on <code>SeTakeOwnershipPrivilege</code> and <code>SeRestorePrivilege</code>.</p>
+<h4>SeTakeOwnershipPrivilege<span class="hx-absolute -hx-mt-20" id="setakeownershipprivilege"></span>
+    <a href="#setakeownershipprivilege" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Allows assigning yourself as owner of any object, bypassing DACL checks, You can only set your own SID (or a group you belong to) as owner.</p>
+<blockquote>
+  <p>Required to take ownership of an object without being granted discretionary access. This privilege allows the owner value to be set only to those values that the holder may legitimately assign as the owner of an object.<br>
+User Right: Take ownership of files or other objects.</p>
+
+</blockquote>
+<h4>SeRestorePrivilege<span class="hx-absolute -hx-mt-20" id="serestoreprivilege"></span>
+    <a href="#serestoreprivilege" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Allows assigning any SID as owner, including third parties. Use by backup/restore pipelines. More powerfil than <em>TakeOwnerShip</em>.</p>
+<blockquote>
+  <p>Required to perform restore operations. This privilege causes the system to grant all write access control to any file, regardless of the ACL specified for the file. Any access request other than write is still evaluated with the ACL. Additionally, this privilege enables you to set any valid user or group SID as the owner of a file. This privilege is required by the <a href="https://learn.microsoft.com/en-us/windows/desktop/api/winreg/nf-winreg-regloadkeya" target="_blank" rel="noopener"><strong>RegLoadKey</strong></a> function. The following access rights are granted if this privilege is held:  <br><br>- WRITE_DAC<br>- WRITE_OWNER<br>- ACCESS_SYSTEM_SECURITY<br>- FILE_GENERIC_WRITE<br>- FILE_ADD_FILE<br>- FILE_ADD_SUBDIRECTORY<br>- DELETE<br><br>User Right: Restore files and directories.  <br>If the file is located on a removable drive and the &ldquo;Audit Removable Storage&rdquo; is enabled, the SE_SECURITY_NAME is required to have ACCESS_SYSTEM_SECURITY.</p>
+
+</blockquote>
+<p>Privileges present in a token are often disabled by default to reduce attack surface. You must call functions like: <code>AdjustTokenPrivileges()</code> to flip them to <code>SE_PRIVILEGE_ENABLE</code> before the kernel will honor them. Simply having the privilege in the token is not enough.</p>
+<h2>Full call flow<span class="hx-absolute -hx-mt-20" id="full-call-flow"></span>
+    <a href="#full-call-flow" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Forwards, the flow that Windows choose while calling <code>SetNamedSecurityInfo()</code> to change the owner field.</p>
+<p><img src="Pasted-image-20260401025604.png" alt="WFOImage" loading="lazy" /></p>
+<h2>Script + POC<span class="hx-absolute -hx-mt-20" id="script--poc"></span>
+    <a href="#script--poc" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>The program below does four things in sequence:</p>
+<ol>
+<li>Enables the required privileges in the process token</li>
+<li>Reads the current users SID</li>
+<li>Transfers ownership of the target path to that SID</li>
+<li>Rewriets the DACL to grant <code>FULL_CONTROL</code></li>
+</ol>
+<h4>Compiling<span class="hx-absolute -hx-mt-20" id="compiling"></span>
+    <a href="#compiling" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>MSVC</strong>: <code>cl take_ownership.c /link advapi32.lib</code>
+<strong>MinGW</strong>: <code>gcc take_ownership.c -o take_ownership -ladvapi32</code></p>
+<blockquote>
+  <p>Run the resulting binary from an elevated (Administrator) command prompt.</p>
+
+</blockquote>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;aclapi.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sddl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef UNICODE
+</span></span></span><span class="line"><span class="cl">	<span class="cp">#define UNICODE
+</span></span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef _UNICODE
+</span></span></span><span class="line"><span class="cl">	<span class="cp">#define _UNICODE
+</span></span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef WIN32_LEAN_AND_MEAN
+</span></span></span><span class="line"><span class="cl">	<span class="cp">#define WIN32_LEAN_AND_MEAN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef _WIN32_WINNT
+</span></span></span><span class="line"><span class="cl">	<span class="cp">#define _WIN32_WINNT 0x0600
+</span></span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef OWNER_SECURITY_INFO
+</span></span></span><span class="line"><span class="cl">    <span class="cp">#define OWNER_SECURITY_INFO              (0x00000001L)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef DACL_SECURITY_INFO
+</span></span></span><span class="line"><span class="cl">    <span class="cp">#define DACL_SECURITY_INFO               (0x00000004L)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef PROTECTED_DACL_SECURITY_INFO
+</span></span></span><span class="line"><span class="cl">    <span class="cp">#define PROTECTED_DACL_SECURITY_INFO    (0x80000000L)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">BOOL</span> <span class="nf">EnablePrivilege</span><span class="p">(</span><span class="n">LPCTSTR</span> <span class="n">lpszPrivilege</span><span class="p">,</span> <span class="n">BOOL</span> <span class="n">bEnablePrivilege</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TOKEN_PRIVILEGES</span> <span class="n">tp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LUID</span> <span class="n">luid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">hToken</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">OpenProcessToken</span><span class="p">(</span><span class="nf">GetCurrentProcess</span><span class="p">(),</span><span class="n">TOKEN_ADJUST_PRIVILEGES</span> <span class="o">|</span> <span class="n">TOKEN_QUERY</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">hToken</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] OpenProcessToken error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">LookupPrivilegeValue</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="n">lpszPrivilege</span><span class="p">,</span><span class="o">&amp;</span><span class="n">luid</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] LookupPrivilegeValue error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hToken</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">tp</span><span class="p">.</span><span class="n">PrivilegeCount</span>           <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">tp</span><span class="p">.</span><span class="n">Privileges</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">Luid</span>       <span class="o">=</span> <span class="n">luid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">tp</span><span class="p">.</span><span class="n">Privileges</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">Attributes</span> <span class="o">=</span> <span class="n">bEnablePrivilege</span> <span class="o">?</span> <span class="nl">SE_PRIVILEGE_ENABLED</span> <span class="p">:</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">AdjustTokenPrivileges</span><span class="p">(</span><span class="n">hToken</span><span class="p">,</span> <span class="n">FALSE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tp</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">tp</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] AdjustTokenPrivileges error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hToken</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">GetLastError</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERROR_NOT_ALL_ASSIGNED</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] The privilege &#39;%s&#39; is not present in the process token.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="n">lpszPrivilege</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;    Make sure to run as Administrator.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hToken</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[+] Privilege &#39;%s&#39; successfully enabled.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">lpszPrivilege</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hToken</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">TRUE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">PSID</span> <span class="nf">GetCurrentUserSID</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">hToken</span>          <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PTOKEN_USER</span> <span class="n">pTokenUser</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">dwSize</span>           <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PSID</span> <span class="n">pSidCopy</span>          <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">OpenProcessToken</span><span class="p">(</span><span class="nf">GetCurrentProcess</span><span class="p">(),</span> <span class="n">TOKEN_QUERY</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">hToken</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] OpenProcessToken (query) error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">GetTokenInformation</span><span class="p">(</span><span class="n">hToken</span><span class="p">,</span> <span class="n">TokenUser</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dwSize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">pTokenUser</span> <span class="o">=</span> <span class="p">(</span><span class="n">PTOKEN_USER</span><span class="p">)</span><span class="nf">LocalAlloc</span><span class="p">(</span><span class="n">LPTR</span><span class="p">,</span> <span class="n">dwSize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pTokenUser</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] LocalAlloc error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hToken</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">GetTokenInformation</span><span class="p">(</span><span class="n">hToken</span><span class="p">,</span> <span class="n">TokenUser</span><span class="p">,</span> <span class="n">pTokenUser</span><span class="p">,</span> <span class="n">dwSize</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dwSize</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] GetTokenInformation error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">LocalFree</span><span class="p">(</span><span class="n">pTokenUser</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hToken</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">sidLen</span> <span class="o">=</span> <span class="nf">GetLengthSid</span><span class="p">(</span><span class="n">pTokenUser</span><span class="o">-&gt;</span><span class="n">User</span><span class="p">.</span><span class="n">Sid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pSidCopy</span> <span class="o">=</span> <span class="p">(</span><span class="n">PSID</span><span class="p">)</span><span class="nf">LocalAlloc</span><span class="p">(</span><span class="n">LPTR</span><span class="p">,</span> <span class="n">sidLen</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">pSidCopy</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">CopySid</span><span class="p">(</span><span class="n">sidLen</span><span class="p">,</span> <span class="n">pSidCopy</span><span class="p">,</span> <span class="n">pTokenUser</span><span class="o">-&gt;</span><span class="n">User</span><span class="p">.</span><span class="n">Sid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">LPTSTR</span> <span class="n">strSid</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">ConvertSidToStringSid</span><span class="p">(</span><span class="n">pSidCopy</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">strSid</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[*] Current user SID: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">strSid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">LocalFree</span><span class="p">(</span><span class="n">strSid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">LocalFree</span><span class="p">(</span><span class="n">pTokenUser</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hToken</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">pSidCopy</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">BOOL</span> <span class="nf">TakeOwnership</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">pszPath</span><span class="p">,</span> <span class="n">PSID</span> <span class="n">pSid</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">dwResult</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dwResult</span> <span class="o">=</span> <span class="nf">SetNamedSecurityInfo</span><span class="p">((</span><span class="n">LPWSTR</span><span class="p">)</span><span class="n">pszPath</span><span class="p">,</span> <span class="n">SE_FILE_OBJECT</span><span class="p">,</span> <span class="n">OWNER_SECURITY_INFO</span><span class="p">,</span> <span class="n">pSid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">dwResult</span> <span class="o">!=</span> <span class="n">ERROR_SUCCESS</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] SetNamedSecurityInfo (Owner) error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">dwResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[+] Owner successfully changed on: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pszPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">TRUE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">BOOL</span> <span class="nf">GrantFullControl</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">pszPath</span><span class="p">,</span> <span class="n">PSID</span> <span class="n">pSid</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">dwResult</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">EXPLICIT_ACCESS</span> <span class="n">ea</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ZeroMemory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ea</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ea</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ea</span><span class="p">.</span><span class="n">grfAccessPermissions</span> <span class="o">=</span> <span class="n">GENERIC_ALL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ea</span><span class="p">.</span><span class="n">grfAccessMode</span>        <span class="o">=</span> <span class="n">SET_ACCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ea</span><span class="p">.</span><span class="n">grfInheritance</span>       <span class="o">=</span> <span class="n">SUB_CONTAINERS_AND_OBJECTS_INHERIT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ea</span><span class="p">.</span><span class="n">Trustee</span><span class="p">.</span><span class="n">TrusteeForm</span>  <span class="o">=</span> <span class="n">TRUSTEE_IS_SID</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ea</span><span class="p">.</span><span class="n">Trustee</span><span class="p">.</span><span class="n">TrusteeType</span>  <span class="o">=</span> <span class="n">TRUSTEE_IS_USER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ea</span><span class="p">.</span><span class="n">Trustee</span><span class="p">.</span><span class="n">ptstrName</span>    <span class="o">=</span> <span class="p">(</span><span class="n">LPTSTR</span><span class="p">)</span><span class="n">pSid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PACL</span> <span class="n">pNewDACL</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dwResult</span> <span class="o">=</span> <span class="nf">SetEntriesInAcl</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ea</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pNewDACL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">dwResult</span> <span class="o">!=</span> <span class="n">ERROR_SUCCESS</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] SetEntriesInAcl error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">dwResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">dwResult</span> <span class="o">=</span> <span class="nf">SetNamedSecurityInfo</span><span class="p">((</span><span class="n">LPWSTR</span><span class="p">)</span><span class="n">pszPath</span><span class="p">,</span> <span class="n">SE_FILE_OBJECT</span><span class="p">,</span><span class="n">DACL_SECURITY_INFO</span> <span class="o">|</span> <span class="n">PROTECTED_DACL_SECURITY_INFO</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">pNewDACL</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">LocalFree</span><span class="p">(</span><span class="n">pNewDACL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">dwResult</span> <span class="o">!=</span> <span class="n">ERROR_SUCCESS</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[-] SetNamedSecurityInfo (DACL) error: %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">dwResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[+] DACL updated: Full Control granted on: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pszPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">TRUE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">wmain</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="n">WCHAR</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;Usage: take_ownership.exe &lt;file_or_directory_path&gt;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;Example: take_ownership.exe C:</span><span class="se">\\</span><span class="s">Windows</span><span class="se">\\</span><span class="s">System32</span><span class="se">\\</span><span class="s">en-US</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">LPCWSTR</span> <span class="n">pszTarget</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">[*] Target: %s</span><span class="se">\n\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pszTarget</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[*] Enabling SeTakeOwnershipPrivilege...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">EnablePrivilege</span><span class="p">(</span><span class="n">SE_TAKE_OWNERSHIP_NAME</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;[*] Enabling SeRestorePrivilege...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">EnablePrivilege</span><span class="p">(</span><span class="n">SE_RESTORE_NAME</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">[*] Retrieving current user SID...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PSID</span> <span class="n">pMySID</span> <span class="o">=</span> <span class="nf">GetCurrentUserSID</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pMySID</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">[*] Taking ownership of the object...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">TakeOwnership</span><span class="p">(</span><span class="n">pszTarget</span><span class="p">,</span> <span class="n">pMySID</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">LocalFree</span><span class="p">(</span><span class="n">pMySID</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">[*] Granting Full Control...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">GrantFullControl</span><span class="p">(</span><span class="n">pszTarget</span><span class="p">,</span> <span class="n">pMySID</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">LocalFree</span><span class="p">(</span><span class="n">pMySID</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">LocalFree</span><span class="p">(</span><span class="n">pMySID</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">Operation completed. You now have full control over:</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">wprintf</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;    %s</span><span class="se">\n\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pszTarget</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Brief explanation of each function for those who are not familiarizated with windows programming:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Function</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>EnablePrivilege()</td>
+          <td>Activates a privilege in the current process token. It only works if the privilege is present but disabled, using a kernel routine to adjust it.</td>
+      </tr>
+      <tr>
+          <td>GetCurrentUserSID()</td>
+          <td>Retrieves the Security Identifier (SID) of the current user from the process token and stores it in dynamically allocated memory that must be freed later.</td>
+      </tr>
+      <tr>
+          <td>TakeOwnership()</td>
+          <td>First step in modifying access control. Sets the current user as the owner of a file or directory after verifying the required privilege.</td>
+      </tr>
+      <tr>
+          <td>GrantFullControl()</td>
+          <td>Second step after ownership is obtained. Updates the access control list to grant the current user full access rights.</td>
+      </tr>
+  </tbody>
+</table>
+<p>And some winapi calls, table created by Claude OPUS 4.6:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Function</th>
+          <th>Purpose</th>
+          <th>Header / Lib</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>OpenProcessToken()</td>
+          <td>Opens the Access Token object associated with a process. Returns a HANDLE that can be passed to token query/manipulation functions.</td>
+          <td>advapi32.lib</td>
+      </tr>
+      <tr>
+          <td>LookupPrivilegeValue()</td>
+          <td>Translates a privilege name string (e.g. <code>&quot;SeTakeOwnershipPrivilege&quot;</code>) into its session-local LUID, which the kernel uses internally to identify it.</td>
+          <td>advapi32.lib</td>
+      </tr>
+      <tr>
+          <td>AdjustTokenPrivileges()</td>
+          <td>Enables or disables privileges in an open token. Calls <code>NtAdjustPrivilegesToken()</code> in kernel mode. Must be called before the kernel will honor a privilege during access checks.</td>
+          <td>advapi32.lib</td>
+      </tr>
+      <tr>
+          <td>GetTokenInformation()</td>
+          <td>Retrieves various information classes from a token. We use <code>TokenUser</code> to get the <code>TOKEN_USER</code> structure containing the caller&rsquo;s SID and attribute flags.</td>
+          <td>advapi32.lib</td>
+      </tr>
+      <tr>
+          <td>CopySid()</td>
+          <td>Copies a SID from one buffer to another. Necessary because the SID returned inside <code>TOKEN_USER</code> is embedded inline and shares memory with the query buffer.</td>
+          <td>advapi32.lib</td>
+      </tr>
+      <tr>
+          <td>SetNamedSecurityInfo()</td>
+          <td>The main workhorse. Modifies one or more components of an object&rsquo;s Security Descriptor by name. The <code>SecurityInfo</code> bitmask selects which components to update (<code>OWNER_SECURITY_INFO</code>, <code>DACL_SECURITY_INFO</code>, etc.).</td>
+          <td>advapi32.lib</td>
+      </tr>
+      <tr>
+          <td>SetEntriesInAcl()</td>
+          <td>Merges an array of <code>EXPLICIT_ACCESS</code> structures with an existing ACL (or <code>NULL</code>) to produce a new binary ACL. Handles all internal ACL bookkeeping (header, ACE alignment, size fields).</td>
+          <td>advapi32.lib</td>
+      </tr>
+      <tr>
+          <td>GetCurrentProcess()</td>
+          <td>Returns a pseudo-handle (<code>-1</code> / <code>0xFFFFFFFFFFFFFFFF</code>) for the current process. No actual kernel object is opened; the handle is resolved by the kernel on each call that receives it.</td>
+          <td>kernel32.lib</td>
+      </tr>
+  </tbody>
+</table>
+<h3>Image POC / Step Guide<span class="hx-absolute -hx-mt-20" id="image-poc--step-guide"></span>
+    <a href="#image-poc--step-guide" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>If you try to rename a driver inside System32 path you will encour with the following prompt:</p>
+<p><img src="Pasted-image-20260401032134.png" alt="WFOImage" loading="lazy" /></p>
+<p>Its because the owner file is TrustedInstaller</p>
+<p><img src="Pasted-image-20260401032406.png" alt="WFOImage" loading="lazy" /></p>
+<p>But we can change that, by pressing the <em>Change</em> buttom and writing you username</p>
+<p><img src="Pasted-image-20260401032544.png" alt="WFOImage" loading="lazy" /></p>
+<p>Once you change the owner, you are able to change your own privileges:</p>
+<p><img src="Pasted-image-20260401033121.png" alt="WFOImage" loading="lazy" /></p>
+<p>And there you have, your driver renamed and signed correctly!</p>
+<p><img src="Pasted-image-20260401033245.png" alt="WFOImage" loading="lazy" /></p>
+<h3>Terminal Guide<span class="hx-absolute -hx-mt-20" id="terminal-guide"></span>
+    <a href="#terminal-guide" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Also works for private folders inside a Desktop:</p>
+<p><img src="Pasted-image-20260401033842.png" alt="WFOImage" loading="lazy" /></p>
+<p>With our code, we are able to bypass it and see its content</p>
+<p><img src="Pasted-image-20260401034001.png" alt="WFOImage" loading="lazy" /></p>
+<h2>Implementation<span class="hx-absolute -hx-mt-20" id="implementation"></span>
+    <a href="#implementation" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Understanding file ownership and the TrustedInstaller mechanism you can use it not only to show off what you know, but also to driver replacemente for custom persistence, driver testing, replacing some existing <code>.sys</code> file without going through a full signed installer. A deep understanding in how WRP protectiion works to offline analysis pipelines and VM-based sandbox in Forensics Labs. Some anticheats programs that only verifies the path where the DLL is and not the real signature&hellip;</p>
+<h3>Forensics Apply<span class="hx-absolute -hx-mt-20" id="forensics-apply"></span>
+    <a href="#forensics-apply" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>If you dig in, you will find useful methods for this feature, consider that every SD change keeps a log in <code>$UsnJrnl</code> and <code>$LogFile</code>, thus these operations are forensically visible&hellip; Be careful where do you use it.</p>
+<p>For those forensics nerds like me, I will leave a quick reference with each artifact to identify the activity.</p>
+<table>
+  <thead>
+      <tr>
+          <th>Artifact</th>
+          <th>Tells you</th>
+          <th>Retention</th>
+          <th>Tool</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>$UsnJrnl</td>
+          <td>Indicates that a security change occurred, but not the exact modification; precise attribution typically requires Event Logs.</td>
+          <td>Days–weeks (size-limited circular journal)</td>
+          <td>MFTECmd, fsutil</td>
+      </tr>
+      <tr>
+          <td>$LogFile</td>
+          <td>Raw NTFS transaction data at MFT attribute level</td>
+          <td>Hours–days (~65 MB circular buffer)</td>
+          <td>LogFileParser</td>
+      </tr>
+      <tr>
+          <td>Event 4670</td>
+          <td>Old Security Descriptor → New Security Descriptor (SDDL), and user</td>
+          <td>Until log rotation (configurable)</td>
+          <td>Event Viewer, PowerShell</td>
+      </tr>
+      <tr>
+          <td>Event 4674</td>
+          <td>Which privilege was exercised and by which process (PID)</td>
+          <td>Until log rotation</td>
+          <td>Event Viewer, PowerShell</td>
+      </tr>
+      <tr>
+          <td>SACL on file</td>
+          <td>Detailed access attempts matching audit rules (most granular visibility)</td>
+          <td>Real-time → stored in Security Event Log</td>
+          <td>icacls, accesschk</td>
+      </tr>
+  </tbody>
+</table>
+<p>Furthermore, you can use <code>accesschk64</code> to list ACL from a file, and get conclusion. In our case, we can see that <code>SpbCx.sys</code> has a local account (<code>yh\yl</code>) with read/write perms, making it vulnerable as we talk before. In the next command we can see a default ACL from a normal driver in System32 path. As you can compare, the way to identify this persistence is evidence.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cmd" data-lang="cmd"><span class="line"><span class="cl">C<span class="p">:</span><span class="nl">\</span><span class="c1">&gt;&#34;C:\Program Files\Microsoft SysInternals Suite (MSI)\accesschk64.exe&#34; -nobanner /accepteula %SystemRoot%\System32\drivers\SpbCx.sys</span>
+</span></span><span class="line"><span class="cl">C<span class="p">:</span><span class="nl">\WINDOWS\System32\drivers\SpbCx.sys</span>
+</span></span><span class="line"><span class="cl">  RW NT SERVICE\TrustedInstaller
+</span></span><span class="line"><span class="cl">  R  BUILTIN\Administrators
+</span></span><span class="line"><span class="cl">  R  NT AUTHORITY\SYSTEM
+</span></span><span class="line"><span class="cl">  RW BUILTIN\Users
+</span></span><span class="line"><span class="cl">  R  APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES
+</span></span><span class="line"><span class="cl">  R  APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES
+</span></span><span class="line"><span class="cl">  RW yh\yl
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">C<span class="p">:</span><span class="nl">\</span><span class="c1">&gt;&#34;C:\Program Files\Microsoft SysInternals Suite (MSI)\accesschk64.exe&#34; -nobanner /accepteula %SystemRoot%\System32\drivers\srv2.sys</span>
+</span></span><span class="line"><span class="cl">C<span class="p">:</span><span class="nl">\WINDOWS\System32\drivers\srv2.sys</span>
+</span></span><span class="line"><span class="cl">  RW NT SERVICE\TrustedInstaller
+</span></span><span class="line"><span class="cl">  R  BUILTIN\Administrators
+</span></span><span class="line"><span class="cl">  R  NT AUTHORITY\SYSTEM
+</span></span><span class="line"><span class="cl">  R  BUILTIN\Users
+</span></span><span class="line"><span class="cl">  R  APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES
+</span></span><span class="line"><span class="cl">  R  APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+
+        </div><div class="hx-mt-16"></div><div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
+        href="/winint-compilation/winint-arbitrarywrite/"
+        title="Arbritrary Write - HEVD (ft. Astharot15)"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-ml-auto ltr:hx-pl-4 ltr:hx-text-right rtl:hx-mr-auto rtl:hx-pr-4 rtl:hx-text-left"
+      >Arbritrary Write - HEVD (ft. Astharot15)<svg class="hx-inline hx-h-5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div></main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx-bg-gray-100 hx-pb-[env(safe-area-inset-bottom)] dark:hx-bg-neutral-900 print:hx-bg-transparent"><div class="hx-mx-auto hx-flex hx-gap-2 hx-py-2 hx-px-4 hx-max-w-screen-xl"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div><hr class="dark:hx-border-neutral-800" /><div
+      class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
+    ></div></footer>
+    
+    <script defer src="/js/main.min.0942239592f0795dc7213dd1057fd229d7edc19c0ef1a285396eb292d9ca9842.js" integrity="sha256-CUIjlZLweV3HIT3RBX/SKdftwZwO8aKFOW6yktnKmEI="></script>
+<script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
+    <script defer src="/en.search.min.7918d81999396a56d9ff1b7a986d6474e66bd5acdbbe01e8bac129f5ef345a88.js" integrity="sha256-eRjYGZk5albZ/xt6mG1kdOZr1azbvgHousEp9e80Wog="></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
+<script defer src="/lib/katex/katex.min.9f45307c5794ed247a0d095f3a62e52ef2215a67b2327203a7fd919959ae79d1.js" integrity="sha256-n0UwfFeU7SR6DQlfOmLlLvIhWmeyMnIDp/2RmVmuedE="></script>
+<script defer src="/lib/katex/auto-render.min.7b57d427ac6270677daf8d8380ded2cc73336f9149a167b8e1fe0d6ef66604ae.js" integrity="sha256-e1fUJ6xicGd9r42DgN7SzHMzb5FJoWe44f4NbvZmBK4="></script>
+<script defer src="/lib/katex/mhchem.min.f0ca03df194b8c3d6017ff455db6a0ef98857905663fa311a6cded788b15340b.js" integrity="sha256-8MoD3xlLjD1gF/9FXbag75iFeQVmP6MRps3teIsVNAs="></script>
+<script>
+  
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+        {left: "\\begin{align}", right: "\\end{align}", display: true},
+        {left: "\\begin{alignat}", right: "\\end{alignat}", display: true},
+        {left: "\\begin{gather}", right: "\\end{gather}", display: true},
+        {left: "\\begin{CD}", right: "\\end{CD}", display: true},
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  });
+</script>
+
+  </body>
+</html>
