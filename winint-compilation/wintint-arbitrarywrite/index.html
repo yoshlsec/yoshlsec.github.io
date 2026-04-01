@@ -22,7 +22,7 @@
 
   <meta itemprop="name" content="Arbritrary Write - HEVD (ft. Astharot15)">
   <meta itemprop="description" content="Learn how to exploit an arbritrary write throught a vulnerable driver to change token process and process protections. Windows 10 token hijacking &amp; Windows 11 lsass dump">
-  <meta itemprop="wordCount" content="2211">
+  <meta itemprop="wordCount" content="2246">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Arbritrary Write - HEVD (ft. Astharot15)">
   <meta name="twitter:description" content="Learn how to exploit an arbritrary write throught a vulnerable driver to change token process and process protections. Windows 10 token hijacking &amp; Windows 11 lsass dump">
@@ -385,7 +385,7 @@
 <li><a href="https://github.com/hacksysteam/HackSysExtremeVulnerableDriver" target="_blank" rel="noopener">https://github.com/hacksysteam/HackSysExtremeVulnerableDriver</a></li>
 </ul>
 <h3>Lab Setup and Environment<span class="hx-absolute -hx-mt-20" id="lab-setup-and-environment"></span>
-    <a href="#lab-setup-and-environment" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>We will not place much emphasis on driver installation; we will simply create the driver service using <code>sc.exe</code> and disable DSE (Drive Signature Enforcement) with <code>bcdedit</code>:</p>
+    <a href="#lab-setup-and-environment" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>We will not place much emphasis on driver installation, we will simply create the driver service using <code>sc.exe</code> and disable DSE (Drive Signature Enforcement) with <code>bcdedit</code>:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">C:<span class="se">\W</span>indows<span class="se">\s</span>ystem32&gt;sc.exe create HEVD <span class="nv">binPath</span><span class="o">=</span>C:<span class="se">\U</span>sers<span class="se">\I</span>EUser<span class="se">\D</span>esktop<span class="se">\H</span>EVD.3.00<span class="se">\d</span>river<span class="se">\v</span>ulnerable<span class="se">\x</span>64<span class="se">\H</span>EVD.sys <span class="nv">type</span><span class="o">=</span>kernel <span class="nv">start</span><span class="o">=</span>demand
@@ -439,8 +439,9 @@
     <a href="#ioctl-interface" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>We use the function <a href="https://learn.microsoft.com/es-es/windows/win32/api/fileapi/nf-fileapi-createfilew" target="_blank" rel="noopener">CreateFileW</a> which is the Unicode version of the <em>CreateFile</em> macro for using wide strings: <code>L&quot;\\\\.\\HackSysExtremeVulnerableDriver&quot;</code>.</p>
 <p>This wide string is a symbolic interface that exposes the driver to the user space. With the WinObjEx64 tool, you can see the symbolic link of the driver in userland.</p>
 <p><img src="image.png" alt="" loading="lazy" /></p>
-<p>Another conclusion we draw from the screenshot is the correlation between <code>\\\\.\\</code> (without escaping: <code>\\.\</code>) and <code>\Device\</code> path.</p>
-<p>This function returns a handle to the driver. This handle is used in <a href="https://learn.microsoft.com/es-es/windows/win32/api/ioapiset/nf-ioapiset-deviceiocontrol" target="_blank" rel="noopener">DeviceIoControl</a> that sends a control code directly to a specified device controller, causing the corresponding device to perform the corresponding operation.</p>
+<p>Another way we draw from the screenshot is the correlation between <code>\\\\.\\</code> (without escaping: <code>\\.\</code>) and <code>\Device\</code> path.
+For more information about <code>DOS path</code> check: <a href="https://medium.com/walmartglobaltech/dos-file-path-magic-tricks-5eda7a7a85fa" target="_blank" rel="noopener">https://medium.com/walmartglobaltech/dos-file-path-magic-tricks-5eda7a7a85fa</a></p>
+<p>This function returns a handle to the driver. This handle is used in <a href="https://learn.microsoft.com/es-es/windows/win32/api/ioapiset/nf-ioapiset-deviceiocontrol" target="_blank" rel="noopener">DeviceIoControl</a> that sends a control code directly to a specified device controller, causing the device driver to perform the corresponding operation.</p>
 <p>For more information about the attributes used please check the learn microsoft wiki.</p>
 <h3>Verifying the Driver in WinDbg<span class="hx-absolute -hx-mt-20" id="verifying-the-driver-in-windbg"></span>
     <a href="#verifying-the-driver-in-windbg" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
@@ -493,7 +494,7 @@
   </button>
 </div>
 </div>
-<p>Thanks to IDA casting we are able to create the following structure. Alternatively, you can review the HEVD source code directly, although this scenario is not realistic in real world exploitation:</p>
+<p>Thanks to IDA casting we are able to create the following structure. Alternatively, you can review the HEVD source code directly, although this scenario is not that realistic in real world exploitation:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-h" data-lang="h"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_WRITE_WHAT_WHERE</span>
@@ -570,7 +571,7 @@
   </button>
 </div>
 </div>
-<p>Once the breakpoint is setted we can show part of the assembly instructions to identify function information:</p>
+<p>Once the breakpoint is set we can show part of the assembly instructions to identify function information:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">2</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">uu</span> <span class="n">HEVD</span><span class="o">!</span><span class="n">TriggerArbitraryWrite</span> <span class="n">L35</span>
@@ -630,7 +631,7 @@
   </button>
 </div>
 </div>
-<p>Our mission now is to see where the <code>rcx</code> is modified to view its value and later check if it is correct. Inside the code you can find the following asm instruction:</p>
+<p>Our mission is to see where the <code>rcx</code> is modified to view its value and later check if it is correct. Inside the code you can find the following asm instruction:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">fffff800</span><span class="err">`</span><span class="mf">34e35</span><span class="n">e99</span> <span class="n">ff15a9c1f7ff</span>    <span class="n">call</span>    <span class="n">qword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">HEVD</span><span class="o">!</span><span class="nf">_imp_ProbeForRead</span> <span class="p">(</span><span class="n">fffff800</span><span class="err">`</span><span class="mi">34</span><span class="n">db2048</span><span class="p">)]</span>
@@ -683,12 +684,12 @@
   </button>
 </div>
 </div>
-<p>As you can see, the last nibbles of the address they will write 0xFACE, and the where address is not defined in our code, which is why it is not properly recognized. Once we have verified that it works, and with other tests manipulating the <code>Where</code> attribute, we can begin the real exploitation.</p>
+<p>As you can see, the last nibbles of the address they will write 0xFACE, and the where address is not defined in our code, which is why it is not properly recognized. The reason it didn’t BSOD is that the driver has a try except exception handler when calling the main function. Once we have verified that it works, and with other tests manipulating the <code>Where</code> attribute, we can begin the real exploitation.</p>
 <h2>Exploitation<span class="hx-absolute -hx-mt-20" id="exploitation"></span>
     <a href="#exploitation" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>Token Hijacking (W10)<span class="hx-absolute -hx-mt-20" id="token-hijacking-w10"></span>
     <a href="#token-hijacking-w10" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Once the vulnerability has been confirmed, we can perform the first attack.</p>
 <h4>Bypassing KASLR<span class="hx-absolute -hx-mt-20" id="bypassing-kaslr"></span>
-    <a href="#bypassing-kaslr" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>To be able to perform actions at the kernel level, such as token hijacking of the NT authority system or changing the protections of a secure process, we need to obtain the kernel base address in order to modify the specific data of each structure.</p>
+    <a href="#bypassing-kaslr" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>To be able to perform actions at the kernel level, such as token hijacking of the <em>NT authority/system</em> user or changing the protections of a secure process, we need to obtain the _eprocess address in order to modify the specific data of each structure.</p>
 <p>In this case we will use a PoC from <a href="https://github.com/bmphx2" target="_blank" rel="noopener">bmphx2</a> to bypass de KASLR with the NtQueryStstemInformation function:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
@@ -764,13 +765,13 @@
   </button>
 </div>
 </div>
-<p>Basically, this code abuses <code>NtQuerySystemInformation</code> using the <code>SystemHandleInformation</code> / <code>0x10</code> class to gather a list of all open handles in the system. Each handle originates from user mode but internally points to a kernel object in this case we want to focus it on the <code>_EPROCESS</code> structure. So the program loads <code>ntdll.dll</code> to access the undocumented syscalls leaking kernel memory.</p>
+<p>Basically, this code abuses <code>NtQuerySystemInformation</code> using the <code>SystemHandleInformation</code> / <code>0x10</code> class to gather a list of all open handles in the system. Each handle originates from user mode but internally points to a kernel object, in this case we want to focus it on the <code>_EPROCESS</code> structure. Thus, the program obtains the memory address of <code>ntdll.dll</code> to be able to leak kernel memory.</p>
 <p>If you want to use another class view: <a href="https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/ntexapi/system_information_class.htm" target="_blank" rel="noopener">https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/ntexapi/system_information_class.htm</a></p>
 <h4>Locating  _EPROCESS<span class="hx-absolute -hx-mt-20" id="locating--_eprocess"></span>
-    <a href="#locating--_eprocess" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>The first is token hijacking on a PowerShell process. In fact, it can be any process you want as long as it has a process referencing itself, since this method takes advantage of obtaining the memory address of the _EPROCESS structure using the handle type: 0x7, a type specific to processes.</p>
+    <a href="#locating--_eprocess" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>The first way to exploit arbitrary write is implementing a token hijacking on a PowerShell process. In fact, it can be any process you want as long as it has a process referencing itself, since this method takes advantage of obtaining the memory address of the _EPROCESS structure using the handle type: 0x7, a type specific to processes.</p>
 <p>You can know which process has this handle type thanks to the System Informer filter:</p>
 <p><img src="image-1.png" alt="" loading="lazy" /></p>
-<p>We have found that the first handle object type with the value 0x7 belongs to the kernel memory address of the _EPROCESS structure of the process selected. From there we can execute the token hijacking, if you want a more detailed information of this attack please read: <a href="https://yoshlsec.github.io/winint-compilation/winint-understading-processes/" target="_blank" rel="noopener">Elementary: Understanding Process</a>.</p>
+<p>We have found that the first handle object type with the value 0x7 belongs to the process that call the function (_EPROCESS structure). From there we can execute the token hijacking, if you want a more detailed information of this attack please read: <a href="https://yoshlsec.github.io/winint-compilation/winint-understading-processes/" target="_blank" rel="noopener">Elementary: Understanding Process</a>.</p>
 <p>Anyways, here a picture of how we plan this attack:</p>
 <p><img src="image-2.png" alt="" loading="lazy" /></p>
 <h4>C Exploit: Token hijacking<span class="hx-absolute -hx-mt-20" id="c-exploit-token-hijacking"></span>
@@ -917,7 +918,7 @@
 <p><img src="image-3.png" alt="" loading="lazy" /></p>
 <h3>Protected Process Light (PPL) bypass (W11)<span class="hx-absolute -hx-mt-20" id="protected-process-light-ppl-bypass-w11"></span>
     <a href="#protected-process-light-ppl-bypass-w11" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><h4>Identifying Protected Processes<span class="hx-absolute -hx-mt-20" id="identifying-protected-processes"></span>
-    <a href="#identifying-protected-processes" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In this last section we will discuss how to apply arbitrary write on a modern windows machine to disable a  protected process. First, identify your protected process, in our case is <code>lsass.exe</code>, as we see in the screenshot the <code>Light (Lsa)</code> protection is enabled:</p>
+    <a href="#identifying-protected-processes" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In this last section we will discuss how to apply arbitrary write on a modern windows machine to disable a  protected process. First of all, identify your protected process, in our case is <code>lsass.exe</code>, as we see in the screenshot the <code>Light (Lsa)</code> protection is enabled:</p>
 <p><img src="image-4.png" alt="" loading="lazy" /></p>
 <h4>_PS_PROTECTION structure<span class="hx-absolute -hx-mt-20" id="_ps_protection-structure"></span>
     <a href="#_ps_protection-structure" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>From windbg we can also see the protections used, as it has the byte <code>0x1</code> in the <code>Type</code> attribute.</p>
