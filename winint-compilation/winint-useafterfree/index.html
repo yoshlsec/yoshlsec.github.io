@@ -10,21 +10,21 @@
 <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
-<title>Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie) – yoshl - IT enjoyer</title>
+<title>Use-After-Free - HEVD (&#43; SMEP/KASLR) – yoshl - IT enjoyer</title>
   <meta name="description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain..." /><link rel="canonical" href="/winint-compilation/winint-useafterfree/" itemprop="url" />
 
-<meta property="og:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)" />
+<meta property="og:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR)" />
 <meta property="og:description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain..." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/winint-compilation/winint-useafterfree/" /><meta property="article:section" content="winint-compilation" />
 
 
 
-  <meta itemprop="name" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)">
+  <meta itemprop="name" content="Use-After-Free - HEVD (&#43; SMEP/KASLR)">
   <meta itemprop="description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain...">
-  <meta itemprop="wordCount" content="3269">
+  <meta itemprop="wordCount" content="3227">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)">
+  <meta name="twitter:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR)">
   <meta name="twitter:description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain...">
 
     <link rel="preload" href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" as="style" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
@@ -198,7 +198,7 @@
       sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
     href="/winint-compilation/winint-useafterfree/"
     
-  >Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)
+  >Use-After-Free - HEVD (&#43; SMEP/KASLR)
     </a>
   
     <ul class='hx-flex hx-flex-col hx-gap-1 hx-relative before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] dark:before:hx-bg-neutral-800 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-pr-3 rtl:before:hx-right-0 ltr:hx-ml-3 rtl:hx-mr-3'><li>
@@ -370,10 +370,6 @@
         </a>
       </li>
       <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
-        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#stack-canary--gs-cookie">Stack Canary / GS Cookie
-        </a>
-      </li>
-      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
         <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#conclusion">Conclusion
         </a>
       </li>
@@ -399,14 +395,14 @@
   <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
         <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
           <a href="/winint-compilation/">WinInt Compilation</a>
-        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)</div>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">Use-After-Free - HEVD (&#43; SMEP/KASLR)</div>
   </div>
 
-        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">Use-After-Free - HEVD (&#43; SMEP/KASLR/GS Cookie)</h1>
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">Use-After-Free - HEVD (&#43; SMEP/KASLR)</h1>
         <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"></div>
         <div class="content">
           <h2>Introduction<span class="hx-absolute -hx-mt-20" id="introduction"></span>
-    <a href="#introduction" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>In this post we are going to deep in the attack: Use-After-Free (UAF) in a common windos vulnerable driver (HEVD). We will cover up some useful techniques of code review, debuggin and bypassing 4 used protections: <strong>Stack Canary</strong> or GS Cookie, Supervisor Mode Execution Prevention (<strong>SMEP</strong>), Kernel Address Space Layout Randomization (<strong>KASLR</strong>). We will try to analyze each protective measure in detail without making it tedious.</p>
+    <a href="#introduction" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>In this post we are going to deep in the attack: Use-After-Free (UAF) in a common windos vulnerable driver (HEVD). We will cover up some useful techniques of code review, debuggin and bypassing some used protections like Supervisor Mode Execution Prevention (<strong>SMEP</strong>), Kernel Address Space Layout Randomization (<strong>KASLR</strong>) and others concepts like <strong>Stack Canary</strong> or GS Cookie. We will try to analyze each protective measure in detail without making it tedious.</p>
 <h3>Environment<span class="hx-absolute -hx-mt-20" id="environment"></span>
     <a href="#environment" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>To make this explotation we will have two virtual machines; the victim, which contains the HEVD, is a Windows 1809 with an OS Build of 17763.1075, is useful to know the exact version to be able to calculate correctly structure offsets in vergilius and, in this case, know that the <em>SMAP</em> is disabled by default.</p>
 <ul>
@@ -1318,8 +1314,7 @@
 </div>
 </div>
 <p>But, when you try to execute that shellcode we will see a BSOD with the stop code: <code>KERNEL_SECURITY_CHECK_FAILURE (139)</code>.</p>
-<h4>Stack Canary / GS Cookie<span class="hx-absolute -hx-mt-20" id="stack-canary--gs-cookie"></span>
-    <a href="#stack-canary--gs-cookie" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Since we are 2 call instructions deep, the return address created from the initial call rcx of <code>g_UseAfterFreeObjectNonPagedPool-&gt;Callback()</code> should be at rsp+8, so we’ll just have to add these instructions to our shellcode.</p>
+<p>This is because when you do a <code>ret</code> is the equivalent of calling <code>pop rip</code> with <code>jmp rip</code>, where the <code>pop</code> instruction retrieves the valuie from the bottom of the stack, which in this case is a return address and in <code>rsp+0x08</code>is the function address from the HEVD.sys function that does the Callback.</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span>  <span class="mi">48</span> <span class="mi">83</span> <span class="n">c4</span> <span class="mi">08</span>             <span class="n">add</span>    <span class="n">rsp</span><span class="p">,</span><span class="mh">0x8</span>
@@ -1333,14 +1328,9 @@
   </button>
 </div>
 </div>
-<p>Thus, here we can align the stack to bypass the GS Cookie.</p>
+<p>Thus, here we can align the stack to &lsquo;bypass&rsquo; the GS Cookie.</p>
 <h2>Conclusion<span class="hx-absolute -hx-mt-20" id="conclusion"></span>
-    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Once you have your custom shell script, you can run it in two different ways:</p>
-<ol>
-<li>Directly from the FakeObj-&gt;Buffer (no need to disable SMEP)</li>
-<li>Making a jump into your userland function before disabling SMEP</li>
-</ol>
-<p>I&rsquo;m sorry I haven&rsquo;t posted a token hijacking exploit yet; for now, you&rsquo;ll have to make do with the SMEP bypass/disable method. I&rsquo;ll update this post with the final exploit in the future.</p>
+    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Writing&hellip; (I will be finished)</p>
 <h3>Resources<span class="hx-absolute -hx-mt-20" id="resources"></span>
     <a href="#resources" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ul>
 <li><a href="https://m2rc.net/posts/hevd-useafterfree/" target="_blank" rel="noopener">https://m2rc.net/posts/hevd-useafterfree/</a></li>
