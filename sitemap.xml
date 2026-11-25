@@ -2,15 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/winint-compilation/winint-readingamddoc/</loc>
-  </url><url>
     <loc>/cbe-blogs/</loc>
   </url><url>
-    <loc>/winint-compilation/winint-understading-processes/</loc>
-  </url><url>
     <loc>/cbe-blogs/cbe-fundamentals/</loc>
-  </url><url>
-    <loc>/winint-compilation/winint-arbitrarywrite/</loc>
   </url><url>
     <loc>/cbe-blogs/cbe-creation/</loc>
   </url><url>
@@ -18,11 +12,17 @@
   </url><url>
     <loc>/cbe-blogs/cbe-decochators/</loc>
   </url><url>
-    <loc>/winint-compilation/winint-wfownership/</loc>
+    <loc>/winint-compilation/winint-readingamddoc/</loc>
+  </url><url>
+    <loc>/winint-compilation/winint-bofgs/</loc>
   </url><url>
     <loc>/winint-compilation/winint-useafterfree/</loc>
   </url><url>
-    <loc>/winint-compilation/winint-bofgs/</loc>
+    <loc>/winint-compilation/winint-wfownership/</loc>
+  </url><url>
+    <loc>/winint-compilation/winint-arbitrarywrite/</loc>
+  </url><url>
+    <loc>/winint-compilation/winint-understading-processes/</loc>
   </url><url>
     <loc>/vm-reversing/</loc>
   </url><url>
